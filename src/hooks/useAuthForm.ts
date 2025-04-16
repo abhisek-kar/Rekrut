@@ -1,0 +1,151 @@
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+
+type AuthFormValues = {
+  email: string;
+  password: string;
+  role: "admin" | "subadmin";
+  rememberMe?: boolean;
+};
+
+export function useAuthForm() {
+  const { login } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async (values: AuthFormValues) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await login(values.email, values.password, values.role, values.rememberMe);
+      toast.success("Login successful!");
+    } catch (err) {
+      console.error("Login error:", err);
+      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (email: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to send reset instructions");
+      }
+
+      toast.success("Password reset instructions sent to your email");
+      return true;
+    } catch (err) {
+      console.error("Forgot password error:", err);
+      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (token: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to reset password");
+      }
+
+      toast.success("Password reset successful");
+      return true;
+    } catch (err) {
+      console.error("Reset password error:", err);
+      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAccountSetup = async (
+    token: string,
+    firstName: string,
+    lastName: string,
+    password: string,
+    phone?: string
+  ) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/auth/account-setup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          token,
+          firstName,
+          lastName,
+          password,
+          phone,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to complete account setup");
+      }
+
+      toast.success("Account setup completed successfully");
+      return true;
+    } catch (err) {
+      console.error("Account setup error:", err);
+      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    isLoading,
+    error,
+    setError,
+    handleLogin,
+    handleForgotPassword,
+    handleResetPassword,
+    handleAccountSetup,
+  };
+}

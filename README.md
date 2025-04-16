@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rekrut ATS - Applicant Tracking System
+
+Rekrut is a modern Applicant Tracking System (ATS) designed for recruitment agencies to streamline their hiring processes. The system enables efficient job posting, candidate tracking, and AI-powered resume screening.
+
+## Features
+
+- User role management (Admin/SubAdmin)
+- Job posting and management
+- Candidate application processing
+- Document management
+- Custom fields for jobs and applications
+- Notification system
+- Analytics and reporting
+
+## Technology Stack
+
+- **Frontend & Backend**: Next.js 14+
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **Database**: MongoDB with Mongoose
+- **Authentication**: NextAuth.js with JWT
+- **File Storage**: AWS S3
+- **AI Processing**: Future implementation
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+ 
+- MongoDB
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/your-organization/rekrut-ats.git
+cd rekrut-ats
+```
+
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Set up environment variables:
+```bash
+cp .env.local.example .env.local
+```
+Edit the `.env.local` file and update the values with your own configuration.
+
+Important environment variables:
+- `MONGODB_URI`: Your MongoDB connection string
+- `JWT_SECRET`: A secure random string for JWT token signing
+- `ADMIN_EMAIL` and `ADMIN_PASSWORD`: Credentials for the initial admin user
+
+4. Run the development server:
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Admin User Seeding
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The application will automatically create an admin user on startup if one doesn't exist. The credentials are taken from your environment variables:
 
-## Learn More
+```
+ADMIN_EMAIL=admin@rekrut.com
+ADMIN_PASSWORD=SecurePassword123
+ADMIN_FIRST_NAME=Admin
+ADMIN_LAST_NAME=User
+```
 
-To learn more about Next.js, take a look at the following resources:
+These values should be changed in your production environment.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `/src/app` - Next.js app directory with routes and API handlers
+- `/src/components` - UI components following Atomic Design pattern
+- `/src/models` - MongoDB schemas
+- `/src/lib` - Utility functions and helpers
+- `/src/hooks` - Custom React hooks
+- `/src/context` - React context providers
 
-## Deploy on Vercel
+## Development Workflow
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The project is developed in phases:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Core Infrastructure: Authentication, user management, basic dashboard
+2. Job Management: Job creation, public job board, custom fields
+3. Application Processing: Application submission, candidate management
+4. Advanced Features: Notifications, candidate portal, analytics
+5. AI Integration: Resume parsing, advanced matching
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

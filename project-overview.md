@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-Rekrut is a modern Applicant Tracking System (ATS) designed for recruitment agencies to streamline their hiring processes. The system enables efficient job posting, candidate tracking, and AI-powered resume screening with a focus on usability and performance.
+Rekrut is a SEO friendly modern Applicant Tracking System (ATS) designed for recruitment agencies to streamline their hiring processes. The system enables efficient job posting, candidate tracking, and AI-powered resume screening with a focus on usability and performance.
 
 ## Technology Stack
 
@@ -108,7 +108,7 @@ Rekrut is a modern Applicant Tracking System (ATS) designed for recruitment agen
 │            Next.js API              │
 │     (Server-side, API Routes)       │
 ├─────────────────┬───────────────────┤
-│   MongoDB       │     AWS Services   │
+│   MongoDB       │     AWS Services  │
 │  (Database)     │ (S3, Lambda, etc) │
 └─────────────────┴───────────────────┘
 ```

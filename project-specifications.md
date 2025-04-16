@@ -2,13 +2,13 @@
 
 ## Project Overview
 
-Rekrut is a modern Applicant Tracking System (ATS) designed for recruitment agencies. The system enables efficient job posting, candidate tracking, and AI-powered resume screening. It supports two primary roles: **Admin** and **SubAdmin**.
+Rekrut is a SEO friendly modern Applicant Tracking System (ATS) designed for recruitment agencies. The system enables efficient job posting, candidate tracking, and AI-powered resume screening. It supports two primary roles: **Admin** and **SubAdmin**.
 
 This document outlines the detailed UI sections and corresponding API requirements for the system.
 
 ## Technology Stack
 
-- **Frontend**: Next.js 14.1.4, Tailwind CSS 3.4.1, shadcn/ui
+- **Frontend**: Next.js 14.2.28, Tailwind CSS 3.4.1, shadcn/ui
 - **Backend**: Next.js API routes, TypeScript 5.4.3
 - **Database**: MongoDB with Mongoose 8.0.0
 - **Authentication**: NextAuth.js 4.24.5
@@ -18,6 +18,7 @@ This document outlines the detailed UI sections and corresponding API requiremen
 ## Component Structure
 
 Following the Atomic Design pattern:
+
 - **Atoms**: Basic UI elements (buttons, inputs, labels)
 - **Molecules**: Simple combinations of atoms (form fields, search bars)
 - **Organisms**: Complex UI components (job cards, application forms)
@@ -25,11 +26,14 @@ Following the Atomic Design pattern:
 
 ---
 
-## 1. Authentication
+ <!-- DEV Steps -->
+
+## DEV 1. Authentication
 
 ### UI Sections
 
 #### Login Page
+
 - Clean, minimal design with centered login form
 - Email and password inputs with validation
 - "Remember me" checkbox
@@ -38,16 +42,19 @@ Following the Atomic Design pattern:
 - Role selector (Admin/SubAdmin)
 
 #### Forgot Password Page
+
 - Email input with validation
 - Clear instructions for password reset process
 - Success confirmation message
 
 #### Reset Password Page
+
 - New password and confirm password inputs
 - Password strength indicator
 - Success confirmation message
 
 #### Account Setup Page (first-time login)
+
 - Welcome message and instructions
 - Password setup
 - Basic profile information form
@@ -55,21 +62,22 @@ Following the Atomic Design pattern:
 
 ### API Requirements
 
-| Endpoint | Method | Description | Request Body | Response |
-|----------|--------|-------------|--------------|----------|
-| `/api/auth/login` | POST | User authentication | `{ email, password, role }` | `{ user, token }` |
-| `/api/auth/forgot-password` | POST | Request password reset | `{ email }` | `{ success, message }` |
-| `/api/auth/reset-password` | POST | Reset password with token | `{ token, password }` | `{ success, message }` |
-| `/api/auth/session` | GET | Get current session data | - | `{ user, permissions }` |
-| `/api/auth/logout` | POST | Logout user | - | `{ success }` |
+| Endpoint                    | Method | Description               | Request Body                | Response                |
+| --------------------------- | ------ | ------------------------- | --------------------------- | ----------------------- |
+| `/api/auth/login`           | POST   | User authentication       | `{ email, password, role }` | `{ user, token }`       |
+| `/api/auth/forgot-password` | POST   | Request password reset    | `{ email }`                 | `{ success, message }`  |
+| `/api/auth/reset-password`  | POST   | Reset password with token | `{ token, password }`       | `{ success, message }`  |
+| `/api/auth/session`         | GET    | Get current session data  | -                           | `{ user, permissions }` |
+| `/api/auth/logout`          | POST   | Logout user               | -                           | `{ success }`           |
 
 ---
 
-## 2. User Management (Admin)
+## DEV 2. User Management (Admin)
 
 ### UI Sections
 
 #### SubAdmin List
+
 - Responsive table/grid layout
 - Search and filter options
 - Sort by name, date created, status
@@ -78,6 +86,7 @@ Following the Atomic Design pattern:
 - "Create New SubAdmin" button
 
 #### SubAdmin Creation Form
+
 - Personal information section
   - Name, email, phone
   - Profile photo upload
@@ -88,6 +97,7 @@ Following the Atomic Design pattern:
 - "Cancel" and "Create" buttons
 
 #### SubAdmin Edit Form
+
 - Same layout as creation form
 - Pre-populated with existing data
 - Additional options:
@@ -96,6 +106,7 @@ Following the Atomic Design pattern:
 - "Cancel" and "Save" buttons
 
 #### User Profile Settings
+
 - Personal information
 - Change password option
 - Notification preferences
@@ -104,24 +115,25 @@ Following the Atomic Design pattern:
 
 ### API Requirements
 
-| Endpoint | Method | Description | Request Body | Response |
-|----------|--------|-------------|--------------|----------|
-| `/api/users/subadmins` | GET | List all SubAdmins | Query params for filtering | `{ users, pagination }` |
-| `/api/users/subadmins` | POST | Create new SubAdmin | User details | `{ user, message }` |
-| `/api/users/subadmins/{id}` | GET | Get SubAdmin details | - | `{ user }` |
-| `/api/users/subadmins/{id}` | PUT | Update SubAdmin details | Updated user details | `{ user, message }` |
-| `/api/users/subadmins/{id}` | DELETE | Delete SubAdmin | - | `{ success, message }` |
-| `/api/users/profile` | GET | Get current user profile | - | `{ profile }` |
-| `/api/users/profile` | PUT | Update current user profile | Updated profile details | `{ profile, message }` |
-| `/api/users/password` | PUT | Change password | `{ currentPassword, newPassword }` | `{ success, message }` |
+| Endpoint                    | Method | Description                 | Request Body                       | Response                |
+| --------------------------- | ------ | --------------------------- | ---------------------------------- | ----------------------- |
+| `/api/users/subadmins`      | GET    | List all SubAdmins          | Query params for filtering         | `{ users, pagination }` |
+| `/api/users/subadmins`      | POST   | Create new SubAdmin         | User details                       | `{ user, message }`     |
+| `/api/users/subadmins/{id}` | GET    | Get SubAdmin details        | -                                  | `{ user }`              |
+| `/api/users/subadmins/{id}` | PUT    | Update SubAdmin details     | Updated user details               | `{ user, message }`     |
+| `/api/users/subadmins/{id}` | DELETE | Delete SubAdmin             | -                                  | `{ success, message }`  |
+| `/api/users/profile`        | GET    | Get current user profile    | -                                  | `{ profile }`           |
+| `/api/users/profile`        | PUT    | Update current user profile | Updated profile details            | `{ profile, message }`  |
+| `/api/users/password`       | PUT    | Change password             | `{ currentPassword, newPassword }` | `{ success, message }`  |
 
 ---
 
-## 3. Admin Dashboard
+## DEV 3. Admin Dashboard
 
 ### UI Sections
 
 #### Overview Panel
+
 - Key metrics in card layout:
   - Total jobs (active/closed)
   - Total applications
@@ -133,6 +145,7 @@ Following the Atomic Design pattern:
   - Source distribution
 
 #### Recent Activity Feed
+
 - Timeline of recent system activities
 - Filter by activity type
 - User avatars and action descriptions
@@ -140,17 +153,20 @@ Following the Atomic Design pattern:
 - Clickable links to related items
 
 #### Job Status Distribution
+
 - Visual representation (pie/donut chart)
 - Hover details showing exact numbers
 - Color-coded by status
 
 #### Application Conversion Funnel
+
 - Visual funnel chart
 - Stages: Applied → Screened → Interviewed → Offered → Hired
 - Percentage and absolute numbers
 - Date range selector
 
 #### System Settings
+
 - Organized in tabs/sections
 - General settings (company info, defaults)
 - Email configuration
@@ -158,6 +174,7 @@ Following the Atomic Design pattern:
 - Access controls
 
 #### Custom Field Configuration
+
 - Field type selection
 - Entity assignment (Jobs/Candidates)
 - Field properties editor
@@ -166,24 +183,25 @@ Following the Atomic Design pattern:
 
 ### API Requirements
 
-| Endpoint | Method | Description | Request Body | Response |
-|----------|--------|-------------|--------------|----------|
-| `/api/admin/dashboard` | GET | Dashboard metrics and stats | Query params for date range | `{ metrics, charts }` |
-| `/api/admin/activity` | GET | Recent system activity | Query params for filtering | `{ activities, pagination }` |
-| `/api/admin/settings` | GET | Get system settings | - | `{ settings }` |
-| `/api/admin/settings` | PUT | Update system settings | Updated settings | `{ settings, message }` |
-| `/api/admin/custom-fields` | GET | Get all custom field definitions | - | `{ fields }` |
-| `/api/admin/custom-fields` | POST | Create new custom field | Field definition | `{ field, message }` |
-| `/api/admin/custom-fields/{id}` | PUT | Update custom field | Updated field definition | `{ field, message }` |
-| `/api/admin/custom-fields/{id}` | DELETE | Delete custom field | - | `{ success, message }` |
+| Endpoint                        | Method | Description                      | Request Body                | Response                     |
+| ------------------------------- | ------ | -------------------------------- | --------------------------- | ---------------------------- |
+| `/api/admin/dashboard`          | GET    | Dashboard metrics and stats      | Query params for date range | `{ metrics, charts }`        |
+| `/api/admin/activity`           | GET    | Recent system activity           | Query params for filtering  | `{ activities, pagination }` |
+| `/api/admin/settings`           | GET    | Get system settings              | -                           | `{ settings }`               |
+| `/api/admin/settings`           | PUT    | Update system settings           | Updated settings            | `{ settings, message }`      |
+| `/api/admin/custom-fields`      | GET    | Get all custom field definitions | -                           | `{ fields }`                 |
+| `/api/admin/custom-fields`      | POST   | Create new custom field          | Field definition            | `{ field, message }`         |
+| `/api/admin/custom-fields/{id}` | PUT    | Update custom field              | Updated field definition    | `{ field, message }`         |
+| `/api/admin/custom-fields/{id}` | DELETE | Delete custom field              | -                           | `{ success, message }`       |
 
 ---
 
-## 4. SubAdmin Dashboard
+## DEV 4. SubAdmin Dashboard
 
 ### UI Sections
 
 #### Overview
+
 - Key metrics relevant to SubAdmin:
   - Assigned jobs (active/closed)
   - Applications to review
@@ -192,6 +210,7 @@ Following the Atomic Design pattern:
 - Personalized welcome message
 
 #### Assigned Jobs Summary
+
 - Card-based layout of assigned jobs
 - Status indicators
 - Application counts
@@ -199,6 +218,7 @@ Following the Atomic Design pattern:
 - Sort/filter options
 
 #### Recent Applications
+
 - List of newest applications
 - Matching score indicators
 - Quick actions (review, shortlist, reject)
@@ -206,6 +226,7 @@ Following the Atomic Design pattern:
 - Pagination
 
 #### Tasks & Reminders
+
 - To-do list format
 - Due dates and priorities
 - Completion checkboxes
@@ -213,6 +234,7 @@ Following the Atomic Design pattern:
 - Option to add custom reminders
 
 #### Quick Actions
+
 - Button/card layout for common actions:
   - Create new job
   - Review applications
@@ -221,21 +243,22 @@ Following the Atomic Design pattern:
 
 ### API Requirements
 
-| Endpoint | Method | Description | Request Body | Response |
-|----------|--------|-------------|--------------|----------|
-| `/api/subadmin/dashboard` | GET | SubAdmin-specific metrics | - | `{ metrics, assignedJobs }` |
-| `/api/subadmin/jobs/summary` | GET | Summary of assigned jobs | Query params for filtering | `{ jobs, counts }` |
-| `/api/subadmin/applications/recent` | GET | Recent applications | Query params for pagination | `{ applications, pagination }` |
-| `/api/subadmin/tasks` | GET | Get tasks and reminders | Query params for filtering | `{ tasks, pagination }` |
-| `/api/subadmin/tasks/{id}` | PUT | Update task status | `{ status, notes }` | `{ task, message }` |
+| Endpoint                            | Method | Description               | Request Body                | Response                       |
+| ----------------------------------- | ------ | ------------------------- | --------------------------- | ------------------------------ |
+| `/api/subadmin/dashboard`           | GET    | SubAdmin-specific metrics | -                           | `{ metrics, assignedJobs }`    |
+| `/api/subadmin/jobs/summary`        | GET    | Summary of assigned jobs  | Query params for filtering  | `{ jobs, counts }`             |
+| `/api/subadmin/applications/recent` | GET    | Recent applications       | Query params for pagination | `{ applications, pagination }` |
+| `/api/subadmin/tasks`               | GET    | Get tasks and reminders   | Query params for filtering  | `{ tasks, pagination }`        |
+| `/api/subadmin/tasks/{id}`          | PUT    | Update task status        | `{ status, notes }`         | `{ task, message }`            |
 
 ---
 
-## 5. Job Management
+## DEV 5. Job Management
 
 ### UI Sections
 
 #### Job Listing
+
 - Responsive table/grid layout
 - Advanced filters:
   - Status
@@ -253,6 +276,7 @@ Following the Atomic Design pattern:
 #### Job Creation Form (Multi-step)
 
 **Step 1: Basic Job Information**
+
 - Job title (text input)
 - Company/department (select/text)
 - Location (text with address autocomplete)
@@ -261,6 +285,7 @@ Following the Atomic Design pattern:
 - Experience level (select)
 
 **Step 2: Job Details**
+
 - Job description (rich text editor)
 - Responsibilities (rich text editor)
 - Requirements (rich text editor)
@@ -268,6 +293,7 @@ Following the Atomic Design pattern:
 - Education requirements (multi-select)
 
 **Step 3: Compensation & Benefits**
+
 - Salary range (min/max inputs)
 - Salary visibility options
 - Benefits (multi-select with custom entries)
@@ -275,6 +301,7 @@ Following the Atomic Design pattern:
 - Working hours/schedule
 
 **Step 4: Application Settings**
+
 - Application deadline (date picker)
 - Expected start date (date picker)
 - Application instructions (text area)
@@ -282,23 +309,27 @@ Following the Atomic Design pattern:
 - Custom screening questions (add/remove interface)
 
 **Step 5: Visibility & Promotion**
+
 - Job visibility toggle (public/private)
 - Featured job option
 - Social sharing options
 - SEO settings (title, description)
 
 **Step 6: Custom Fields**
+
 - Dynamically generated based on admin configuration
 - Various input types based on field definitions
 - Conditional display options
 
 **Step 7: Preview & Publish**
+
 - Complete job preview (as seen by candidates)
 - "Save as Draft" button
 - "Publish" button
 - "Back to Edit" option
 
 #### Job Detail View
+
 - Comprehensive layout of all job information
 - Statistics panel (views, applications, hires)
 - Application management section
@@ -308,12 +339,14 @@ Following the Atomic Design pattern:
 - Edit and Status action buttons
 
 #### Job Edit Form
+
 - Same layout as creation form
 - Pre-populated with existing data
 - Version history access
 - "Cancel" and "Save" buttons
 
 #### Job Assignment Interface (Admin only)
+
 - Available SubAdmins list
 - Search and filter options
 - Assignment history
@@ -321,27 +354,28 @@ Following the Atomic Design pattern:
 
 ### API Requirements
 
-| Endpoint | Method | Description | Request Body | Response |
-|----------|--------|-------------|--------------|----------|
-| `/api/jobs` | GET | List all jobs with filtering | Query params | `{ jobs, pagination }` |
-| `/api/jobs` | POST | Create new job | Job details (all steps) | `{ job, message }` |
-| `/api/jobs/{id}` | GET | Get job details | - | `{ job }` |
-| `/api/jobs/{id}` | PUT | Update job | Updated job details | `{ job, message }` |
-| `/api/jobs/{id}` | DELETE | Delete/archive job | - | `{ success, message }` |
-| `/api/jobs/{id}/assign` | PUT | Assign job to SubAdmin | `{ subadminId, notifySubadmin }` | `{ job, message }` |
-| `/api/jobs/{id}/status` | PUT | Update job status | `{ status, reason }` | `{ job, message }` |
-| `/api/jobs/templates` | GET | Get job templates | Query params | `{ templates, pagination }` |
-| `/api/jobs/templates` | POST | Create job template | Template details | `{ template, message }` |
-| `/api/jobs/assigned` | GET | Get jobs assigned to current SubAdmin | Query params | `{ jobs, pagination }` |
-| `/api/jobs/stats/{id}` | GET | Get statistics for specific job | - | `{ stats }` |
+| Endpoint                | Method | Description                           | Request Body                     | Response                    |
+| ----------------------- | ------ | ------------------------------------- | -------------------------------- | --------------------------- |
+| `/api/jobs`             | GET    | List all jobs with filtering          | Query params                     | `{ jobs, pagination }`      |
+| `/api/jobs`             | POST   | Create new job                        | Job details (all steps)          | `{ job, message }`          |
+| `/api/jobs/{id}`        | GET    | Get job details                       | -                                | `{ job }`                   |
+| `/api/jobs/{id}`        | PUT    | Update job                            | Updated job details              | `{ job, message }`          |
+| `/api/jobs/{id}`        | DELETE | Delete/archive job                    | -                                | `{ success, message }`      |
+| `/api/jobs/{id}/assign` | PUT    | Assign job to SubAdmin                | `{ subadminId, notifySubadmin }` | `{ job, message }`          |
+| `/api/jobs/{id}/status` | PUT    | Update job status                     | `{ status, reason }`             | `{ job, message }`          |
+| `/api/jobs/templates`   | GET    | Get job templates                     | Query params                     | `{ templates, pagination }` |
+| `/api/jobs/templates`   | POST   | Create job template                   | Template details                 | `{ template, message }`     |
+| `/api/jobs/assigned`    | GET    | Get jobs assigned to current SubAdmin | Query params                     | `{ jobs, pagination }`      |
+| `/api/jobs/stats/{id}`  | GET    | Get statistics for specific job       | -                                | `{ stats }`                 |
 
 ---
 
-## 6. Public Job Board
+## DEV 6. Public Job Board
 
 ### UI Sections
 
 #### Job Search Page
+
 - Hero section with search bar
 - Advanced filters (dropdown/sidebar):
   - Location
@@ -356,6 +390,7 @@ Following the Atomic Design pattern:
 - Optional: related searches
 
 #### Job Detail Page
+
 - Comprehensive job details
 - Company information section
 - Apply button (prominent)
@@ -367,6 +402,7 @@ Following the Atomic Design pattern:
 #### Application Form (Multi-step)
 
 **Step 1: Personal Information**
+
 - Full name
 - Email address
 - Phone number
@@ -378,6 +414,7 @@ Following the Atomic Design pattern:
 - Next/Back navigation
 
 **Step 2: Professional Information**
+
 - Current employment status (select)
 - Current/most recent job title
 - Current/most recent company
@@ -393,6 +430,7 @@ Following the Atomic Design pattern:
 - Notice period
 
 **Step 3: Educational Background**
+
 - Highest education level (select)
 - Degree/certification name
 - Institution name
@@ -401,6 +439,7 @@ Following the Atomic Design pattern:
 - Relevant certifications
 
 **Step 4: Address Information**
+
 - Current address
   - Street address
   - City
@@ -411,6 +450,7 @@ Following the Atomic Design pattern:
 - Willingness to relocate (yes/no/conditional)
 
 **Step 5: Document Upload**
+
 - Resume/CV upload (drag-drop + file select)
   - Supported formats notice
   - Size limit indicator
@@ -420,6 +460,7 @@ Following the Atomic Design pattern:
 - Upload progress indicator
 
 **Step 6: Additional Information**
+
 - Availability to start (date picker)
 - Preferred working arrangement (select)
 - How they found the job (select + text)
@@ -428,6 +469,7 @@ Following the Atomic Design pattern:
 - Additional comments (text area)
 
 **Step 7: Final Review**
+
 - Summary of all entered information
 - Section-by-section review
 - Edit links for each section
@@ -437,6 +479,7 @@ Following the Atomic Design pattern:
 - Save as draft option
 
 #### Application Confirmation
+
 - Success message
 - Application reference number
 - Next steps information
@@ -445,6 +488,7 @@ Following the Atomic Design pattern:
 - "View Other Jobs" button
 
 #### Optional Account Creation
+
 - Post-application account creation prompt
 - Email/password setup
 - Benefits of creating account explained
@@ -453,22 +497,23 @@ Following the Atomic Design pattern:
 
 ### API Requirements
 
-| Endpoint | Method | Description | Request Body | Response |
-|----------|--------|-------------|--------------|----------|
-| `/api/public/jobs` | GET | List public jobs with filtering | Query params | `{ jobs, pagination }` |
-| `/api/public/jobs/{id}` | GET | Get public job details | - | `{ job }` |
-| `/api/public/jobs/{id}/apply` | POST | Submit job application | All application form data | `{ application, message, token }` |
-| `/api/public/applications/{id}/documents` | POST | Upload application documents | Form data with files | `{ documents, message }` |
-| `/api/public/register` | POST | Create candidate account after application | `{ email, password, applicationToken }` | `{ user, message }` |
-| `/api/public/applications/status/{token}` | GET | Check application status (no login) | - | `{ status, timeline }` |
+| Endpoint                                  | Method | Description                                | Request Body                            | Response                          |
+| ----------------------------------------- | ------ | ------------------------------------------ | --------------------------------------- | --------------------------------- |
+| `/api/public/jobs`                        | GET    | List public jobs with filtering            | Query params                            | `{ jobs, pagination }`            |
+| `/api/public/jobs/{id}`                   | GET    | Get public job details                     | -                                       | `{ job }`                         |
+| `/api/public/jobs/{id}/apply`             | POST   | Submit job application                     | All application form data               | `{ application, message, token }` |
+| `/api/public/applications/{id}/documents` | POST   | Upload application documents               | Form data with files                    | `{ documents, message }`          |
+| `/api/public/register`                    | POST   | Create candidate account after application | `{ email, password, applicationToken }` | `{ user, message }`               |
+| `/api/public/applications/status/{token}` | GET    | Check application status (no login)        | -                                       | `{ status, timeline }`            |
 
 ---
 
-## 7. Candidate Management
+## DEV 7. Candidate Management
 
 ### UI Sections
 
 #### Candidate Listing
+
 - Responsive table/grid view
 - Advanced filtering options:
   - Status
@@ -485,39 +530,46 @@ Following the Atomic Design pattern:
 - Saved filters/searches
 
 #### Candidate Detail View
+
 - Profile header with photo and key info
 - Tab-based layout:
-  
+
   **Personal & Contact Info Tab**
+
   - All personal details
   - Contact information
   - Social profiles
   - Communication log
-  
+
   **Professional Background Tab**
+
   - Work history timeline
   - Current employment
   - Skills visualization
   - Experience summary
-  
+
   **Educational History Tab**
+
   - Education timeline
   - Degrees and certifications
   - Institutions
-  
+
   **Documents Tab**
+
   - Resume/CV viewer
   - Cover letter
   - Additional documents
   - Upload new document button
-  
+
   **Applications History Tab**
+
   - List of all job applications
   - Status indicators
   - Timeline view
   - Related job links
-  
+
   **Notes & Comments Tab**
+
   - Threaded comments
   - Timestamp and author
   - Add comment form
@@ -530,6 +582,7 @@ Following the Atomic Design pattern:
   - Rating system
 
 #### Candidate Edit Form
+
 - Similar layout to application form
 - Pre-populated with existing data
 - Ability to edit all sections
@@ -539,6 +592,7 @@ Following the Atomic Design pattern:
 - Save/Cancel buttons
 
 #### Resume/Document Viewer
+
 - In-page document preview
 - Download option
 - Print option
@@ -547,6 +601,7 @@ Following the Atomic Design pattern:
 - Text extraction view (toggle)
 
 #### Candidate Status Management
+
 - Visual status pipeline
 - Drag-drop status changes
 - Status change modal with reason field
@@ -555,27 +610,28 @@ Following the Atomic Design pattern:
 
 ### API Requirements
 
-| Endpoint | Method | Description | Request Body | Response |
-|----------|--------|-------------|--------------|----------|
-| `/api/candidates` | GET | List candidates with filtering | Query params | `{ candidates, pagination }` |
-| `/api/candidates` | POST | Create new candidate manually | Candidate details | `{ candidate, message }` |
-| `/api/candidates/{id}` | GET | Get candidate details | - | `{ candidate }` |
-| `/api/candidates/{id}` | PUT | Update candidate information | Updated details | `{ candidate, message }` |
-| `/api/candidates/{id}` | DELETE | Delete candidate | - | `{ success, message }` |
-| `/api/candidates/{id}/documents` | GET | Get candidate documents | - | `{ documents }` |
-| `/api/candidates/{id}/documents` | POST | Add document to candidate | Form data with file | `{ document, message }` |
-| `/api/candidates/{id}/documents/{docId}` | DELETE | Delete candidate document | - | `{ success, message }` |
-| `/api/candidates/{id}/applications` | GET | Get candidate's application history | - | `{ applications }` |
-| `/api/candidates/{id}/notes` | POST | Add notes to candidate | `{ note, visibility }` | `{ note, message }` |
-| `/api/candidates/{id}/notes` | GET | Get candidate notes | - | `{ notes }` |
+| Endpoint                                 | Method | Description                         | Request Body           | Response                     |
+| ---------------------------------------- | ------ | ----------------------------------- | ---------------------- | ---------------------------- |
+| `/api/candidates`                        | GET    | List candidates with filtering      | Query params           | `{ candidates, pagination }` |
+| `/api/candidates`                        | POST   | Create new candidate manually       | Candidate details      | `{ candidate, message }`     |
+| `/api/candidates/{id}`                   | GET    | Get candidate details               | -                      | `{ candidate }`              |
+| `/api/candidates/{id}`                   | PUT    | Update candidate information        | Updated details        | `{ candidate, message }`     |
+| `/api/candidates/{id}`                   | DELETE | Delete candidate                    | -                      | `{ success, message }`       |
+| `/api/candidates/{id}/documents`         | GET    | Get candidate documents             | -                      | `{ documents }`              |
+| `/api/candidates/{id}/documents`         | POST   | Add document to candidate           | Form data with file    | `{ document, message }`      |
+| `/api/candidates/{id}/documents/{docId}` | DELETE | Delete candidate document           | -                      | `{ success, message }`       |
+| `/api/candidates/{id}/applications`      | GET    | Get candidate's application history | -                      | `{ applications }`           |
+| `/api/candidates/{id}/notes`             | POST   | Add notes to candidate              | `{ note, visibility }` | `{ note, message }`          |
+| `/api/candidates/{id}/notes`             | GET    | Get candidate notes                 | -                      | `{ notes }`                  |
 
 ---
 
-## 8. Application Processing
+## DEV 8. Application Processing
 
 ### UI Sections
 
 #### Application List
+
 - Responsive table layout
 - Filtering options:
   - Job
@@ -591,6 +647,7 @@ Following the Atomic Design pattern:
 - Custom column selection
 
 #### Application Detail View
+
 - Application summary header
 - Candidate profile section
 - Job details section
@@ -602,6 +659,7 @@ Following the Atomic Design pattern:
 - Action buttons (appropriate to current status)
 
 #### Bulk Action Interface
+
 - Selection counter
 - Action dropdown:
   - Update status
@@ -613,6 +671,7 @@ Following the Atomic Design pattern:
 - Success/error feedback
 
 #### Status Update Workflow
+
 - Intuitive status progression buttons
 - Status change form with:
   - Reason field
@@ -622,6 +681,7 @@ Following the Atomic Design pattern:
 - Success feedback
 
 #### AI Matching Results View
+
 - Overall match score (percentage)
 - Detailed breakdown by categories:
   - Skills match
@@ -633,6 +693,7 @@ Following the Atomic Design pattern:
 - Recommendation engine results
 
 #### Top Candidates View
+
 - Sorted list by match score
 - Side-by-side comparison option
 - Key differentiators highlighted
@@ -641,6 +702,7 @@ Following the Atomic Design pattern:
 - Filter controls
 
 #### Application Review Form
+
 - Rating system (stars/numerical)
 - Strengths and weaknesses fields
 - Interview recommendation
@@ -649,6 +711,7 @@ Following the Atomic Design pattern:
 - Decision and reasoning
 
 #### Interview Scheduling Interface
+
 - Calendar view
 - Available time slots
 - Interview type selection
@@ -660,26 +723,27 @@ Following the Atomic Design pattern:
 
 ### API Requirements
 
-| Endpoint | Method | Description | Request Body | Response |
-|----------|--------|-------------|--------------|----------|
-| `/api/applications` | GET | List applications with filtering | Query params | `{ applications, pagination }` |
-| `/api/applications/{id}` | GET | Get application details | - | `{ application }` |
-| `/api/applications/{id}/status` | PUT | Update application status | `{ status, reason, notifyCandidate }` | `{ application, message }` |
-| `/api/applications/bulk-status` | POST | Update multiple application statuses | `{ ids, status, reason, notify }` | `{ success, count, message }` |
-| `/api/applications/{id}/matching` | GET | Get AI matching score and details | - | `{ matching, details }` |
-| `/api/applications/{id}/schedule` | POST | Schedule interview | Interview details | `{ interview, message }` |
-| `/api/applications/top-matches/{jobId}` | GET | Get top matching candidates for job | Query params for count | `{ candidates, pagination }` |
-| `/api/applications/{id}/review` | POST | Save application review | Review details | `{ review, message }` |
-| `/api/applications/{id}/hire` | PUT | Mark candidate as hired | Hiring details | `{ application, message }` |
-| `/api/applications/{id}/reject` | PUT | Reject candidate with reason | `{ reason, template }` | `{ application, message }` |
+| Endpoint                                | Method | Description                          | Request Body                          | Response                       |
+| --------------------------------------- | ------ | ------------------------------------ | ------------------------------------- | ------------------------------ |
+| `/api/applications`                     | GET    | List applications with filtering     | Query params                          | `{ applications, pagination }` |
+| `/api/applications/{id}`                | GET    | Get application details              | -                                     | `{ application }`              |
+| `/api/applications/{id}/status`         | PUT    | Update application status            | `{ status, reason, notifyCandidate }` | `{ application, message }`     |
+| `/api/applications/bulk-status`         | POST   | Update multiple application statuses | `{ ids, status, reason, notify }`     | `{ success, count, message }`  |
+| `/api/applications/{id}/matching`       | GET    | Get AI matching score and details    | -                                     | `{ matching, details }`        |
+| `/api/applications/{id}/schedule`       | POST   | Schedule interview                   | Interview details                     | `{ interview, message }`       |
+| `/api/applications/top-matches/{jobId}` | GET    | Get top matching candidates for job  | Query params for count                | `{ candidates, pagination }`   |
+| `/api/applications/{id}/review`         | POST   | Save application review              | Review details                        | `{ review, message }`          |
+| `/api/applications/{id}/hire`           | PUT    | Mark candidate as hired              | Hiring details                        | `{ application, message }`     |
+| `/api/applications/{id}/reject`         | PUT    | Reject candidate with reason         | `{ reason, template }`                | `{ application, message }`     |
 
 ---
 
-## 9. AI Resume Processing (Future Implementation)
+## DEV 9. AI Resume Processing (Future Implementation)
 
-*Note: This section will be implemented in a later phase.*
+_Note: This section will be implemented in a later phase._
 
 ### Functionality
+
 - Automatic processing when resume is uploaded during application
 - Document parsing and text extraction
 - Skills and experience extraction
@@ -689,19 +753,20 @@ Following the Atomic Design pattern:
 
 ### API Requirements (For Future Implementation)
 
-| Endpoint | Method | Description | Request Body | Response |
-|----------|--------|-------------|--------------|----------|
-| `/api/ai/process-resume` | POST | Process resume | `{ resumeId, jobId }` | `{ status, message }` |
-| `/api/ai/matching-score` | GET | Get matching score | Query params | `{ score, breakdown }` |
-| `/api/ai/top-candidates` | GET | Get top candidates | Query params | `{ candidates }` |
+| Endpoint                 | Method | Description        | Request Body          | Response               |
+| ------------------------ | ------ | ------------------ | --------------------- | ---------------------- |
+| `/api/ai/process-resume` | POST   | Process resume     | `{ resumeId, jobId }` | `{ status, message }`  |
+| `/api/ai/matching-score` | GET    | Get matching score | Query params          | `{ score, breakdown }` |
+| `/api/ai/top-candidates` | GET    | Get top candidates | Query params          | `{ candidates }`       |
 
 ---
 
-## 10. Candidate Portal (Post-Application)
+## DEV 10. Candidate Portal (Post-Application)
 
 ### UI Sections
 
 #### Account Registration
+
 - Simple form after application submission
 - Email (pre-filled from application)
 - Password creation
@@ -710,6 +775,7 @@ Following the Atomic Design pattern:
 - Verification email process
 
 #### Application Status View
+
 - Visual pipeline of application stages
 - Current status indicator
 - Timeline of status changes
@@ -718,6 +784,7 @@ Following the Atomic Design pattern:
 - Interview schedules (if applicable)
 
 #### Profile Management
+
 - Personal information edit form
 - Professional information management
 - Education details
@@ -726,6 +793,7 @@ Following the Atomic Design pattern:
 - Account settings
 
 #### Document Management
+
 - Current documents list
 - Document preview
 - Upload new/replacement documents
@@ -733,6 +801,7 @@ Following the Atomic Design pattern:
 - Delete options
 
 #### Job Recommendations
+
 - Personalized job suggestions
 - Similarity indicators
 - Quick apply options
@@ -740,6 +809,7 @@ Following the Atomic Design pattern:
 - Job alert settings
 
 #### Application History
+
 - List of all applications
 - Status indicators
 - Date applied
@@ -748,23 +818,24 @@ Following the Atomic Design pattern:
 
 ### API Requirements
 
-| Endpoint | Method | Description | Request Body | Response |
-|----------|--------|-------------|--------------|----------|
-| `/api/candidate-portal/register` | POST | Register new candidate account | `{ email, password, applicationToken }` | `{ user, message }` |
-| `/api/candidate-portal/applications` | GET | View candidate's applications | Query params | `{ applications, pagination }` |
-| `/api/candidate-portal/profile` | GET | Get candidate profile | - | `{ profile }` |
-| `/api/candidate-portal/profile` | PUT | Update candidate profile | Updated profile | `{ profile, message }` |
-| `/api/candidate-portal/documents` | GET | Get candidate documents | - | `{ documents }` |
-| `/api/candidate-portal/documents` | POST | Upload new documents | Form data with file | `{ document, message }` |
-| `/api/candidate-portal/recommendations` | GET | Get job recommendations | - | `{ jobs }` |
+| Endpoint                                | Method | Description                    | Request Body                            | Response                       |
+| --------------------------------------- | ------ | ------------------------------ | --------------------------------------- | ------------------------------ |
+| `/api/candidate-portal/register`        | POST   | Register new candidate account | `{ email, password, applicationToken }` | `{ user, message }`            |
+| `/api/candidate-portal/applications`    | GET    | View candidate's applications  | Query params                            | `{ applications, pagination }` |
+| `/api/candidate-portal/profile`         | GET    | Get candidate profile          | -                                       | `{ profile }`                  |
+| `/api/candidate-portal/profile`         | PUT    | Update candidate profile       | Updated profile                         | `{ profile, message }`         |
+| `/api/candidate-portal/documents`       | GET    | Get candidate documents        | -                                       | `{ documents }`                |
+| `/api/candidate-portal/documents`       | POST   | Upload new documents           | Form data with file                     | `{ document, message }`        |
+| `/api/candidate-portal/recommendations` | GET    | Get job recommendations        | -                                       | `{ jobs }`                     |
 
 ---
 
-## 11. Notification System
+## DEV 11. Notification System
 
 ### UI Sections
 
 #### In-app Notification Center
+
 - Notification bell icon with counter
 - Dropdown list of recent notifications
 - Read/unread indicators
@@ -774,6 +845,7 @@ Following the Atomic Design pattern:
 - Timestamp for each notification
 
 #### Notification Preferences
+
 - Email notification toggles
 - In-app notification toggles
 - Categorized preferences:
@@ -786,6 +858,7 @@ Following the Atomic Design pattern:
 - Quiet hours configuration
 
 #### Email Notification Templates (Admin)
+
 - Template list view
 - Template editor with variables
 - Preview functionality
@@ -795,23 +868,24 @@ Following the Atomic Design pattern:
 
 ### API Requirements
 
-| Endpoint | Method | Description | Request Body | Response |
-|----------|--------|-------------|--------------|----------|
-| `/api/notifications` | GET | Get user notifications | Query params | `{ notifications, pagination }` |
-| `/api/notifications/{id}/read` | PUT | Mark notification as read | - | `{ success, message }` |
-| `/api/notifications/read-all` | PUT | Mark all notifications as read | - | `{ success, count }` |
-| `/api/notifications/preferences` | GET | Get notification preferences | - | `{ preferences }` |
-| `/api/notifications/preferences` | PUT | Update notification preferences | Updated preferences | `{ preferences, message }` |
-| `/api/admin/email-templates` | GET | Get email templates | - | `{ templates }` |
-| `/api/admin/email-templates/{id}` | PUT | Update email template | Updated template | `{ template, message }` |
+| Endpoint                          | Method | Description                     | Request Body        | Response                        |
+| --------------------------------- | ------ | ------------------------------- | ------------------- | ------------------------------- |
+| `/api/notifications`              | GET    | Get user notifications          | Query params        | `{ notifications, pagination }` |
+| `/api/notifications/{id}/read`    | PUT    | Mark notification as read       | -                   | `{ success, message }`          |
+| `/api/notifications/read-all`     | PUT    | Mark all notifications as read  | -                   | `{ success, count }`            |
+| `/api/notifications/preferences`  | GET    | Get notification preferences    | -                   | `{ preferences }`               |
+| `/api/notifications/preferences`  | PUT    | Update notification preferences | Updated preferences | `{ preferences, message }`      |
+| `/api/admin/email-templates`      | GET    | Get email templates             | -                   | `{ templates }`                 |
+| `/api/admin/email-templates/{id}` | PUT    | Update email template           | Updated template    | `{ template, message }`         |
 
 ---
 
-## 12. Custom Field Management
+## DEV 12. Custom Field Management
 
 ### UI Sections
 
 #### Field Type Management
+
 - Available field types list:
   - Text input
   - Text area
@@ -826,6 +900,7 @@ Following the Atomic Design pattern:
 - Edit field properties
 
 #### Entity Field Assignment
+
 - Entity selection (Jobs, Candidates)
 - Available fields list
 - Assigned fields list
@@ -834,6 +909,7 @@ Following the Atomic Design pattern:
 - Visibility settings
 
 #### Form Builder Interface
+
 - Visual form layout
 - Section creation and management
 - Field placement
@@ -842,6 +918,7 @@ Following the Atomic Design pattern:
 - Responsive design testing
 
 #### Field Visibility Settings
+
 - Role-based visibility options
 - Public/internal toggle
 - Conditional display rules
@@ -849,22 +926,23 @@ Following the Atomic Design pattern:
 
 ### API Requirements
 
-| Endpoint | Method | Description | Request Body | Response |
-|----------|--------|-------------|--------------|----------|
-| `/api/custom-fields/types` | GET | Get available field types | - | `{ types }` |
-| `/api/custom-fields/types` | POST | Create new field type | Field type definition | `{ type, message }` |
-| `/api/custom-fields/entities/{entity}` | GET | Get fields for entity type | - | `{ fields }` |
-| `/api/custom-fields/entities/{entity}` | POST | Assign fields to entity | Field assignment details | `{ field, message }` |
-| `/api/custom-fields/entities/{entity}/{fieldId}` | PUT | Update field assignment | Updated assignment | `{ field, message }` |
-| `/api/custom-fields/entities/{entity}/{fieldId}` | DELETE | Remove field from entity | - | `{ success, message }` |
+| Endpoint                                         | Method | Description                | Request Body             | Response               |
+| ------------------------------------------------ | ------ | -------------------------- | ------------------------ | ---------------------- |
+| `/api/custom-fields/types`                       | GET    | Get available field types  | -                        | `{ types }`            |
+| `/api/custom-fields/types`                       | POST   | Create new field type      | Field type definition    | `{ type, message }`    |
+| `/api/custom-fields/entities/{entity}`           | GET    | Get fields for entity type | -                        | `{ fields }`           |
+| `/api/custom-fields/entities/{entity}`           | POST   | Assign fields to entity    | Field assignment details | `{ field, message }`   |
+| `/api/custom-fields/entities/{entity}/{fieldId}` | PUT    | Update field assignment    | Updated assignment       | `{ field, message }`   |
+| `/api/custom-fields/entities/{entity}/{fieldId}` | DELETE | Remove field from entity   | -                        | `{ success, message }` |
 
 ---
 
-## 13. Settings & Configuration
+## DEV 13. Settings & Configuration
 
 ### UI Sections
 
 #### General Settings
+
 - Company information
 - Default language
 - Date and time formats
@@ -874,6 +952,7 @@ Following the Atomic Design pattern:
 - Default job post settings
 
 #### Email Configuration
+
 - SMTP settings
 - Default sender information
 - Email signature configuration
@@ -882,6 +961,7 @@ Following the Atomic Design pattern:
 - Email testing tool
 
 #### System Preferences
+
 - Default views and sorting
 - Records per page
 - Auto-logout timing
@@ -890,6 +970,7 @@ Following the Atomic Design pattern:
 - Export format preferences
 
 #### User Roles & Permissions
+
 - Role management
 - Permission assignment matrix
 - Custom role creation
@@ -897,6 +978,7 @@ Following the Atomic Design pattern:
 - Feature enablement toggles
 
 #### Compliance Settings
+
 - Data retention policies
 - GDPR compliance toggles
 - Privacy policy management
@@ -906,24 +988,25 @@ Following the Atomic Design pattern:
 
 ### API Requirements
 
-| Endpoint | Method | Description | Request Body | Response |
-|----------|--------|-------------|--------------|----------|
-| `/api/settings/general` | GET | Get general settings | - | `{ settings }` |
-| `/api/settings/general` | PUT | Update general settings | Updated settings | `{ settings, message }` |
-| `/api/settings/email` | GET | Get email settings | - | `{ settings }` |
-| `/api/settings/email` | PUT | Update email settings | Updated settings | `{ settings, message }` |
-| `/api/settings/compliance` | GET | Get compliance settings | - | `{ settings }` |
-| `/api/settings/compliance` | PUT | Update compliance settings | Updated settings | `{ settings, message }` |
-| `/api/settings/roles` | GET | Get role permissions | - | `{ roles }` |
-| `/api/settings/roles/{role}` | PUT | Update role permissions | Updated permissions | `{ role, message }` |
+| Endpoint                     | Method | Description                | Request Body        | Response                |
+| ---------------------------- | ------ | -------------------------- | ------------------- | ----------------------- |
+| `/api/settings/general`      | GET    | Get general settings       | -                   | `{ settings }`          |
+| `/api/settings/general`      | PUT    | Update general settings    | Updated settings    | `{ settings, message }` |
+| `/api/settings/email`        | GET    | Get email settings         | -                   | `{ settings }`          |
+| `/api/settings/email`        | PUT    | Update email settings      | Updated settings    | `{ settings, message }` |
+| `/api/settings/compliance`   | GET    | Get compliance settings    | -                   | `{ settings }`          |
+| `/api/settings/compliance`   | PUT    | Update compliance settings | Updated settings    | `{ settings, message }` |
+| `/api/settings/roles`        | GET    | Get role permissions       | -                   | `{ roles }`             |
+| `/api/settings/roles/{role}` | PUT    | Update role permissions    | Updated permissions | `{ role, message }`     |
 
 ---
 
-## 14. Basic Analytics & Reporting
+## DEV 14. Basic Analytics & Reporting
 
 ### UI Sections
 
 #### Application Sources Report
+
 - Visual charts (pie, bar)
 - Source breakdown
 - Timeline comparison
@@ -932,6 +1015,7 @@ Following the Atomic Design pattern:
 - Date range selector
 
 #### Job Performance Metrics
+
 - Job comparison table
 - Views, applications, interviews, hires
 - Conversion rate analysis
@@ -940,6 +1024,7 @@ Following the Atomic Design pattern:
 - Export functionality
 
 #### Time-to-Hire Analysis
+
 - Stage duration breakdown
 - Bottleneck identification
 - Comparison across jobs/departments
@@ -948,6 +1033,7 @@ Following the Atomic Design pattern:
 - Improvement suggestions
 
 #### Candidate Pipeline View
+
 - Visual funnel or pipeline view
 - Stage-by-stage metrics
 - Conversion rates between stages
@@ -956,6 +1042,7 @@ Following the Atomic Design pattern:
 - Filter by job, date range, department
 
 #### Basic Export Functions
+
 - Export format selection (CSV, Excel, PDF)
 - Data selection interface
 - Scheduled exports option
@@ -965,19 +1052,20 @@ Following the Atomic Design pattern:
 
 ### API Requirements
 
-| Endpoint | Method | Description | Request Body | Response |
-|----------|--------|-------------|--------------|----------|
-| `/api/analytics/applications/sources` | GET | Get application source data | Query params | `{ sources, metrics }` |
-| `/api/analytics/jobs/performance` | GET | Get job performance metrics | Query params | `{ jobs, metrics }` |
-| `/api/analytics/hiring/time` | GET | Get time-to-hire analysis | Query params | `{ times, breakdown }` |
-| `/api/analytics/pipeline` | GET | Get candidate pipeline data | Query params | `{ stages, metrics }` |
-| `/api/analytics/export` | POST | Generate data export | Export configuration | `{ url, message }` |
+| Endpoint                              | Method | Description                 | Request Body         | Response               |
+| ------------------------------------- | ------ | --------------------------- | -------------------- | ---------------------- |
+| `/api/analytics/applications/sources` | GET    | Get application source data | Query params         | `{ sources, metrics }` |
+| `/api/analytics/jobs/performance`     | GET    | Get job performance metrics | Query params         | `{ jobs, metrics }`    |
+| `/api/analytics/hiring/time`          | GET    | Get time-to-hire analysis   | Query params         | `{ times, breakdown }` |
+| `/api/analytics/pipeline`             | GET    | Get candidate pipeline data | Query params         | `{ stages, metrics }`  |
+| `/api/analytics/export`               | POST   | Generate data export        | Export configuration | `{ url, message }`     |
 
 ---
 
 ## Database Schema (MongoDB)
 
 ### User Collection
+
 ```javascript
 {
   _id: ObjectId,
@@ -997,6 +1085,7 @@ Following the Atomic Design pattern:
 ```
 
 ### Job Collection
+
 ```javascript
 {
   _id: ObjectId,
@@ -1048,6 +1137,7 @@ Following the Atomic Design pattern:
 ```
 
 ### Candidate Collection
+
 ```javascript
 {
   _id: ObjectId,
@@ -1116,6 +1206,7 @@ Following the Atomic Design pattern:
 ```
 
 ### Application Collection
+
 ```javascript
 {
   _id: ObjectId,
@@ -1174,6 +1265,7 @@ Following the Atomic Design pattern:
 ```
 
 ### CustomField Collection
+
 ```javascript
 {
   _id: ObjectId,
@@ -1201,6 +1293,7 @@ Following the Atomic Design pattern:
 ```
 
 ### Notification Collection
+
 ```javascript
 {
   _id: ObjectId,
@@ -1216,6 +1309,7 @@ Following the Atomic Design pattern:
 ```
 
 ### Settings Collection
+
 ```javascript
 {
   _id: ObjectId,
@@ -1227,6 +1321,7 @@ Following the Atomic Design pattern:
 ```
 
 ### Activity Collection
+
 ```javascript
 {
   _id: ObjectId,
@@ -1244,6 +1339,7 @@ Following the Atomic Design pattern:
 ## AWS Integration Components
 
 ### S3 Storage
+
 - **Bucket Structure**:
   - `/resumes` - Candidate resumes
   - `/cover-letters` - Candidate cover letters
@@ -1252,6 +1348,7 @@ Following the Atomic Design pattern:
   - `/exports` - Exported reports and data
 
 ### Lambda Functions (Future Implementation)
+
 - **resumeProcessor** - Extracts text from uploaded resumes
 - **documentParser** - Parses structured information from resumes
 - **matchingEngine** - Compares resume content with job requirements
@@ -1259,17 +1356,20 @@ Following the Atomic Design pattern:
 ## Security Considerations
 
 1. **Authentication**:
+
    - JWT-based authentication
    - Secure password storage with bcrypt
    - Session management with expiration
    - CSRF protection
 
 2. **Authorization**:
+
    - Role-based access control
    - Resource-level permissions
    - Data access restrictions
 
 3. **Data Protection**:
+
    - Input validation and sanitization
    - Protection against XSS and injection attacks
    - Secure handling of uploaded files
@@ -1285,12 +1385,14 @@ Following the Atomic Design pattern:
 ## Performance Considerations
 
 1. **Database Optimization**:
+
    - Proper indexing for frequently queried fields
    - Pagination for large result sets
    - Aggregation pipeline optimization
    - Query caching where appropriate
 
 2. **Frontend Performance**:
+
    - Server-side rendering for initial load
    - Client-side navigation for subsequent pages
    - Code splitting for reduced bundle size
@@ -1306,29 +1408,34 @@ Following the Atomic Design pattern:
 ## Implementation Phases
 
 ### Phase 1: Core Infrastructure (Weeks 1-2)
+
 - Project setup and configuration
 - Authentication system
 - User management
 - Basic dashboard
 
 ### Phase 2: Job Management (Weeks 3-4)
+
 - Job creation and management
 - Public job board
 - Custom fields for jobs
 
 ### Phase 3: Application Processing (Weeks 5-6)
+
 - Application submission flow
 - Candidate management
 - Application review interface
 - Basic matching logic
 
 ### Phase 4: Advanced Features (Weeks 7-8)
+
 - Notification system
 - Candidate portal
 - Analytics and reporting
 - Settings and configuration
 
 ### Phase 5: AI Integration and Refinement (Week 9)
+
 - Resume parsing implementation
 - Advanced matching algorithms
 - UI/UX refinements

@@ -1,44 +1,38 @@
-import React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
-interface BadgeProps {
-  children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info';
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
-}
+const badgeVariants = cva(
+  'inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset',
+  {
+    variants: {
+      variant: {
+        default: 'bg-gray-50 text-gray-700 ring-gray-600/20',
+        primary: 'bg-primary-50 text-primary-700 ring-primary-600/20',
+        secondary: 'bg-secondary-50 text-secondary-700 ring-secondary-600/20',
+        success: 'bg-green-50 text-green-700 ring-green-600/20',
+        danger: 'bg-red-50 text-red-700 ring-red-600/20',
+        warning: 'bg-yellow-50 text-yellow-700 ring-yellow-600/20',
+        info: 'bg-blue-50 text-blue-700 ring-blue-600/20',
+      },
+      size: {
+        sm: 'text-xs px-1.5 py-0.5',
+        md: 'text-xs px-2 py-1',
+        lg: 'text-sm px-2.5 py-1',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'md',
+    },
+  }
+);
 
-export function Badge({ 
-  children, 
-  variant = 'primary', 
-  size = 'md',
-  className
-}: BadgeProps) {
-  const variantClasses = {
-    primary: 'bg-primary/10 text-primary border-primary/20',
-    secondary: 'bg-secondary/10 text-secondary border-secondary/20',
-    success: 'bg-green-100 text-green-800 border-green-200',
-    danger: 'bg-red-100 text-red-800 border-red-200',
-    warning: 'bg-amber-100 text-amber-800 border-amber-200',
-    info: 'bg-blue-100 text-blue-800 border-blue-200'
-  };
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
 
-  const sizeClasses = {
-    sm: 'text-xs px-2 py-0.5',
-    md: 'text-sm px-2.5 py-0.5',
-    lg: 'text-base px-3 py-1'
-  };
-
+export function Badge({ className, variant, size, ...props }: BadgeProps) {
   return (
-    <span className={cn(
-      'inline-flex items-center rounded-full border font-medium',
-      variantClasses[variant],
-      sizeClasses[size],
-      className
-    )}>
-      {children}
-    </span>
+    <div className={cn(badgeVariants({ variant, size }), className)} {...props} />
   );
 }
-
-export default Badge;

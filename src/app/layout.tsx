@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Poppins, Open_Sans } from "next/font/google";
+import { AuthProvider } from "@/context/AuthContext";
+import { Toaster } from "@/components/shadcn-ui/sonner";
+
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
@@ -15,7 +18,7 @@ const openSans = Open_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Rekrut",
+  title: "Rekrut ATS",
   description: "A recruitment platform",
 };
 
@@ -27,7 +30,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.variable} ${openSans.variable}`}>
-        {children}
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

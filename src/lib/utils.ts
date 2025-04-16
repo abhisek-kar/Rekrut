@@ -1,60 +1,76 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 /**
- * Combines class names using clsx and tailwind-merge
+ * Combine multiple class names using clsx and tailwind-merge
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 /**
- * Formats a date object using Intl.DateTimeFormat
+ * Format a date using Intl.DateTimeFormat
  */
-export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOptions) {
+export function formatDate(date: Date | string | number, options?: Intl.DateTimeFormatOptions) {
   const defaultOptions: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+    dateStyle: 'medium',
+    timeStyle: undefined,
   };
-  
-  const dateToFormat = date instanceof Date ? date : new Date(date);
-  return new Intl.DateTimeFormat('en-US', options || defaultOptions).format(dateToFormat);
+
+  const dateObj = date instanceof Date ? date : new Date(date);
+  const formatter = new Intl.DateTimeFormat('en-US', { ...defaultOptions, ...options });
+
+  return formatter.format(dateObj);
 }
 
 /**
- * Truncate text to a specific length and add ellipsis
+ * Format a currency amount
  */
-export function truncateText(text: string, maxLength: number): string {
+export function formatCurrency(amount: number, currency = 'USD') {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+  }).format(amount);
+}
+
+/**
+ * Truncate text to a specific length
+ */
+export function truncateText(text: string, maxLength: number) {
   if (text.length <= maxLength) return text;
-  return `${text.substring(0, maxLength)}...`;
+  return text.slice(0, maxLength) + '...';
 }
 
 /**
- * Convert a string to slug format
+ * Get initials from name
  */
-export function slugify(text: string): string {
-  return text
-    .toString()
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '')
-    .replace(/--+/g, '-')
-    .replace(/^-+/, '')
-    .replace(/-+$/, '');
+export function getInitials(name: string) {
+  const names = name.split(' ');
+  return names.map(n => n[0]).join('').toUpperCase();
 }
 
 /**
- * Generate a random string of specified length
+ * Generate a random string
  */
-export function generateRandomString(length: number): string {
+export function generateRandomString(length = 10) {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let result = '';
-  const charactersLength = characters.length;
-  
   for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
-  
   return result;
+}
+
+/**
+ * Debounce a function
+ */
+export function debounce<T extends (...args: any[]) => any>(
+  fn: T,
+  delay: number
+): (...args: Parameters<T>) => void {
+  let timer: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
 }

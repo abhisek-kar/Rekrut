@@ -1,37 +1,47 @@
-import React from 'react';
-import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import React from "react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+
+type LogoSize = "sm" | "md" | "lg" | "xl";
 
 interface LogoProps {
+  size?: LogoSize;
   className?: string;
-  color?: 'light' | 'dark';
-  size?: 'sm' | 'md' | 'lg';
+  asLink?: boolean;
 }
 
-export function Logo({ 
-  className, 
-  color = 'dark',
-  size = 'md',
-}: LogoProps) {
-  const colorClass = color === 'light' ? 'text-white' : 'text-primary';
-  
+export function Logo({ size = "md", className, asLink = true }: LogoProps) {
+  // Define size classes
   const sizeClasses = {
-    sm: 'text-xl',
-    md: 'text-2xl',
-    lg: 'text-3xl'
+    sm: "text-xl",
+    md: "text-2xl",
+    lg: "text-3xl",
+    xl: "text-4xl",
   };
 
-  return (
-    <Link href="/" className={cn(
-      'font-bold',
-      colorClass,
-      sizeClasses[size],
-      className
-    )}>
-      <span className="font-extrabold">Rekrut</span>
-      <span className="text-primary-500">ATS</span>
-    </Link>
+  // Logo content component
+  const LogoContent = () => (
+    <div
+      className={cn(
+        "font-bold text-primary flex items-center",
+        sizeClasses[size],
+        className
+      )}
+    >
+      <h1 className="text-primary">
+        Rekrut<span className="text-gray-800"> ATS</span>
+      </h1>
+    </div>
   );
-}
 
-export default Logo;
+  // Return as link or div based on prop
+  if (asLink) {
+    return (
+      <Link href="/" className="hover:opacity-90 transition-opacity">
+        <LogoContent />
+      </Link>
+    );
+  }
+
+  return <LogoContent />;
+}
