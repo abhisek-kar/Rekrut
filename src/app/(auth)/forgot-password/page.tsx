@@ -138,10 +138,10 @@ export default function ForgotPasswordPage() {
                 >
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 mb-2">
                     <InfoIcon className="" />
-                    <p className="text-sm text-gray-700 flex items-start">
+                    <span className="text-sm text-gray-700 flex items-start">
                       We'll send you an email with instructions to reset your
                       password. Make sure to check your spam folder.
-                    </p>
+                    </span>
                   </div>
 
                   <FormField
