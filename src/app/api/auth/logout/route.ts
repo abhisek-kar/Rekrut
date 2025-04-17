@@ -1,48 +1,74 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 import User from "@/models/User";
 import dbConnect from "@/lib/db/connect";
+import jwt from "jsonwebtoken";
 
 export async function POST(request: NextRequest) {
   try {
-    // Get authorization header
+    // Get the authorization header
     const authHeader = request.headers.get("authorization");
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json({ success: true });
+    
+    // Check both authorization header and cookie
+    const token = authHeader && authHeader.startsWith("Bearer ")
+      ? authHeader.split(" ")[1]
+      : request.cookies.get("auth_token")?.value;
+    
+    if (!token) {
+      return NextResponse.json(
+        { message: "Authentication required" },
+        { status: 401 }
+      );
     }
 
-    // Extract token
-    const token = authHeader.split(" ")[1];
-
     try {
+      // Make sure JWT_SECRET is set
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        console.error("JWT_SECRET is not set in environment variables");
+        throw new Error("Server configuration error");
+      }
+      
       // Verify token
-      const decoded = jwt.verify(
-        token,
-        process.env.JWT_SECRET || "your-secret-key"
-      ) as {
-        id: string;
+      const decodedToken = jwt.verify(token, jwtSecret) as { 
+        id: string; 
+        email: string; 
+        role: string 
       };
 
       // Connect to database
       await dbConnect();
 
-      // Log last logout time
-      if (decoded && decoded.id) {
-        await User.findByIdAndUpdate(decoded.id, {
-          lastLogout: new Date(),
-        });
-      }
-    } catch (tokenError) {
-      // If token is invalid, that's fine, we still want to let the user logout
-      console.error("Token error during logout:", tokenError);
+      // Update last logout timestamp for user
+      await User.findByIdAndUpdate(decodedToken.id, {
+        lastLogout: new Date(),
+      });
+    } catch (error) {
+      // Even if token verification fails, we'll still clear the cookie
+      console.error("Token verification error during logout:", error);
     }
 
-    // In a real application with HTTP-only cookies, you would clear the cookie here
+    // Create response
+    const response = NextResponse.json({
+      success: true,
+      message: "Successfully logged out",
+    });
 
-    return NextResponse.json({ success: true });
+    // Clear the auth_token cookie
+    response.cookies.set({
+      name: "auth_token",
+      value: "",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      expires: new Date(0), // Expire immediately
+      path: "/",
+    });
+
+    return response;
   } catch (error) {
     console.error("Logout error:", error);
-    return NextResponse.json({ success: true });
+    return NextResponse.json(
+      { message: "An error occurred during logout" },
+      { status: 500 }
+    );
   }
 }

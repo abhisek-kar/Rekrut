@@ -1,10 +1,10 @@
-import React from 'react';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import React from "react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/shadcn-ui/button";
+import { Input } from "@/components/shadcn-ui/input";
+import { Label } from "@/components/shadcn-ui/label";
 import {
   Form,
   FormControl,
@@ -13,16 +13,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from "@/components/shadcn-ui/form";
 
 const personalInfoSchema = z.object({
-  firstName: z.string().min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  phone: z.string().min(5, 'Invalid phone number').optional(),
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(5, "Invalid phone number").optional(),
   dateOfBirth: z.string().optional(),
-  linkedinProfile: z.string().url('Invalid URL').optional().or(z.literal('')),
-  portfolioWebsite: z.string().url('Invalid URL').optional().or(z.literal('')),
+  linkedinProfile: z.string().url("Invalid URL").optional().or(z.literal("")),
+  portfolioWebsite: z.string().url("Invalid URL").optional().or(z.literal("")),
 });
 
 export type PersonalInfoValues = z.infer<typeof personalInfoSchema>;
@@ -33,17 +33,21 @@ interface PersonalInfoProps {
   onBack?: () => void;
 }
 
-export function PersonalInfo({ defaultValues, onSubmit, onBack }: PersonalInfoProps) {
+export function PersonalInfo({
+  defaultValues,
+  onSubmit,
+  onBack,
+}: PersonalInfoProps) {
   const form = useForm<PersonalInfoValues>({
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      dateOfBirth: '',
-      linkedinProfile: '',
-      portfolioWebsite: '',
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      dateOfBirth: "",
+      linkedinProfile: "",
+      portfolioWebsite: "",
       ...defaultValues,
     },
   });
@@ -87,10 +91,15 @@ export function PersonalInfo({ defaultValues, onSubmit, onBack }: PersonalInfoPr
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input {...field} type="email" placeholder="john.doe@example.com" />
+                <Input
+                  {...field}
+                  type="email"
+                  placeholder="john.doe@example.com"
+                />
               </FormControl>
               <FormDescription>
-                We'll use this email to communicate with you about your application.
+                We'll use this email to communicate with you about your
+                application.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -132,7 +141,11 @@ export function PersonalInfo({ defaultValues, onSubmit, onBack }: PersonalInfoPr
             <FormItem>
               <FormLabel>LinkedIn Profile (Optional)</FormLabel>
               <FormControl>
-                <Input {...field} type="url" placeholder="https://linkedin.com/in/johndoe" />
+                <Input
+                  {...field}
+                  type="url"
+                  placeholder="https://linkedin.com/in/johndoe"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -146,7 +159,11 @@ export function PersonalInfo({ defaultValues, onSubmit, onBack }: PersonalInfoPr
             <FormItem>
               <FormLabel>Portfolio/Website (Optional)</FormLabel>
               <FormControl>
-                <Input {...field} type="url" placeholder="https://johndoe.com" />
+                <Input
+                  {...field}
+                  type="url"
+                  placeholder="https://johndoe.com"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -159,9 +176,7 @@ export function PersonalInfo({ defaultValues, onSubmit, onBack }: PersonalInfoPr
               Back
             </Button>
           )}
-          <Button type="submit">
-            Next Step
-          </Button>
+          <Button type="submit">Next Step</Button>
         </div>
       </form>
     </Form>

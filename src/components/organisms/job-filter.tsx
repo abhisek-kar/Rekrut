@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { 
+import React, { useState } from "react";
+import { Button } from "@/components/shadcn-ui/button";
+import { Input } from "@/components/shadcn-ui/input";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
-import { cn } from '@/lib/utils';
-import { Filter, RefreshCw, X } from 'lucide-react';
+} from "@/components/shadcn-ui/select";
+import { Checkbox } from "@/components/shadcn-ui/checkbox";
+import { Label } from "@/components/shadcn-ui/label";
+import { Slider } from "@/components/shadcn-ui/slider";
+import { cn } from "@/lib/utils";
+import { Filter, RefreshCw, X } from "lucide-react";
 
 interface JobFilterProps {
   onFilter: (filters: JobFilters) => void;
@@ -31,13 +31,13 @@ export interface JobFilters {
 
 export function JobFilter({ onFilter, className }: JobFilterProps) {
   const [filters, setFilters] = useState<JobFilters>({
-    search: '',
-    location: '',
+    search: "",
+    location: "",
     jobTypes: [],
     experienceLevels: [],
     salaryRange: [0, 200000],
     remote: false,
-    postedWithin: '',
+    postedWithin: "",
   });
 
   const [isOpen, setIsOpen] = useState(false);
@@ -47,9 +47,13 @@ export function JobFilter({ onFilter, className }: JobFilterProps) {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCheckboxChange = (name: string, value: string, checked: boolean) => {
+  const handleCheckboxChange = (
+    name: string,
+    value: string,
+    checked: boolean
+  ) => {
     setFilters((prev) => {
-      const currentValues = prev[name as keyof JobFilters] as string[] || [];
+      const currentValues = (prev[name as keyof JobFilters] as string[]) || [];
       if (checked) {
         return { ...prev, [name]: [...currentValues, value] };
       } else {
@@ -77,27 +81,27 @@ export function JobFilter({ onFilter, className }: JobFilterProps) {
 
   const resetFilters = () => {
     setFilters({
-      search: '',
-      location: '',
+      search: "",
+      location: "",
       jobTypes: [],
       experienceLevels: [],
       salaryRange: [0, 200000],
       remote: false,
-      postedWithin: '',
+      postedWithin: "",
     });
     onFilter({});
   };
 
   return (
-    <div className={cn('bg-background rounded-lg border shadow-sm', className)}>
+    <div className={cn("bg-background rounded-lg border shadow-sm", className)}>
       <div className="p-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Filter className="h-5 w-5" />
           <h3 className="font-medium">Filters</h3>
         </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => setIsOpen(!isOpen)}
           className="md:hidden"
         >
@@ -105,11 +109,11 @@ export function JobFilter({ onFilter, className }: JobFilterProps) {
         </Button>
       </div>
 
-      <form 
+      <form
         onSubmit={handleSubmit}
         className={cn(
-          'border-t p-4 space-y-4',
-          isOpen ? 'block' : 'hidden md:block'
+          "border-t p-4 space-y-4",
+          isOpen ? "block" : "hidden md:block"
         )}
       >
         <div className="space-y-4">
@@ -139,8 +143,8 @@ export function JobFilter({ onFilter, className }: JobFilterProps) {
 
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="remote" 
+              <Checkbox
+                id="remote"
                 checked={filters.remote}
                 onCheckedChange={handleRemoteChange}
               />
@@ -151,31 +155,41 @@ export function JobFilter({ onFilter, className }: JobFilterProps) {
           <div>
             <Label>Job Type</Label>
             <div className="mt-1 space-y-2">
-              {['Full-time', 'Part-time', 'Contract', 'Internship'].map((type) => (
-                <div className="flex items-center space-x-2" key={type}>
-                  <Checkbox 
-                    id={`jobType-${type}`}
-                    checked={filters.jobTypes?.includes(type)}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('jobTypes', type, checked as boolean)
-                    }
-                  />
-                  <Label htmlFor={`jobType-${type}`}>{type}</Label>
-                </div>
-              ))}
+              {["Full-time", "Part-time", "Contract", "Internship"].map(
+                (type) => (
+                  <div className="flex items-center space-x-2" key={type}>
+                    <Checkbox
+                      id={`jobType-${type}`}
+                      checked={filters.jobTypes?.includes(type)}
+                      onCheckedChange={(checked) =>
+                        handleCheckboxChange(
+                          "jobTypes",
+                          type,
+                          checked as boolean
+                        )
+                      }
+                    />
+                    <Label htmlFor={`jobType-${type}`}>{type}</Label>
+                  </div>
+                )
+              )}
             </div>
           </div>
 
           <div>
             <Label>Experience Level</Label>
             <div className="mt-1 space-y-2">
-              {['Entry', 'Mid', 'Senior', 'Executive'].map((level) => (
+              {["Entry", "Mid", "Senior", "Executive"].map((level) => (
                 <div className="flex items-center space-x-2" key={level}>
-                  <Checkbox 
+                  <Checkbox
                     id={`expLevel-${level}`}
                     checked={filters.experienceLevels?.includes(level)}
-                    onCheckedChange={(checked) => 
-                      handleCheckboxChange('experienceLevels', level, checked as boolean)
+                    onCheckedChange={(checked) =>
+                      handleCheckboxChange(
+                        "experienceLevels",
+                        level,
+                        checked as boolean
+                      )
                     }
                   />
                   <Label htmlFor={`expLevel-${level}`}>{level}</Label>
@@ -186,9 +200,11 @@ export function JobFilter({ onFilter, className }: JobFilterProps) {
 
           <div>
             <Label>Posted Within</Label>
-            <Select 
-              value={filters.postedWithin} 
-              onValueChange={(value) => handleSelectChange('postedWithin', value)}
+            <Select
+              value={filters.postedWithin}
+              onValueChange={(value) =>
+                handleSelectChange("postedWithin", value)
+              }
             >
               <SelectTrigger className="mt-1">
                 <SelectValue placeholder="Any time" />
@@ -207,14 +223,18 @@ export function JobFilter({ onFilter, className }: JobFilterProps) {
             <div className="flex justify-between">
               <Label>Salary Range</Label>
               <span className="text-sm text-muted-foreground">
-                ${filters.salaryRange[0].toLocaleString()} - ${filters.salaryRange[1].toLocaleString()}
+                ${(filters.salaryRange?.[0] ?? 0).toLocaleString()} - $
+                {(filters.salaryRange?.[1] ?? 200000).toLocaleString()}
               </span>
             </div>
             <Slider
               defaultValue={[0, 200000]}
               max={200000}
               step={10000}
-              value={[filters.salaryRange[0], filters.salaryRange[1]]}
+              value={[
+                filters.salaryRange?.[0] ?? 0,
+                filters.salaryRange?.[1] ?? 200000,
+              ]}
               onValueChange={handleSliderChange}
               className="mt-2"
             />
@@ -225,9 +245,9 @@ export function JobFilter({ onFilter, className }: JobFilterProps) {
           <Button type="submit" className="flex-1">
             Apply Filters
           </Button>
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             onClick={resetFilters}
             className="flex items-center gap-1"
           >

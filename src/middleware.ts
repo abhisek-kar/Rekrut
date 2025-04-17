@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   const token = authHeader && authHeader.startsWith("Bearer ")
     ? authHeader.split(" ")[1]
-    : request.cookies.get("token")?.value;
+    : request.cookies.get("auth_token")?.value;
 
   if (!token) {
     // If API route, return 401 unauthorized
@@ -59,10 +59,17 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
+    // Get JWT secret from environment variables
+    const jwtSecret = process.env.JWT_SECRET;
+    
+    // Ensure JWT_SECRET exists
+    if (!jwtSecret) {
+      console.error("JWT_SECRET is not set in environment variables");
+      throw new Error("Server configuration error");
+    }
+    
     // Verify JWT token
-    const secret = new TextEncoder().encode(
-      process.env.JWT_SECRET || "your-secret-key"
-    );
+    const secret = new TextEncoder().encode(jwtSecret);
     
     const { payload } = await jwtVerify(token, secret);
     

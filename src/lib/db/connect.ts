@@ -13,14 +13,25 @@ if (!MONGODB_URI) {
  * in development. This prevents connections growing exponentially
  * during API Route usage.
  */
-let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+// Define the type for the cached mongoose client
+interface Cached {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
 }
+
+// Avoid TS error by using 'declare global'
+declare global {
+  // eslint-disable-next-line no-var
+  var mongoose: Cached | undefined; // Use var to avoid TypeScript's block scoping
+}
+
+let cached: Cached = global.mongoose || { conn: null, promise: null };
+
+if (process.env.NODE_ENV !== 'production') global.mongoose = cached;
 
 async function dbConnect() {
   if (cached.conn) {
+    console.log('🔄 Using existing MongoDB connection');
     return cached.conn;
   }
 
@@ -29,15 +40,20 @@ async function dbConnect() {
       bufferCommands: false,
     };
 
+    console.log('🔌 Creating new MongoDB connection');
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      console.log('✅ MongoDB connected successfully');
       return mongoose;
     });
+  } else {
+    console.log('⏳ Waiting for existing MongoDB connection promise');
   }
 
   try {
     cached.conn = await cached.promise;
   } catch (e) {
     cached.promise = null;
+    console.error('❌ MongoDB connection error:', e);
     throw e;
   }
 

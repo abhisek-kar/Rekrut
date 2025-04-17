@@ -1,16 +1,16 @@
-import React from 'react';
-import Link from 'next/link';
-import { MapPin, Clock, Briefcase, CalendarDays } from 'lucide-react';
-import { Badge } from '@/components/atoms/badge';
-import { Button } from '@/components/ui/button';
-import { cn, formatDate } from '@/lib/utils';
+import React from "react";
+import Link from "next/link";
+import { MapPin, Clock, Briefcase, CalendarDays } from "lucide-react";
+import { Badge } from "@/components/atoms/badge";
+import { Button } from "@/components/shadcn-ui/button";
+import { cn, formatDate } from "@/lib/utils";
 
 interface JobCardProps {
   id: string;
   title: string;
   company: string;
   location: string;
-  locationType: 'remote' | 'onsite' | 'hybrid';
+  locationType: "remote" | "onsite" | "hybrid";
   employmentType: string;
   salary?: {
     min?: number;
@@ -39,11 +39,13 @@ export function JobCard({
   className,
 }: JobCardProps) {
   return (
-    <div className={cn(
-      'group rounded-lg border bg-card p-5 shadow-sm transition-all hover:shadow',
-      isFeatured && 'border-primary/50 bg-primary/5',
-      className
-    )}>
+    <div
+      className={cn(
+        "group rounded-lg border bg-card p-5 shadow-sm transition-all hover:shadow",
+        isFeatured && "border-primary/50 bg-primary/5",
+        className
+      )}
+    >
       <div className="flex flex-col space-y-4">
         <div className="flex items-start justify-between">
           <div>
@@ -56,10 +58,14 @@ export function JobCard({
           </div>
           <div className="flex space-x-2">
             {isNew && (
-              <Badge variant="success" size="sm">New</Badge>
+              <Badge variant="success" size="sm">
+                New
+              </Badge>
             )}
             {isFeatured && (
-              <Badge variant="primary" size="sm">Featured</Badge>
+              <Badge variant="primary" size="sm">
+                Featured
+              </Badge>
             )}
           </div>
         </div>
@@ -67,7 +73,9 @@ export function JobCard({
         <div className="flex flex-wrap gap-y-2 gap-x-4 text-sm text-muted-foreground">
           <div className="flex items-center">
             <MapPin className="mr-1.5 h-4 w-4" />
-            <span>{location} ({locationType})</span>
+            <span>
+              {location} ({locationType})
+            </span>
           </div>
           <div className="flex items-center">
             <Briefcase className="mr-1.5 h-4 w-4" />
@@ -75,12 +83,14 @@ export function JobCard({
           </div>
           <div className="flex items-center">
             <Clock className="mr-1.5 h-4 w-4" />
-            <span>Posted {formatDate(postedAt, { dateStyle: 'medium' })}</span>
+            <span>Posted {formatDate(postedAt, { dateStyle: "medium" })}</span>
           </div>
           {deadline && (
             <div className="flex items-center">
               <CalendarDays className="mr-1.5 h-4 w-4" />
-              <span>Deadline {formatDate(deadline, { dateStyle: 'medium' })}</span>
+              <span>
+                Deadline {formatDate(deadline, { dateStyle: "medium" })}
+              </span>
             </div>
           )}
         </div>
@@ -88,8 +98,10 @@ export function JobCard({
         {salary?.min && (
           <div className="text-sm">
             <span className="font-medium">
-              {salary.currency || '$'}{salary.min.toLocaleString()}
-              {salary.max && ` - ${salary.currency || '$'}${salary.max.toLocaleString()}`}
+              {salary.currency || "$"}
+              {salary.min.toLocaleString()}
+              {salary.max &&
+                ` - ${salary.currency || "$"}${salary.max.toLocaleString()}`}
             </span>
           </div>
         )}
@@ -98,7 +110,10 @@ export function JobCard({
           <Link href={`/apply/${id}`} passHref>
             <Button>Apply Now</Button>
           </Link>
-          <Link href={`/jobs/${id}`} className="text-sm text-primary hover:underline">
+          <Link
+            href={`/jobs/${id}`}
+            className="text-sm text-primary hover:underline"
+          >
             View Details
           </Link>
         </div>

@@ -3,8 +3,8 @@ import { z } from "zod";
 import User from "@/models/User";
 import dbConnect from "@/lib/db/connect";
 import crypto from "crypto";
-// In a real application, you would use a proper email service
-// import { sendEmail } from "@/lib/email";
+import { sendEmail, generatePasswordResetEmail } from "@/lib/email";
+import { applyRateLimit } from "@/lib/rate-limit";
 
 // Validation schema for forgot password request
 const forgotPasswordSchema = z.object({
@@ -13,6 +13,27 @@ const forgotPasswordSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting - 3 attempts per 10 minutes
+    const rateLimitResult = applyRateLimit(request, {
+      interval: 10 * 60 * 1000, // 10 minutes
+      maxRequests: 3,           // 3 requests
+    });
+
+    if (rateLimitResult?.isLimited) {
+      return NextResponse.json(
+        { 
+          message: "Too many password reset requests. Please try again later.",
+          retryAfter: Math.ceil(rateLimitResult.timeUntilReset / 1000) // seconds until reset
+        },
+        { 
+          status: 429, // Too Many Requests
+          headers: {
+            "Retry-After": Math.ceil(rateLimitResult.timeUntilReset / 1000).toString()
+          }
+        }
+      );
+    }
+
     // Connect to database
     await dbConnect();
 
@@ -54,25 +75,28 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
 
-    // In a real application, send email with reset link
-    // await sendEmail({
-    //   to: email,
-    //   subject: "Reset Your Password",
-    //   html: `
-    //     <p>You requested a password reset. Click the link below to reset your password:</p>
-    //     <p><a href="${resetUrl}">Reset Password</a></p>
-    //     <p>This link will expire in 1 hour.</p>
-    //     <p>If you didn't request this, please ignore this email.</p>
-    //   `,
-    // });
+    // Generate password reset email
+    const htmlContent = generatePasswordResetEmail(
+      resetUrl, 
+      `${user.firstName} ${user.lastName}`
+    );
 
-    // For development purposes, we'll return the reset URL in the response
-    // In production, this should be removed
+    // Send email
+    await sendEmail({
+      to: email,
+      subject: "Reset Your Password - Rekrut ATS",
+      html: htmlContent,
+    });
+
+    // Development convenience - remove in production
+    const devInfo = process.env.NODE_ENV === 'development' 
+      ? { devResetUrl: resetUrl }
+      : {};
+
     return NextResponse.json({
       success: true,
       message: "If your email is registered, you will receive password reset instructions",
-      // Only include this in development
-      devResetUrl: resetUrl, 
+      ...devInfo,
     });
   } catch (error) {
     console.error("Forgot password error:", error);

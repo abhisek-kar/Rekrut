@@ -55,18 +55,25 @@ Important environment variables:
 - `JWT_SECRET`: A secure random string for JWT token signing
 - `ADMIN_EMAIL` and `ADMIN_PASSWORD`: Credentials for the initial admin user
 
-4. Run the development server:
+4. Seed the database with the admin user:
+```bash
+npm run seed
+# or
+yarn seed
+```
+
+5. Run the development server:
 ```bash
 npm run dev
 # or
 yarn dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Admin User Seeding
 
-The application will automatically create an admin user on startup if one doesn't exist. The credentials are taken from your environment variables:
+The seed script will create an admin user with the credentials specified in your environment variables:
 
 ```
 ADMIN_EMAIL=admin@rekrut.com
@@ -85,6 +92,7 @@ These values should be changed in your production environment.
 - `/src/lib` - Utility functions and helpers
 - `/src/hooks` - Custom React hooks
 - `/src/context` - React context providers
+- `/scripts` - Utility scripts including database seeding
 
 ## Development Workflow
 

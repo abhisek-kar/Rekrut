@@ -28,6 +28,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/shadcn-ui/form";
+import { Tabs, TabsList, TabsTrigger } from "@/components/shadcn-ui/tabs";
 import { Input } from "@/components/shadcn-ui/input";
 import { Checkbox } from "@/components/shadcn-ui/checkbox";
 import {
@@ -37,7 +38,8 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/shadcn-ui/card";
-import appConfig from "@/lib/appConfig";
+import { Logo } from "@/components/atoms/logo";
+import { AppFooter } from "@/components/atoms/footer";
 
 // Form validation schema
 const loginSchema = z.object({
@@ -83,10 +85,6 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
       <div className="w-full max-w-md">
-        {/* <div className="mb-8 flex justify-center">
-          <Logo size="lg" />
-        </div> */}
-
         <Card className="border-none shadow-lg">
           <CardHeader className="space-y-2 pb-2">
             <CardTitle className="text-2xl font-semibold text-center ">
@@ -97,29 +95,54 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-4">
-            {error && (
-              <div className="mb-5 rounded-md bg-red-50 p-3.5 text-sm text-red-600 border border-red-200 flex items-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2 text-red-500"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                {error}
-              </div>
-            )}
-
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6"
               >
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel className="text-gray-700 font-medium">
+                        Login as
+                      </FormLabel>
+                      <FormControl>
+                        <Tabs
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          className="w-full"
+                        >
+                          <TabsList className="grid w-full grid-cols-2">
+                            {["admin", "subadmin"].map((item, index) => (
+                              <TabsTrigger
+                                key={item}
+                                value={item}
+                                className=" data-[state=active]:text-primary "
+                              >
+                                <div className="flex items-center">
+                                  {item === "admin" ? (
+                                    <Shield className="h-4 w-4 mr-2" />
+                                  ) : (
+                                    <User className="h-4 w-4 mr-2" />
+                                  )}
+
+                                  <span>
+                                    {item.charAt(0).toUpperCase() +
+                                      item.slice(1)}
+                                  </span>
+                                </div>
+                              </TabsTrigger>
+                            ))}
+                          </TabsList>
+                        </Tabs>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="email"
@@ -195,76 +218,6 @@ export default function LoginPage() {
 
                 <FormField
                   control={form.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                      <FormLabel className="text-gray-700 font-medium mb-2 block">
-                        Login as
-                      </FormLabel>
-                      <div className="flex space-x-6 mt-1">
-                        <label className="flex items-center space-x-2 cursor-pointer">
-                          <div className="relative">
-                            <input
-                              type="radio"
-                              name="role"
-                              value="admin"
-                              checked={field.value === "admin"}
-                              onChange={() => field.onChange("admin")}
-                              className="sr-only"
-                            />
-                            <div
-                              className={`w-5 h-5 rounded-full border ${
-                                field.value === "admin"
-                                  ? "border-primary bg-primary"
-                                  : "border-gray-300 bg-white"
-                              } flex items-center justify-center`}
-                            >
-                              {field.value === "admin" && (
-                                <div className="w-2 h-2 rounded-full bg-white"></div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center">
-                            <Shield className="h-4 w-4 mr-1.5 text-gray-600" />
-                            <span className="font-medium">Admin</span>
-                          </div>
-                        </label>
-
-                        <label className="flex items-center space-x-2 cursor-pointer">
-                          <div className="relative">
-                            <input
-                              type="radio"
-                              name="role"
-                              value="subadmin"
-                              checked={field.value === "subadmin"}
-                              onChange={() => field.onChange("subadmin")}
-                              className="sr-only"
-                            />
-                            <div
-                              className={`w-5 h-5 rounded-full border ${
-                                field.value === "subadmin"
-                                  ? "border-primary bg-primary"
-                                  : "border-gray-300 bg-white"
-                              } flex items-center justify-center`}
-                            >
-                              {field.value === "subadmin" && (
-                                <div className="w-2 h-2 rounded-full bg-white"></div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center">
-                            <User className="h-4 w-4 mr-1.5 text-gray-600" />
-                            <span className="font-medium">Recruiter</span>
-                          </div>
-                        </label>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="rememberMe"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center space-x-3 space-y-0">
@@ -305,10 +258,7 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        <div className="mt-6 text-center text-xs text-gray-500">
-          &copy; {new Date().getFullYear()} {appConfig.COMPANY_NAME}. All rights
-          reserved.
-        </div>
+        <AppFooter />
       </div>
     </div>
   );

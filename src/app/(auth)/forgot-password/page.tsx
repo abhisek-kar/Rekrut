@@ -35,7 +35,7 @@ import {
   CardDescription,
   CardFooter,
 } from "@/components/shadcn-ui/card";
-import appConfig from "@/lib/appConfig";
+import { AppFooter } from "@/components/atoms/footer";
 
 // Form validation schema
 const forgotPasswordSchema = z.object({
@@ -77,7 +77,7 @@ export default function ForgotPasswordPage() {
         <Card className="border-none shadow-lg overflow-hidden">
           <CardHeader className="space-y-2   pb-6">
             <CardTitle className="text-2xl font-semibold text-center ">
-              Reset Password
+              Forgot your password?
             </CardTitle>
             <CardDescription className="text-center text-gray-600">
               Enter your email address and we'll send you a link to reset your
@@ -137,11 +137,13 @@ export default function ForgotPasswordPage() {
                   className="space-y-5"
                 >
                   <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 mb-2">
-                    <InfoIcon className="" />
-                    <span className="text-sm text-gray-700 flex items-start">
-                      We'll send you an email with instructions to reset your
-                      password. Make sure to check your spam folder.
-                    </span>
+                    <div className="flex items-start gap-2 text-gray-700">
+                      <InfoIcon className="" />
+                      <span className="text-sm ">
+                        We'll send you an email with instructions to reset your
+                        password. Make sure to check your spam folder.
+                      </span>
+                    </div>
                   </div>
 
                   <FormField
@@ -201,10 +203,7 @@ export default function ForgotPasswordPage() {
           </CardFooter>
         </Card>
 
-        <div className="mt-6 text-center text-xs text-gray-500">
-          &copy; {new Date().getFullYear()} {appConfig.COMPANY_NAME}. All rights
-          reserved.
-        </div>
+        <AppFooter />
       </div>
     </div>
   );

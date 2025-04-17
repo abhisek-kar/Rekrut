@@ -21,31 +21,37 @@ import {
 } from "@/components/shadcn-ui/form";
 import { Input } from "@/components/shadcn-ui/input";
 import { Progress } from "@/components/shadcn-ui/progress";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/shadcn-ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/shadcn-ui/card";
 import { Logo } from "@/components/atoms/logo";
 
 // Password strength scoring function
 const calculatePasswordStrength = (password: string): number => {
   // Start with a base score
   let score = 0;
-  
+
   // No score for empty passwords
   if (!password) return 0;
-  
+
   // Length check - minimum 6 characters, maximum score at 12+
   const lengthScore = Math.min(password.length / 2, 6);
   score += lengthScore;
-  
+
   // Complexity checks
   if (/[A-Z]/.test(password)) score += 1; // Has uppercase
   if (/[a-z]/.test(password)) score += 1; // Has lowercase
   if (/[0-9]/.test(password)) score += 1; // Has number
   if (/[^A-Za-z0-9]/.test(password)) score += 1; // Has special character
-  
+
   // Variety of characters
-  const uniqueChars = new Set(password.split('')).size;
+  const uniqueChars = new Set(password.split("")).size;
   score += Math.min(uniqueChars / 4, 3);
-  
+
   // Normalize to 0-100 scale
   return Math.min(Math.floor(score * 8.33), 100);
 };
@@ -56,8 +62,12 @@ const resetPasswordSchema = z
     password: z
       .string()
       .min(6, { message: "Password must be at least 6 characters" })
-      .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
-      .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
+      .regex(/[A-Z]/, {
+        message: "Password must contain at least one uppercase letter",
+      })
+      .regex(/[a-z]/, {
+        message: "Password must contain at least one lowercase letter",
+      })
       .regex(/[0-9]/, { message: "Password must contain at least one number" }),
     confirmPassword: z.string(),
     token: z.string(),
@@ -73,7 +83,7 @@ export default function ResetPasswordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
-  
+
   const { isAuthenticated } = useAuth();
   const { isLoading, error, handleResetPassword } = useAuthForm();
   const [showPassword, setShowPassword] = useState(false);
@@ -113,10 +123,10 @@ export default function ResetPasswordPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/admin/dashboard');
+      router.push("/admin/dashboard");
     }
   }, [isAuthenticated, router]);
-  
+
   const onSubmit = async (data: ResetPasswordFormValues) => {
     const success = await handleResetPassword(data.token, data.password);
     if (success) {
@@ -144,7 +154,9 @@ export default function ResetPasswordPage() {
 
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Set New Password</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">
+              Set New Password
+            </CardTitle>
             <CardDescription className="text-center">
               Create a new password for your account
             </CardDescription>
@@ -161,9 +173,12 @@ export default function ResetPasswordPage() {
                 <div className="flex justify-center">
                   <CheckCircle2 className="h-12 w-12 text-green-500" />
                 </div>
-                <h3 className="text-lg font-medium">Password Reset Successful</h3>
+                <h3 className="text-lg font-medium">
+                  Password Reset Successful
+                </h3>
                 <p className="text-gray-500">
-                  Your password has been successfully reset. You can now log in with your new password.
+                  Your password has been successfully reset. You can now log in
+                  with your new password.
                 </p>
                 <Button asChild className="w-full mt-2">
                   <Link href="/login">Go to Login</Link>
@@ -171,7 +186,10 @@ export default function ResetPasswordPage() {
               </div>
             ) : (
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
                   <FormField
                     control={form.control}
                     name="password"
@@ -208,7 +226,11 @@ export default function ResetPasswordPage() {
                               <span>Password strength</span>
                               <span>{strengthDetails.label}</span>
                             </div>
-                            <Progress value={passwordStrength} className="h-1" indicatorClassName={strengthDetails.color} />
+                            <Progress
+                              value={passwordStrength}
+                              className="h-1"
+                              // indicatorClassName={strengthDetails.color}
+                            />
                           </div>
                         )}
                       </FormItem>
@@ -232,7 +254,9 @@ export default function ResetPasswordPage() {
                             <button
                               type="button"
                               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              onClick={() =>
+                                setShowConfirmPassword(!showConfirmPassword)
+                              }
                             >
                               {showConfirmPassword ? (
                                 <EyeOff className="h-4 w-4" />
@@ -247,14 +271,11 @@ export default function ResetPasswordPage() {
                     )}
                   />
 
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={isLoading}
-                  >
+                  <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Resetting...
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                        Resetting...
                       </>
                     ) : (
                       "Reset Password"

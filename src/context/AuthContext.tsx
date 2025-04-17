@@ -58,16 +58,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // Initialize auth state from localStorage on mount
+  // Initialize auth state on mount
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const storedToken = localStorage.getItem("token");
-
+        // Try to restore session from localStorage/sessionStorage for backward compatibility
+        const storedToken = localStorage.getItem("token") || sessionStorage.getItem("token");
+        
         if (storedToken) {
           setToken(storedToken);
-          await refreshSession();
         }
+        
+        // Always try to refresh the session - this will work with either the stored token
+        // or the HTTP-only cookie that the browser will automatically send
+        await refreshSession();
       } catch (error) {
         console.error("Failed to initialize auth:", error);
         setUser(null);
@@ -96,6 +100,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password, role, rememberMe }),
+        credentials: "include", // Important: include cookies in the request
       });
 
       if (!response.ok) {
@@ -109,7 +114,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setToken(data.token);
       setUser(data.user);
 
-      // Store token in localStorage if rememberMe is true, sessionStorage otherwise
+      // Store token in client-side storage for backward compatibility
+      // This is less secure but maintains compatibility with existing code
       if (rememberMe) {
         localStorage.setItem("token", data.token);
       } else {
@@ -134,14 +140,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     try {
       // Call logout API
-      if (token) {
-        await fetch("/api/auth/logout", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      }
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        credentials: "include", // Important: include cookies in the request
+      });
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
@@ -157,13 +162,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Refresh session
   const refreshSession = async () => {
-    if (!token) return;
-
     try {
+      const headers: Record<string, string> = {};
+      
+      // Add Authorization header if we have a token
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch("/api/auth/session", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers,
+        credentials: "include", // Important: include cookies in the request
       });
 
       if (!response.ok) {
@@ -172,6 +181,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       const data = await response.json();
       setUser(data.user);
+      
+      // If we don't have a token in state but the session is valid,
+      // the authentication must be via the HTTP-only cookie
+      if (!token && data.user) {
+        // We still need a token in memory for client-side code that needs it
+        // This is less secure but necessary for backward compatibility
+        const apiToken = data.token;
+        if (apiToken) {
+          setToken(apiToken);
+        }
+      }
+      
+      return true;
     } catch (error) {
       console.error("Session refresh error:", error);
 
@@ -180,6 +202,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setToken(null);
       localStorage.removeItem("token");
       sessionStorage.removeItem("token");
+      
+      return false;
     }
   };
 

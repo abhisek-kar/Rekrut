@@ -3,6 +3,7 @@ import { z } from "zod";
 import User from "@/models/User";
 import dbConnect from "@/lib/db/connect";
 import jwt from "jsonwebtoken";
+import { applyRateLimit } from "@/lib/rate-limit";
 
 // Validation schema for login request
 const loginSchema = z.object({
@@ -14,6 +15,27 @@ const loginSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting - 5 attempts per minute
+    const rateLimitResult = applyRateLimit(request, {
+      interval: 60 * 1000, // 1 minute
+      maxRequests: 5,       // 5 requests
+    });
+
+    if (rateLimitResult?.isLimited) {
+      return NextResponse.json(
+        { 
+          message: "Too many login attempts. Please try again later.",
+          retryAfter: Math.ceil(rateLimitResult.timeUntilReset / 1000) // seconds until reset
+        },
+        { 
+          status: 429, // Too Many Requests
+          headers: {
+            "Retry-After": Math.ceil(rateLimitResult.timeUntilReset / 1000).toString()
+          }
+        }
+      );
+    }
+
     // Connect to database
     await dbConnect();
 
@@ -58,6 +80,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Make sure JWT_SECRET is set
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      console.error("JWT_SECRET is not set in environment variables");
+      return NextResponse.json(
+        { message: "Server configuration error" },
+        { status: 500 }
+      );
+    }
+
     // Create JWT token
     const token = jwt.sign(
       {
@@ -65,7 +97,7 @@ export async function POST(request: NextRequest) {
         email: user.email,
         role: user.role,
       },
-      process.env.JWT_SECRET || "your-secret-key",
+      jwtSecret,
       {
         expiresIn: rememberMe ? "30d" : "1d",
       }
@@ -75,8 +107,8 @@ export async function POST(request: NextRequest) {
     user.lastLogin = new Date();
     await user.save();
 
-    // Return user info and token
-    return NextResponse.json({
+    // Create the response
+    const response = NextResponse.json({
       message: "Login successful",
       user: {
         id: user._id,
@@ -85,8 +117,22 @@ export async function POST(request: NextRequest) {
         lastName: user.lastName,
         role: user.role,
       },
-      token,
+      token, // Still include token in response for client-side storage if needed
     });
+
+    // Set HTTP-only cookie with the token
+    // This cookie will be automatically sent with subsequent requests
+    response.cookies.set({
+      name: "auth_token",
+      value: token,
+      httpOnly: true, // Prevents JavaScript from reading the cookie
+      secure: process.env.NODE_ENV === "production", // Use HTTPS in production
+      sameSite: "strict", // Prevents the cookie from being sent in cross-site requests
+      maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60, // 30 days or 1 day in seconds
+      path: "/", // Cookie available for all paths
+    });
+
+    return response;
   } catch (error) {
     console.error("Login error:", error);
     return NextResponse.json(

@@ -1,5 +1,4 @@
-import { runSeeders } from '../seed';
-import { validateEnv } from '../env';
+import { validateEnv } from "../env";
 
 let initialized = false;
 
@@ -10,15 +9,13 @@ export async function initializeServer() {
   // Validate environment variables
   try {
     validateEnv();
-  } catch (error) {
-    console.error('❌ Environment validation failed:', error.message);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("❌ Environment validation failed:", errorMessage);
     return;
   }
 
-  // Run database seeders
-  await runSeeders();
-
   // Mark as initialized
   initialized = true;
-  console.log('🚀 Server initialization complete');
+  console.log("🚀 Server initialization complete");
 }
