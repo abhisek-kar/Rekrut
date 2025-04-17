@@ -1,4 +1,4 @@
-import { AppSidebar } from "@/components/shadcn-components/app-sidebar"
+import { AppSidebar } from "@/components/shadcn-components/app-sidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -6,13 +6,13 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/shadcn-ui/breadcrumb"
-import { Separator } from "@/components/shadcn-ui/separator"
+} from "@/components/shadcn-ui/breadcrumb";
+import { Separator } from "@/components/shadcn-ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/shadcn-ui/sidebar"
+} from "@/components/shadcn-ui/sidebar";
 
 export default function Page() {
   return (
@@ -26,14 +26,9 @@ export default function Page() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Building Your Application
-                  </BreadcrumbLink>
+                  <BreadcrumbLink href="#">Admin Dashboard</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
@@ -48,5 +43,5 @@ export default function Page() {
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

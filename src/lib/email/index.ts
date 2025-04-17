@@ -1,9 +1,5 @@
-/**
- * Email service utility
- * 
- * This is a placeholder implementation that logs emails to the console in development.
- * For production, you would replace this with a real email service like SendGrid, AWS SES, etc.
- */
+import nodemailer from "nodemailer";
+import { env } from "@/lib/env";
 
 type EmailOptions = {
   to: string;
@@ -14,7 +10,7 @@ type EmailOptions = {
 };
 
 /**
- * Send an email
+ * Send an email using nodemailer
  * @param options Email options
  * @returns Promise that resolves when email is sent
  */
@@ -22,9 +18,20 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
   const { to, subject, html, text, from } = options;
   
   // Default sender address from environment variables
-  const sender = from || process.env.EMAIL_FROM || 'no-reply@rekrut.com';
+  const sender = from || env.EMAIL_FROM || 'no-reply@rekrut.com';
   
-  // In development, just log the email to the console
+  // Create nodemailer transporter
+  const transporter = nodemailer.createTransport({
+    host: env.EMAIL_HOST,
+    port: parseInt(env.EMAIL_PORT),
+    secure: env.EMAIL_SECURE === "true",
+    auth: {
+      user: env.EMAIL_USER,
+      pass: env.EMAIL_PASSWORD,
+    },
+  });
+  
+  // In development, log the email to the console
   if (process.env.NODE_ENV !== 'production') {
     console.log('📧 Email sent:');
     console.log('From:', sender);
@@ -32,44 +39,16 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
     console.log('Subject:', subject);
     console.log('Text:', text || '(HTML email)');
     console.log('HTML:', html);
-    return;
   }
   
-  // For production, you would implement a real email service here
-  // Example with SendGrid:
-  /*
-  const sgMail = require('@sendgrid/mail');
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-  
-  await sgMail.send({
-    to,
+  // Send email
+  await transporter.sendMail({
     from: sender,
+    to,
     subject,
     text: text || '',
     html,
   });
-  */
-  
-  // Example with AWS SES:
-  /*
-  const AWS = require('aws-sdk');
-  const ses = new AWS.SES({ region: 'us-east-1' });
-  
-  await ses.sendEmail({
-    Source: sender,
-    Destination: { ToAddresses: [to] },
-    Message: {
-      Subject: { Data: subject },
-      Body: {
-        Text: { Data: text || '' },
-        Html: { Data: html },
-      },
-    },
-  }).promise();
-  */
-  
-  // For now, just log that we would have sent an email in production
-  console.log('📧 Email would be sent in production');
 }
 
 /**
