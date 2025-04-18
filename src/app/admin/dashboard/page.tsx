@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,15 +10,206 @@ import {
 } from "@/components/shadcn-ui/breadcrumb";
 import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
 import { Separator } from "@/components/shadcn-ui/separator";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/shadcn-ui/card";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn-ui/tabs";
+import { 
+  MetricsGrid, 
+  ActivityFeed, 
+  JobStatusChart,
+  ApplicationFunnel,
+  ApplicationsOverTime
+} from "@/components/admin/dashboard";
+import { Activity } from "@/components/admin/dashboard/activity-feed";
+import { Button } from "@/components/shadcn-ui/button";
+
+// Sample data for testing when API fails
+const sampleMetrics = {
+  totalJobs: 42,
+  activeJobs: 24,
+  totalApplications: 342,
+  candidatesInPipeline: 156,
+  hiringRate: 8.5,
+  totalCandidates: 415,
+  totalSubadmins: 12
+};
+
+const sampleJobStatusData = [
+  { status: 'active', count: 24, percentage: 57 },
+  { status: 'draft', count: 8, percentage: 19 },
+  { status: 'closed', count: 7, percentage: 17 },
+  { status: 'archived', count: 3, percentage: 7 }
+];
+
+const sampleApplicationFunnelData = [
+  { stage: 'applied', count: 342, percentage: 100 },
+  { stage: 'screened', count: 215, percentage: 63 },
+  { stage: 'interview_scheduled', count: 128, percentage: 37 },
+  { stage: 'interviewed', count: 98, percentage: 29 },
+  { stage: 'offered', count: 43, percentage: 13 },
+  { stage: 'hired', count: 29, percentage: 8 }
+];
+
+const sampleApplicationsOverTime = [
+  { date: 'W1', value: 23 },
+  { date: 'W2', value: 32 },
+  { date: 'W3', value: 18 },
+  { date: 'W4', value: 41 },
+  { date: 'W5', value: 26 }
+];
+
+const sampleActivities: Activity[] = [
+  {
+    id: '1',
+    userAvatar: null,
+    userInitials: 'JD',
+    userName: 'Jane Doe',
+    action: 'created a new job',
+    entityType: 'job',
+    entityId: '12345',
+    entityName: 'Senior Developer',
+    timestamp: new Date().toISOString(),
+    relativeTime: '2h ago'
+  },
+  {
+    id: '2',
+    userAvatar: null,
+    userInitials: 'MS',
+    userName: 'Mike Smith',
+    action: 'updated a candidate',
+    entityType: 'candidate',
+    entityId: '54321',
+    entityName: 'John Applicant',
+    timestamp: new Date().toISOString(),
+    relativeTime: '5h ago'
+  },
+  {
+    id: '3',
+    userAvatar: null,
+    userInitials: 'AK',
+    userName: 'Alice Kim',
+    action: 'scheduled an interview',
+    entityType: 'application',
+    entityId: '67890',
+    entityName: 'Frontend Developer Application',
+    timestamp: new Date().toISOString(),
+    relativeTime: 'Yesterday'
+  }
+];
 
 export default function AdminDashboardPage() {
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("overview");
+  const [dateRange, setDateRange] = useState("30days");
+  const [activityFilter, setActivityFilter] = useState("all");
+  const [timeRange, setTimeRange] = useState("week");
+  const [isLoading, setIsLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [activities, setActivities] = useState<Activity[]>([]);
+
+  // Fetch dashboard data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/admin/dashboard?dateRange=${dateRange}`);
+        
+        if (!response.ok) {
+          if (response.status === 401) {
+            toast.error("Authentication error. Please log in again.");
+            // Use sample data for development
+            setDashboardData({
+              metrics: sampleMetrics,
+              charts: {
+                jobStatusDistribution: sampleJobStatusData,
+                applicationFunnel: sampleApplicationFunnelData,
+                applicationsOverTime: sampleApplicationsOverTime
+              }
+            });
+            return;
+          }
+          throw new Error('Failed to fetch dashboard data');
+        }
+        
+        const data = await response.json();
+        setDashboardData(data);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        toast.error("Failed to load dashboard data");
+        
+        // Use sample data for development
+        setDashboardData({
+          metrics: sampleMetrics,
+          charts: {
+            jobStatusDistribution: sampleJobStatusData,
+            applicationFunnel: sampleApplicationFunnelData,
+            applicationsOverTime: sampleApplicationsOverTime
+          }
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [dateRange]);
+
+  // Fetch activities
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        const response = await fetch(`/api/admin/activity?limit=5&type=${activityFilter}`);
+        
+        if (!response.ok) {
+          if (response.status === 401) {
+            toast.error("Authentication error. Please log in again.");
+            // Use sample data for development
+            setActivities(sampleActivities);
+            return;
+          }
+          throw new Error('Failed to fetch activity data');
+        }
+        
+        const data = await response.json();
+        setActivities(data.activities);
+      } catch (error) {
+        console.error("Error fetching activities:", error);
+        toast.error("Failed to load activity feed");
+        
+        // Use sample data for development
+        setActivities(sampleActivities);
+      }
+    };
+
+    fetchActivities();
+  }, [activityFilter]);
+
+  // Handle time range change for applications over time
+  const handleTimeRangeChange = (range: string) => {
+    setTimeRange(range);
+    // We could fetch new data here if needed
+  };
+
+  // Handle date range change for application funnel
+  const handleDateRangeChange = (range: string) => {
+    setDateRange(range);
+  };
+
+  // Handle activity filter change
+  const handleActivityFilterChange = (filter: string) => {
+    setActivityFilter(filter);
+  };
+
+  // Handle view all activities
+  const handleViewAllActivities = () => {
+    // Navigate to activity page or open modal
+    // For now, just fetch more activities
+    toast.info("Loading all activities...");
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
         <div className="flex items-center gap-2">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mx-2 h-4" />
@@ -36,106 +227,101 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-4 md:p-6">
         <div className="flex flex-col gap-6">
-          <h1 className="text-3xl font-bold tracking-tight">
-            Welcome, {user?.firstName || 'Admin'}
-          </h1>
-          <p className="text-muted-foreground">
-            Here's an overview of your recruitment process
-          </p>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {/* Sample stats cards */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total SubAdmins</CardTitle>
-                <CardDescription>Active recruitment team members</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">12</div>
-                <p className="text-xs text-muted-foreground">+2 from last month</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Active Jobs</CardTitle>
-                <CardDescription>Currently open positions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">24</div>
-                <p className="text-xs text-muted-foreground">+5 from last month</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Applications</CardTitle>
-                <CardDescription>Total candidates in pipeline</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">342</div>
-                <p className="text-xs text-muted-foreground">+86 from last month</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Hiring Rate</CardTitle>
-                <CardDescription>Conversion of applicants to hires</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">8.5%</div>
-                <p className="text-xs text-muted-foreground">+0.5% from last month</p>
-              </CardContent>
-            </Card>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-bold tracking-tight">
+              Welcome, {user?.firstName || 'Admin'}
+            </h1>
+            <p className="text-muted-foreground">
+              Here's an overview of your recruitment process
+            </p>
           </div>
 
-          {/* Recent activity (placeholder) */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest actions in your recruitment system</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-primary text-sm">JD</span>
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium leading-none">Jane Doe</p>
-                    <p className="text-sm text-muted-foreground">Created a new job posting for Senior Developer</p>
-                  </div>
-                  <div className="text-sm text-muted-foreground">2h ago</div>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="activity">Activity</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="overview" className="space-y-6">
+              {/* Metrics Cards */}
+              <MetricsGrid 
+                metrics={dashboardData?.metrics} 
+                loading={isLoading} 
+              />
+
+              {/* Charts Row */}
+              <div className="grid gap-6 md:grid-cols-2">
+                <JobStatusChart 
+                  data={dashboardData?.charts?.jobStatusDistribution || []} 
+                  loading={isLoading} 
+                />
+                <ApplicationsOverTime 
+                  data={dashboardData?.charts?.applicationsOverTime || []} 
+                  timeRanges={["week", "month", "quarter", "year"]}
+                  loading={isLoading}
+                  onTimeRangeChange={handleTimeRangeChange}
+                />
+              </div>
+
+              {/* Activity Feed */}
+              <ActivityFeed 
+                activities={activities} 
+                loading={isLoading}
+                onFilterChange={handleActivityFilterChange}
+                onViewAll={handleViewAllActivities}
+              />
+            </TabsContent>
+            
+            <TabsContent value="activity" className="space-y-6">
+              <h2 className="text-2xl font-bold">System Activity</h2>
+              <p className="text-muted-foreground">
+                Track all actions and changes in your recruitment system
+              </p>
+              
+              {/* We'd implement a full activity page here */}
+              <div className="border rounded-lg p-8 text-center">
+                <h3 className="text-xl font-medium mb-2">Activity Tracking</h3>
+                <p className="text-muted-foreground mb-4">
+                  View a comprehensive log of all system activities and changes
+                </p>
+                <Button>View Full Activity Log</Button>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="analytics" className="space-y-6">
+              <h2 className="text-2xl font-bold">Recruitment Analytics</h2>
+              <p className="text-muted-foreground">
+                Detailed metrics and insights for your recruitment process
+              </p>
+              
+              {/* Application Funnel */}
+              <ApplicationFunnel 
+                data={dashboardData?.charts?.applicationFunnel || []} 
+                dateRanges={["30days", "60days", "90days", "thisyear"]}
+                loading={isLoading}
+                onDateRangeChange={handleDateRangeChange}
+              />
+              
+              {/* Additional analytics components would go here */}
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="border rounded-lg p-6">
+                  <h3 className="font-medium mb-2">Time-to-Hire Analysis</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Coming soon: Track your recruitment timeline efficiency
+                  </p>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-primary text-sm">MS</span>
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium leading-none">Mike Smith</p>
-                    <p className="text-sm text-muted-foreground">Added 3 candidates to Marketing Manager role</p>
-                  </div>
-                  <div className="text-sm text-muted-foreground">5h ago</div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-primary text-sm">AK</span>
-                  </div>
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium leading-none">Alice Kim</p>
-                    <p className="text-sm text-muted-foreground">Scheduled interviews for 5 candidates</p>
-                  </div>
-                  <div className="text-sm text-muted-foreground">Yesterday</div>
+                <div className="border rounded-lg p-6">
+                  <h3 className="font-medium mb-2">Source Attribution</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Coming soon: Analyze where your candidates are coming from
+                  </p>
                 </div>
               </div>
-            </CardContent>
-            <CardFooter>
-              <button className="text-sm text-primary hover:underline">View all activity</button>
-            </CardFooter>
-          </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
     </div>

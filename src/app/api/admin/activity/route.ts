@@ -1,86 +1,120 @@
-import { NextRequest, NextResponse } from "next/server";
-import Activity from "@/models/Activity";
-import dbConnect from "@/lib/db/connect";
-import { Types } from "mongoose";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth/nextauth';
+import dbConnect from '@/lib/db/connect';
+import Activity from '@/models/Activity';
+import User from '@/models/User';
+import { formatDistanceToNow } from 'date-fns';
 
-// Check if MongoDB ObjectId is valid
-function isValidObjectId(id: string) {
-  return Types.ObjectId.isValid(id);
-}
-
-export async function GET(request: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    // Check if request is from an admin
-    const userRole = request.headers.get("x-user-role");
-
-    if (userRole !== "admin") {
-      return NextResponse.json(
-        { message: "Unauthorized: Admin access required" },
-        { status: 403 }
-      );
+    // Check authentication
+    const session = await getServerSession(authOptions);
+    
+    // Check if user is authenticated and has admin role
+    if (!session || !session.user || session.user.role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    // Get query parameters
-    const searchParams = request.nextUrl.searchParams;
-    const userId = searchParams.get("userId") || "";
-    const action = searchParams.get("action") || "";
-    const entityType = searchParams.get("entityType") || "";
-    const startDate = searchParams.get("startDate") || "";
-    const endDate = searchParams.get("endDate") || "";
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
-    const skip = (page - 1) * limit;
 
     // Connect to database
     await dbConnect();
 
-    // Build query
-    const query: any = {};
-    
-    if (userId && isValidObjectId(userId)) {
-      query.userId = userId;
-    }
-    
-    if (action) {
-      query.action = action;
-    }
-    
-    if (entityType) {
-      query.entityType = entityType;
-    }
-    
-    if (startDate || endDate) {
-      query.createdAt = {};
-      
-      if (startDate) {
-        query.createdAt.$gte = new Date(startDate);
-      }
-      
-      if (endDate) {
-        query.createdAt.$lte = new Date(endDate);
-      }
+    // Get query parameters
+    const url = new URL(req.url);
+    const limit = parseInt(url.searchParams.get('limit') || '10');
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const skip = (page - 1) * limit;
+    const activityType = url.searchParams.get('type') || undefined;
+
+    // Build filter
+    const filter: any = {};
+    if (activityType && activityType !== 'all') {
+      filter.entityType = activityType;
     }
 
-    // Execute query
-    const totalActivities = await Activity.countDocuments(query);
-    const activities = await Activity.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    // Fetch activities with pagination
+    const [activities, totalCount] = await Promise.all([
+      Activity.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('userId', 'firstName lastName profilePhoto')
+        .lean(),
+      
+      Activity.countDocuments(filter)
+    ]);
+
+    // Process and format activities
+    const formattedActivities = activities.map(activity => {
+      const user = activity.userId as any;
+      const userInitials = user ? 
+        `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() : 'UN';
+      
+      // Format the activity message
+      let message = '';
+      switch (activity.action) {
+        case 'create':
+          message = `created a new ${activity.entityType}`;
+          break;
+        case 'update':
+          message = `updated a ${activity.entityType}`;
+          break;
+        case 'delete':
+          message = `deleted a ${activity.entityType}`;
+          break;
+        case 'status_change':
+          message = `changed status of a ${activity.entityType} to ${activity.details?.newStatus || 'unknown'}`;
+          break;
+        case 'login':
+          message = 'logged into the system';
+          break;
+        case 'logout':
+          message = 'logged out of the system';
+          break;
+        default:
+          message = `performed action "${activity.action}" on a ${activity.entityType}`;
+      }
+
+      // Calculate relative time
+      const relativeTime = formatDistanceToNow(new Date(activity.createdAt), { 
+        addSuffix: true 
+      });
+
+      return {
+        id: activity._id.toString(),
+        userAvatar: user?.profilePhoto || null,
+        userInitials,
+        userName: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
+        action: message,
+        entityType: activity.entityType,
+        entityId: activity.entityId?.toString() || '',
+        entityName: activity.details?.name || `${activity.entityType} #${activity.entityId?.toString().slice(-5) || ''}`,
+        timestamp: activity.createdAt.toISOString(),
+        relativeTime,
+        details: activity.details || {}
+      };
+    });
+
+    // Calculate pagination info
+    const totalPages = Math.ceil(totalCount / limit);
+    const hasNext = page < totalPages;
+    const hasPrev = page > 1;
 
     return NextResponse.json({
-      activities,
+      activities: formattedActivities,
       pagination: {
-        total: totalActivities,
-        pages: Math.ceil(totalActivities / limit),
         page,
         limit,
-      },
+        totalCount,
+        totalPages,
+        hasNext,
+        hasPrev
+      }
     });
   } catch (error) {
-    console.error("Error fetching activities:", error);
+    console.error("Error fetching activity feed:", error);
     return NextResponse.json(
-      { message: "An error occurred while fetching activities" },
+      { error: "Failed to fetch activity feed" }, 
       { status: 500 }
     );
   }

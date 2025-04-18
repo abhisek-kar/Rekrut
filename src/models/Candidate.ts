@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ICandidate extends Document {
   // Personal Information
@@ -10,7 +10,7 @@ export interface ICandidate extends Document {
   profilePhoto?: string; // URL to S3
   linkedinProfile?: string;
   portfolioWebsite?: string;
-  
+
   // Professional Information
   employmentStatus?: string;
   currentJobTitle?: string;
@@ -32,7 +32,7 @@ export interface ICandidate extends Document {
   currentSalary?: number;
   expectedSalary?: number;
   noticePeriod?: string;
-  
+
   // Educational Background
   education?: Array<{
     level: string; // 'highschool', 'bachelor', 'master', 'phd', 'other'
@@ -42,7 +42,7 @@ export interface ICandidate extends Document {
     description?: string;
   }>;
   certifications?: string[];
-  
+
   // Address Information
   currentAddress?: {
     street?: string;
@@ -59,7 +59,7 @@ export interface ICandidate extends Document {
     country?: string;
   };
   willingToRelocate?: boolean;
-  
+
   // Documents
   resume?: {
     url: string;
@@ -77,7 +77,7 @@ export interface ICandidate extends Document {
     documentType?: string;
     uploadDate: Date;
   }>;
-  
+
   // Additional Information
   availabilityToStart?: Date;
   preferredWorkArrangement?: string; // 'remote', 'onsite', 'hybrid'
@@ -88,7 +88,7 @@ export interface ICandidate extends Document {
   };
   accommodationNeeds?: string;
   additionalComments?: string;
-  
+
   // System Fields
   user?: mongoose.Types.ObjectId; // if they create an account
   status: string; // 'active', 'inactive', 'blacklisted'
@@ -114,122 +114,132 @@ const CandidateSchema = new Schema<ICandidate>(
     // Personal Information
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true },
     phone: { type: String },
     dateOfBirth: { type: Date },
     profilePhoto: { type: String },
     linkedinProfile: { type: String },
     portfolioWebsite: { type: String },
-    
+
     // Professional Information
     employmentStatus: { type: String },
     currentJobTitle: { type: String },
     currentCompany: { type: String },
     currentStartDate: { type: Date },
     currentEndDate: { type: Date },
-    previousEmployment: [{
-      company: { type: String, required: true },
-      jobTitle: { type: String, required: true },
-      startDate: { type: Date, required: true },
-      endDate: { type: Date },
-      description: { type: String }
-    }],
-    skills: [{
-      name: { type: String, required: true },
-      proficiency: { type: String }
-    }],
+    previousEmployment: [
+      {
+        company: { type: String, required: true },
+        jobTitle: { type: String, required: true },
+        startDate: { type: Date, required: true },
+        endDate: { type: Date },
+        description: { type: String },
+      },
+    ],
+    skills: [
+      {
+        name: { type: String, required: true },
+        proficiency: { type: String },
+      },
+    ],
     yearsOfExperience: { type: Number },
     currentSalary: { type: Number },
     expectedSalary: { type: Number },
     noticePeriod: { type: String },
-    
+
     // Educational Background
-    education: [{
-      level: { 
-        type: String, 
-        required: true,
-        enum: ['highschool', 'bachelor', 'master', 'phd', 'other']
+    education: [
+      {
+        level: {
+          type: String,
+          required: true,
+          enum: ["highschool", "bachelor", "master", "phd", "other"],
+        },
+        degree: { type: String },
+        institution: { type: String, required: true },
+        graduationYear: { type: Number },
+        description: { type: String },
       },
-      degree: { type: String },
-      institution: { type: String, required: true },
-      graduationYear: { type: Number },
-      description: { type: String }
-    }],
+    ],
     certifications: [{ type: String }],
-    
+
     // Address Information
     currentAddress: {
       street: { type: String },
       city: { type: String },
       state: { type: String },
       postalCode: { type: String },
-      country: { type: String }
+      country: { type: String },
     },
     permanentAddress: {
       street: { type: String },
       city: { type: String },
       state: { type: String },
       postalCode: { type: String },
-      country: { type: String }
+      country: { type: String },
     },
     willingToRelocate: { type: Boolean },
-    
+
     // Documents
     resume: {
       url: { type: String },
       filename: { type: String },
-      uploadDate: { type: Date }
+      uploadDate: { type: Date },
     },
     coverLetter: {
       url: { type: String },
       filename: { type: String },
-      uploadDate: { type: Date }
+      uploadDate: { type: Date },
     },
-    additionalDocuments: [{
-      url: { type: String, required: true },
-      filename: { type: String, required: true },
-      documentType: { type: String },
-      uploadDate: { type: Date, default: Date.now }
-    }],
-    
+    additionalDocuments: [
+      {
+        url: { type: String, required: true },
+        filename: { type: String, required: true },
+        documentType: { type: String },
+        uploadDate: { type: Date, default: Date.now },
+      },
+    ],
+
     // Additional Information
     availabilityToStart: { type: Date },
-    preferredWorkArrangement: { 
+    preferredWorkArrangement: {
       type: String,
-      enum: ['remote', 'onsite', 'hybrid']
+      enum: ["remote", "onsite", "hybrid"],
     },
     source: { type: String },
     referral: {
-      referredBy: { type: Schema.Types.ObjectId, ref: 'User' },
-      referralCode: { type: String }
+      referredBy: { type: Schema.Types.ObjectId, ref: "User" },
+      referralCode: { type: String },
     },
     accommodationNeeds: { type: String },
     additionalComments: { type: String },
-    
+
     // System Fields
-    user: { type: Schema.Types.ObjectId, ref: 'User' },
-    status: { 
-      type: String, 
+    user: { type: Schema.Types.ObjectId, ref: "User" },
+    status: {
+      type: String,
       required: true,
-      default: 'active',
-      enum: ['active', 'inactive', 'blacklisted']
+      default: "active",
+      enum: ["active", "inactive", "blacklisted"],
     },
     customFields: { type: Schema.Types.Mixed },
-    notes: [{
-      content: { type: String, required: true },
-      createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-      createdAt: { type: Date, default: Date.now },
-      visibility: { 
-        type: String, 
-        default: 'internal',
-        enum: ['internal', 'shared']
-      }
-    }],
+    notes: [
+      {
+        content: { type: String, required: true },
+        createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+        createdAt: { type: Date, default: Date.now },
+        visibility: {
+          type: String,
+          default: "internal",
+          enum: ["internal", "shared"],
+        },
+      },
+    ],
     tags: [{ type: String }],
     gdprConsent: {
       consentGiven: { type: Boolean, default: false },
       consentDate: { type: Date },
-      consentVersion: { type: String }
+      consentVersion: { type: String },
     },
   },
   { timestamps: true }
@@ -239,8 +249,8 @@ const CandidateSchema = new Schema<ICandidate>(
 CandidateSchema.index({ email: 1 });
 CandidateSchema.index({ user: 1 });
 CandidateSchema.index({ status: 1 });
-CandidateSchema.index({ 'skills.name': 1 });
+CandidateSchema.index({ "skills.name": 1 });
 CandidateSchema.index({ createdAt: -1 });
 
-export default (mongoose.models.Candidate as Model<ICandidate>) || 
-  mongoose.model<ICandidate>('Candidate', CandidateSchema);
+export default (mongoose.models.Candidate as Model<ICandidate>) ||
+  mongoose.model<ICandidate>("Candidate", CandidateSchema);

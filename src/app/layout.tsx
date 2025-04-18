@@ -3,6 +3,7 @@ import "./globals.css";
 import { Poppins, Open_Sans } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/shadcn-ui/sonner";
+import { SessionProviderWrapper } from "@/lib/auth/session-provider"; 
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -30,10 +31,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.variable} ${openSans.variable}`}>
-        <AuthProvider>
-          {children}
-          <Toaster />
-        </AuthProvider>
+        <SessionProviderWrapper>
+          <AuthProvider>
+            {children}
+            <Toaster />
+          </AuthProvider>
+        </SessionProviderWrapper>
       </body>
     </html>
   );
