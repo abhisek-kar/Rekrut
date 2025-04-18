@@ -1,28 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import User from "@/models/User";
 import dbConnect from "@/lib/db/connect";
+import User from "@/models/User";
+import crypto from "crypto";
 
-// Validation schema for account setup request
+// Validation schema
 const accountSetupSchema = z.object({
-  token: z.string().min(1, "Setup token is required"),
-  firstName: z.string().min(2, "First name is required"),
-  lastName: z.string().min(2, "Last name is required"),
+  token: z.string().min(1),
+  firstName: z.string().min(1, { message: "First name is required" }),
+  lastName: z.string().min(1, { message: "Last name is required" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   phone: z.string().optional(),
-  password: z
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number"),
 });
 
 export async function POST(request: NextRequest) {
   try {
-    // Connect to database
-    await dbConnect();
-
-    // Parse and validate request
+    // Parse and validate request body
     const body = await request.json();
     const result = accountSetupSchema.safeParse(body);
 
@@ -33,40 +26,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { token, firstName, lastName, phone, password } = result.data;
+    const { token, firstName, lastName, password, phone } = result.data;
+
+    // Connect to the database
+    await dbConnect();
+
+    // Hash the token to check against stored hash
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
 
     // Find user with valid setup token
     const user = await User.findOne({
-      setupToken: token,
+      setupToken: hashedToken,
       setupTokenExpires: { $gt: Date.now() },
     });
 
     if (!user) {
       return NextResponse.json(
-        { message: "Setup token is invalid or has expired" },
+        { message: "Invalid or expired setup token" },
         { status: 400 }
       );
     }
 
-    // Update user details
+    // Update user information
     user.firstName = firstName;
     user.lastName = lastName;
-    if (phone) user.phone = phone;
-    user.password = password;
+    user.password = password; // Pre-save hook will hash this
+    user.phone = phone || user.phone;
+    user.status = "active";
     user.setupToken = undefined;
     user.setupTokenExpires = undefined;
-    user.status = "active";
-    
+
     await user.save();
 
-    return NextResponse.json({
-      success: true,
-      message: "Account setup completed successfully",
-    });
+    return NextResponse.json(
+      { message: "Account setup completed successfully" },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Account setup error:", error);
     return NextResponse.json(
-      { message: "An error occurred during account setup" },
+      { message: "An error occurred while setting up your account" },
       { status: 500 }
     );
   }

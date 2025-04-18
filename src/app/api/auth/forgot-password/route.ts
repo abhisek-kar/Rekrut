@@ -1,103 +1,100 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import User from "@/models/User";
 import dbConnect from "@/lib/db/connect";
+import User from "@/models/User";
 import crypto from "crypto";
-import { sendEmail, generatePasswordResetEmail } from "@/lib/email";
-import { applyRateLimit } from "@/lib/rate-limit";
+import nodemailer from "nodemailer";
 
-// Validation schema for forgot password request
+// Validation schema
 const forgotPasswordSchema = z.object({
   email: z.string().email(),
 });
 
 export async function POST(request: NextRequest) {
   try {
-    // Apply rate limiting - 3 attempts per 10 minutes
-    const rateLimitResult = applyRateLimit(request, {
-      interval: 10 * 60 * 1000, // 10 minutes
-      maxRequests: 3,           // 3 requests
-    });
-
-    if (rateLimitResult?.isLimited) {
-      return NextResponse.json(
-        { 
-          message: "Too many password reset requests. Please try again later.",
-          retryAfter: Math.ceil(rateLimitResult.timeUntilReset / 1000) // seconds until reset
-        },
-        { 
-          status: 429, // Too Many Requests
-          headers: {
-            "Retry-After": Math.ceil(rateLimitResult.timeUntilReset / 1000).toString()
-          }
-        }
-      );
-    }
-
-    // Connect to database
-    await dbConnect();
-
-    // Parse and validate request
+    // Parse and validate request body
     const body = await request.json();
     const result = forgotPasswordSchema.safeParse(body);
 
     if (!result.success) {
       return NextResponse.json(
-        { message: "Invalid request data", errors: result.error.errors },
+        { message: "Invalid email address" },
         { status: 400 }
       );
     }
 
+    // Connect to the database
+    await dbConnect();
+
     const { email } = result.data;
 
-    // Find user (don't reveal if user exists for security reasons)
+    // Find the user by email
     const user = await User.findOne({ email });
 
+    // If no user is found, still return success for security reasons
     if (!user) {
-      // Return success even if user doesn't exist to prevent email enumeration
-      return NextResponse.json({
-        success: true,
-        message: "If your email is registered, you will receive password reset instructions",
-      });
+      return NextResponse.json(
+        { message: "If your email is registered, you'll receive reset instructions" },
+        { status: 200 }
+      );
     }
 
-    // Generate password reset token
+    // Generate reset token
     const resetToken = crypto.randomBytes(32).toString("hex");
-    const resetTokenExpiry = new Date();
-    resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 1); // Token valid for 1 hour
+    const resetTokenHash = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
 
-    // Save token to user
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = resetTokenExpiry;
+    // Set token and expiry in user record
+    user.resetPasswordToken = resetTokenHash;
+    user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
     await user.save();
 
-    // Construct reset URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
+    // Create reset URL
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetToken}`;
 
-    // Generate password reset email
-    const htmlContent = generatePasswordResetEmail(
-      resetUrl, 
-      `${user.firstName} ${user.lastName}`
-    );
+    // Set up email
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: Number(process.env.EMAIL_PORT),
+      secure: process.env.EMAIL_PORT === "465",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_FROM,
+      to: user.email,
+      subject: "Password Reset - Rekrut ATS",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Reset Your Password</h2>
+          <p>You are receiving this email because you (or someone else) has requested to reset your password.</p>
+          <p>Please click the link below or copy and paste it into your browser to reset your password:</p>
+          <p>
+            <a href="${resetUrl}" style="display: inline-block; background-color: #4f46e5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+              Reset Password
+            </a>
+          </p>
+          <p>This link will expire in 1 hour.</p>
+          <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>
+          <p>Thank you,</p>
+          <p>Rekrut ATS Team</p>
+        </div>
+      `,
+    };
 
     // Send email
-    await sendEmail({
-      to: email,
-      subject: "Reset Your Password - Rekrut ATS",
-      html: htmlContent,
-    });
+    await transporter.sendMail(mailOptions);
 
-    // Development convenience - remove in production
-    const devInfo = process.env.NODE_ENV === 'development' 
-      ? { devResetUrl: resetUrl }
-      : {};
-
-    return NextResponse.json({
-      success: true,
-      message: "If your email is registered, you will receive password reset instructions",
-      ...devInfo,
-    });
+    return NextResponse.json(
+      { message: "If your email is registered, you'll receive reset instructions" },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Forgot password error:", error);
     return NextResponse.json(

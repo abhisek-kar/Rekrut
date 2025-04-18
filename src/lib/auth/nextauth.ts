@@ -27,23 +27,28 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (!user) {
-            return null;
+            console.log("User not found:", credentials.email);
+            throw new Error("Invalid email or password");
           }
 
           // Check if user is active
           if (user.status !== "active") {
+            console.log("User account is inactive:", credentials.email);
             throw new Error("User account is inactive");
           }
 
           // Verify password
           const isPasswordValid = await user.comparePassword(credentials.password);
           if (!isPasswordValid) {
-            return null;
+            console.log("Invalid password for:", credentials.email);
+            throw new Error("Invalid email or password");
           }
 
           // Update last login timestamp
           user.lastLogin = new Date();
           await user.save();
+
+          console.log("Login successful for:", credentials.email);
 
           // Return user object (will be encoded in the JWT)
           return {
@@ -56,14 +61,18 @@ export const authOptions: NextAuthOptions = {
           };
         } catch (error) {
           console.error("Auth error:", error);
-          return null;
+          // Rethrow the error with the message to be shown to the user
+          if (error instanceof Error) {
+            throw new Error(error.message);
+          }
+          throw new Error("Authentication failed");
         }
       },
     }),
   ],
   pages: {
-    signIn: "/auth/login",
-    error: "/auth/error",
+    signIn: "/(auth)/login", // Update to match the actual route
+    error: "/(auth)/error",
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -91,6 +100,6 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
+  secret: process.env.NEXTAUTH_SECRET,
 };

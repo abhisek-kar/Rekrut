@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { signIn } from "next-auth/react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type AuthFormValues = {
   email: string;
@@ -10,7 +11,7 @@ type AuthFormValues = {
 };
 
 export function useAuthForm() {
-  const { login } = useAuth();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,13 +20,35 @@ export function useAuthForm() {
     setError(null);
 
     try {
-      await login(values.email, values.password, values.role, values.rememberMe);
+      // Call NextAuth signIn with the 'credentials' provider
+      const result = await signIn("credentials", {
+        redirect: false,
+        email: values.email,
+        password: values.password,
+        role: values.role,
+      });
+
+      if (!result) {
+        throw new Error("Authentication failed. No response from server.");
+      }
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
       toast.success("Login successful!");
+      
+      // Redirect based on role
+      const redirectPath = values.role === "admin" ? "/admin/dashboard" : "/subadmin/dashboard";
+      router.push(redirectPath);
+      
+      return result;
     } catch (err) {
       console.error("Login error:", err);
       const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
       setError(errorMessage);
       toast.error(errorMessage);
+      return null;
     } finally {
       setIsLoading(false);
     }

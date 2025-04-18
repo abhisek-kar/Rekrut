@@ -17,7 +17,7 @@ import {
   Shield,
 } from "lucide-react";
 import { useAuthForm } from "@/hooks/useAuthForm";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 import { Button } from "@/components/shadcn-ui/button";
 import {
@@ -79,6 +79,8 @@ export default function LoginPage() {
   }, [isAuthenticated, redirectUrl, router]);
 
   const onSubmit = async (data: LoginFormValues) => {
+    // Prevent default form submission to avoid adding credentials to URL
+    event?.preventDefault();
     await handleLogin(data);
   };
 
@@ -99,6 +101,7 @@ export default function LoginPage() {
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-6"
+                method="POST" // Explicitly set method to POST
               >
                 <FormField
                   control={form.control}
@@ -180,7 +183,7 @@ export default function LoginPage() {
                           Password
                         </FormLabel>
                         <Link
-                          href="/forgot-password"
+                          href="/auth/forgot-password"
                           className="text-xs font-medium text-primary hover:underline"
                         >
                           Forgot password?
@@ -236,6 +239,12 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
+
+                {error && (
+                  <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
+                    {error}
+                  </div>
+                )}
 
                 <Button
                   type="submit"

@@ -3,7 +3,6 @@
 import { ChevronRight, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 
-import { Collapsible } from "@/components/shadcn-ui/collapsible";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -29,7 +28,7 @@ export function NavMain({
       {items.map((item) => (
         <SidebarMenuItem key={item.title}>
           <Link href={item.url} className="w-full">
-            <SidebarMenuButton 
+            <SidebarMenuButton
               tooltip={item.title}
               data-active={item.isActive}
               className="w-full data-[active=true]:bg-accent data-[active=true]:text-accent-foreground"
