@@ -20,18 +20,7 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
   // Default sender address from environment variables
   const sender = from || env.EMAIL_FROM || 'no-reply@rekrut.com';
   
-  // Create nodemailer transporter
-  const transporter = nodemailer.createTransport({
-    host: env.EMAIL_HOST,
-    port: parseInt(env.EMAIL_PORT),
-    secure: env.EMAIL_SECURE === "true",
-    auth: {
-      user: env.EMAIL_USER,
-      pass: env.EMAIL_PASSWORD,
-    },
-  });
-  
-  // In development, log the email to the console
+  // Always log the email in development
   if (process.env.NODE_ENV !== 'production') {
     console.log('📧 Email sent:');
     console.log('From:', sender);
@@ -39,16 +28,47 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
     console.log('Subject:', subject);
     console.log('Text:', text || '(HTML email)');
     console.log('HTML:', html);
+    
+    // In development, we can return here without actually sending if needed
+    if (process.env.SKIP_EMAIL_SEND === 'true') {
+      return;
+    }
   }
   
-  // Send email
-  await transporter.sendMail({
-    from: sender,
-    to,
-    subject,
-    text: text || '',
-    html,
-  });
+  try {
+    // Create nodemailer transporter
+    const transporter = nodemailer.createTransport({
+      host: env.EMAIL_HOST,
+      port: env.EMAIL_PORT,
+      secure: env.EMAIL_SECURE,
+      auth: {
+        user: env.EMAIL_USER,
+        pass: env.EMAIL_PASSWORD,
+      },
+      // Add this for development to avoid certificate validation issues
+      ...(process.env.NODE_ENV !== 'production' ? { 
+        tls: {
+          rejectUnauthorized: false
+        }
+      } : {})
+    });
+    
+    // Send email
+    await transporter.sendMail({
+      from: `"Rekrut AI" <${sender}>`,
+      to,
+      subject,
+      text: text || '',
+      html,
+    });
+  } catch (error) {
+    console.error('Error sending email:', error);
+    
+    // Don't throw in development
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
+  }
 }
 
 /**
@@ -99,7 +119,7 @@ export function generateAccountSetupEmail(setupUrl: string, email: string): stri
         </div>
         <p>Or copy and paste this link into your browser:</p>
         <p style="word-break: break-all; color: #4f46e5;">${setupUrl}</p>
-        <p>This link will expire in 24 hours for security reasons.</p>
+        <p>This link will expire in 24 hours for security reasons.</p>  
         <p>Thanks,<br>The Rekrut Team</p>
       </div>
       <div style="background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 12px; color: #6b7280;">

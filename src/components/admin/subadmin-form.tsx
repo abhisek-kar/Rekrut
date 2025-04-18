@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, Controller, SubmitHandler } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, Eye, EyeOff, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/shadcn-ui/button";
 import {
@@ -30,11 +30,7 @@ import { Switch } from "@/components/shadcn-ui/switch";
 import { Card, CardContent } from "@/components/shadcn-ui/card";
 import { Checkbox } from "@/components/shadcn-ui/checkbox";
 import { Separator } from "@/components/shadcn-ui/separator";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/shadcn-ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn-ui/avatar";
 
 // Define the permissions
 const availablePermissions = [
@@ -52,12 +48,8 @@ const availablePermissions = [
 
 // Form validation schema
 const subadminFormSchema = z.object({
-  firstName: z
-    .string()
-    .min(2, { message: "First name must be at least 2 characters" }),
-  lastName: z
-    .string()
-    .min(2, { message: "Last name must be at least 2 characters" }),
+  firstName: z.string().min(2, { message: "First name must be at least 2 characters" }),
+  lastName: z.string().min(2, { message: "Last name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
   phone: z.string().optional(),
   password: z
@@ -65,7 +57,7 @@ const subadminFormSchema = z.object({
     .min(6, { message: "Password must be at least 6 characters" })
     .optional(),
   status: z.enum(["active", "inactive"]),
-  sendSetupEmail: z.boolean(),
+  sendSetupEmail: z.boolean().default(true),
   permissions: z.array(z.string()),
   profilePhoto: z.any().optional(), // File upload handling
 });
@@ -73,9 +65,34 @@ const subadminFormSchema = z.object({
 // Types for the form values
 export type SubadminFormValues = z.infer<typeof subadminFormSchema>;
 
+// Function to generate a strong password
+function generateStrongPassword(length = 12) {
+  const uppercaseChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const lowercaseChars = 'abcdefghijkmnopqrstuvwxyz';
+  const numberChars = '23456789';
+  const specialChars = '!@#$%^&*_-+=';
+  
+  const allChars = uppercaseChars + lowercaseChars + numberChars + specialChars;
+  
+  // Ensure at least one of each character type
+  let password = 
+    uppercaseChars.charAt(Math.floor(Math.random() * uppercaseChars.length)) +
+    lowercaseChars.charAt(Math.floor(Math.random() * lowercaseChars.length)) +
+    numberChars.charAt(Math.floor(Math.random() * numberChars.length)) +
+    specialChars.charAt(Math.floor(Math.random() * specialChars.length));
+  
+  // Fill the rest of the password
+  for (let i = 4; i < length; i++) {
+    password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+  }
+  
+  // Shuffle the password
+  return password.split('').sort(() => 0.5 - Math.random()).join('');
+}
+
 // SubAdmin form props
 interface SubadminFormProps {
-  initialData?: Partial<SubadminFormValues> & { id?: string };
+  initialData?: Partial<SubadminFormValues>;
   isEditing?: boolean;
   onSuccess?: (data: any) => void;
 }
@@ -88,8 +105,10 @@ export function SubadminForm({
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(
-    (initialData?.profilePhoto as string) || null
+    initialData?.profilePhoto as string || null
   );
+  const [showPassword, setShowPassword] = useState(false);
+  const [selectAllPermissions, setSelectAllPermissions] = useState(false);
 
   // Initialize form with default values or provided data
   const form = useForm<SubadminFormValues>({
@@ -101,43 +120,66 @@ export function SubadminForm({
       phone: initialData?.phone || "",
       password: "",
       status: initialData?.status || "active",
-      sendSetupEmail:
-        initialData?.sendSetupEmail !== undefined
-          ? initialData.sendSetupEmail
-          : true,
+      sendSetupEmail: initialData?.sendSetupEmail !== undefined ? initialData.sendSetupEmail : true,
       permissions: initialData?.permissions || [],
       profilePhoto: undefined,
     },
   });
 
+  // Effect to handle "select all permissions" checkbox
+  useEffect(() => {
+    const permissions = form.watch("permissions");
+    setSelectAllPermissions(
+      permissions.length === availablePermissions.length && 
+      availablePermissions.every(p => permissions.includes(p.id))
+    );
+  }, [form.watch("permissions")]);
+
+  // Handler for "select all permissions" checkbox
+  const handleSelectAllPermissions = (checked: boolean) => {
+    if (checked) {
+      form.setValue("permissions", availablePermissions.map(p => p.id));
+    } else {
+      form.setValue("permissions", []);
+    }
+    setSelectAllPermissions(checked);
+  };
+  
+  // Handle password generation
+  const handleGeneratePassword = () => {
+    const newPassword = generateStrongPassword();
+    form.setValue("password", newPassword);
+    toast.success("Strong password generated");
+  };
+
   // Handle form submission
-  const onSubmit: SubmitHandler<SubadminFormValues> = async (data) => {
+  const onSubmit = async (data: SubadminFormValues) => {
     setIsSubmitting(true);
 
     try {
       const formData = new FormData();
-
+      
       // Append all text fields
       Object.entries(data).forEach(([key, value]) => {
-        if (key !== "profilePhoto" && key !== "permissions") {
+        if (key !== 'profilePhoto' && key !== 'permissions') {
           formData.append(key, String(value));
         }
       });
 
       // Append permissions as JSON
-      formData.append("permissions", JSON.stringify(data.permissions));
-
+      formData.append('permissions', JSON.stringify(data.permissions));
+      
       // Append profile photo if it exists
       if (data.profilePhoto && data.profilePhoto instanceof File) {
-        formData.append("profilePhoto", data.profilePhoto);
+        formData.append('profilePhoto', data.profilePhoto);
       }
 
       // Determine API endpoint and method
-      const url = isEditing
-        ? `/api/users/subadmins/${initialData?.id}`
-        : "/api/users/subadmins";
-
-      const method = isEditing ? "PUT" : "POST";
+      const url = isEditing 
+        ? `/api/users/subadmins/${initialData?.id}` 
+        : '/api/users/subadmins';
+      
+      const method = isEditing ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
@@ -146,28 +188,26 @@ export function SubadminForm({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Something went wrong");
+        throw new Error(errorData.message || 'Something went wrong');
       }
 
       const result = await response.json();
-
+      
       toast.success(
-        isEditing
-          ? "SubAdmin updated successfully"
+        isEditing 
+          ? "SubAdmin updated successfully" 
           : "SubAdmin created successfully"
       );
 
       if (onSuccess) {
         onSuccess(result);
       } else {
-        router.push("/admin/users");
+        router.push('/admin/users');
         router.refresh();
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to save SubAdmin"
-      );
+      console.error('Error submitting form:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to save SubAdmin');
     } finally {
       setIsSubmitting(false);
     }
@@ -176,10 +216,10 @@ export function SubadminForm({
   // Handle profile photo change
   const handleProfilePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-
+    
     if (file) {
-      form.setValue("profilePhoto", file);
-
+      form.setValue('profilePhoto', file);
+      
       // Create preview URL
       const reader = new FileReader();
       reader.onload = () => {
@@ -204,8 +244,7 @@ export function SubadminForm({
                     <Avatar className="h-24 w-24">
                       <AvatarImage src={profilePhotoPreview || ""} />
                       <AvatarFallback className="text-lg">
-                        {form.watch("firstName")?.[0]}
-                        {form.watch("lastName")?.[0]}
+                        {form.watch("firstName")?.[0]}{form.watch("lastName")?.[0]}
                       </AvatarFallback>
                     </Avatar>
                     <Button
@@ -213,9 +252,7 @@ export function SubadminForm({
                       size="sm"
                       variant="secondary"
                       className="absolute -bottom-2 -right-2 rounded-full h-8 w-8 p-0"
-                      onClick={() =>
-                        document.getElementById("profile-photo-input")?.click()
-                      }
+                      onClick={() => document.getElementById('profile-photo-input')?.click()}
                     >
                       <Upload className="h-4 w-4" />
                     </Button>
@@ -268,10 +305,10 @@ export function SubadminForm({
                     <FormItem>
                       <FormLabel>Email Address</FormLabel>
                       <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="john.doe@example.com"
-                          {...field}
+                        <Input 
+                          type="email" 
+                          placeholder="john.doe@example.com" 
+                          {...field} 
                           disabled={isEditing}
                         />
                       </FormControl>
@@ -292,11 +329,7 @@ export function SubadminForm({
                     <FormItem>
                       <FormLabel>Phone Number (Optional)</FormLabel>
                       <FormControl>
-                        <Input
-                          type="tel"
-                          placeholder="+1 (555) 123-4567"
-                          {...field}
-                        />
+                        <Input type="tel" placeholder="+1 (555) 123-4567" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -310,16 +343,41 @@ export function SubadminForm({
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="••••••••"
-                            {...field}
-                          />
-                        </FormControl>
+                        <div className="flex gap-2">
+                          <div className="relative flex-1">
+                            <FormControl>
+                              <Input 
+                                type={showPassword ? "text" : "password"} 
+                                placeholder="••••••••" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="flex-shrink-0"
+                            onClick={handleGeneratePassword}
+                          >
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                            Generate
+                          </Button>
+                        </div>
                         <FormDescription>
-                          Leave blank to generate a secure password and send
-                          setup email
+                          Leave blank to generate a secure password and send setup email
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -390,7 +448,22 @@ export function SubadminForm({
                 )}
 
                 <div className="space-y-4">
-                  <FormLabel>Permissions</FormLabel>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Permissions</FormLabel>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="selectAll"
+                        checked={selectAllPermissions}
+                        onCheckedChange={handleSelectAllPermissions}
+                      />
+                      <label
+                        htmlFor="selectAll"
+                        className="text-sm font-medium cursor-pointer"
+                      >
+                        Select All
+                      </label>
+                    </div>
+                  </div>
                   <FormDescription>
                     Select the permissions for this SubAdmin
                   </FormDescription>
@@ -410,10 +483,7 @@ export function SubadminForm({
                                 checked={field.value?.includes(permission.id)}
                                 onCheckedChange={(checked) => {
                                   return checked
-                                    ? field.onChange([
-                                        ...field.value,
-                                        permission.id,
-                                      ])
+                                    ? field.onChange([...field.value, permission.id])
                                     : field.onChange(
                                         field.value?.filter(
                                           (value) => value !== permission.id
@@ -440,7 +510,7 @@ export function SubadminForm({
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/admin/users")}
+            onClick={() => router.push('/admin/users')}
           >
             Cancel
           </Button>

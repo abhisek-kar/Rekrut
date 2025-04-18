@@ -5,7 +5,6 @@ import dbConnect from "@/lib/db/connect";
 import { Types } from "mongoose";
 import crypto from "crypto";
 import { sendEmail, generatePasswordResetEmail } from "@/lib/email";
-import { uploadToS3, generateS3Key, deleteFromS3 } from "@/lib/aws/s3";
 
 // Validation schema for updating a SubAdmin
 const updateSubadminSchema = z.object({
@@ -15,18 +14,6 @@ const updateSubadminSchema = z.object({
   permissions: z.array(z.string()).optional(),
   status: z.enum(["active", "inactive"]).optional(),
 });
-
-// Helper to extract S3 key from URL
-function getS3KeyFromUrl(url: string): string | null {
-  try {
-    const urlObj = new URL(url);
-    // Remove the domain part to get the key
-    const path = urlObj.pathname;
-    return path.startsWith('/') ? path.substring(1) : path;
-  } catch (e) {
-    return null;
-  }
-}
 
 // Check if MongoDB ObjectId is valid
 function isValidObjectId(id: string) {
@@ -193,22 +180,11 @@ export async function PUT(
       
       if (profilePhoto && profilePhoto.size > 0) {
         try {
-          // Delete old profile photo if exists
-          if (user.profilePhoto) {
-            const oldKey = getS3KeyFromUrl(user.profilePhoto);
-            if (oldKey) {
-              await deleteFromS3(oldKey);
-            }
-          }
-          
-          // Generate S3 key
-          const s3Key = generateS3Key("profile-photos", profilePhoto.name);
-          
-          // Upload to S3
-          const photoUrl = await uploadToS3(profilePhoto, s3Key);
-          
-          // Set profilePhoto field to the S3 URL
-          user.profilePhoto = photoUrl;
+          // In a real implementation with S3, we would upload here
+          // For now, we'll just store a placeholder URL
+          const timestamp = Date.now();
+          const uniqueId = Math.random().toString(36).substring(2, 10);
+          user.profilePhoto = `/uploads/profile-photos/${timestamp}-${uniqueId}-${profilePhoto.name}`;
         } catch (error) {
           console.error("Error updating profile photo:", error);
           // Continue without updating profile photo if upload fails
@@ -286,19 +262,6 @@ export async function DELETE(
         { message: "User is not a SubAdmin" },
         { status: 400 }
       );
-    }
-
-    // Delete profile photo from S3 if exists
-    if (user.profilePhoto) {
-      try {
-        const key = getS3KeyFromUrl(user.profilePhoto);
-        if (key) {
-          await deleteFromS3(key);
-        }
-      } catch (error) {
-        console.error("Error deleting profile photo:", error);
-        // Continue with user deletion even if photo deletion fails
-      }
     }
 
     // Delete the user

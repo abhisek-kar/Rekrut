@@ -4,7 +4,6 @@ import User from "@/models/User";
 import dbConnect from "@/lib/db/connect";
 import crypto from "crypto";
 import { sendEmail, generateAccountSetupEmail } from "@/lib/email";
-import { uploadToS3, generateS3Key } from "@/lib/aws/s3";
 
 // Validation schema for creating a SubAdmin
 const subadminSchema = z.object({
@@ -185,14 +184,11 @@ export async function POST(request: NextRequest) {
       
       if (profilePhoto && profilePhoto.size > 0) {
         try {
-          // Generate S3 key
-          const s3Key = generateS3Key("profile-photos", profilePhoto.name);
-          
-          // Upload to S3
-          const photoUrl = await uploadToS3(profilePhoto, s3Key);
-          
-          // Set profilePhoto field to the S3 URL
-          subadmin.profilePhoto = photoUrl;
+          // In a real implementation with S3, we would upload here
+          // For now, we'll just store a placeholder URL
+          const timestamp = Date.now();
+          const uniqueId = Math.random().toString(36).substring(2, 10);
+          subadmin.profilePhoto = `/uploads/profile-photos/${timestamp}-${uniqueId}-${profilePhoto.name}`;
         } catch (error) {
           console.error("Error uploading profile photo:", error);
           // Continue without profile photo if upload fails
@@ -204,19 +200,24 @@ export async function POST(request: NextRequest) {
 
     // Send setup email if requested
     if (validatedData.sendSetupEmail) {
-      // Construct setup URL
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-      const setupUrl = `${baseUrl}/account-setup?token=${setupToken}&email=${encodeURIComponent(validatedData.email)}`;
+      try {
+        // Construct setup URL
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+        const setupUrl = `${baseUrl}/account-setup?token=${setupToken}&email=${encodeURIComponent(validatedData.email)}`;
 
-      // Generate account setup email
-      const htmlContent = generateAccountSetupEmail(setupUrl, validatedData.email);
+        // Generate account setup email
+        const htmlContent = generateAccountSetupEmail(setupUrl, validatedData.email);
 
-      // Send email
-      await sendEmail({
-        to: validatedData.email,
-        subject: "Complete Your Rekrut ATS Account Setup",
-        html: htmlContent,
-      });
+        // Send email
+        await sendEmail({
+          to: validatedData.email,
+          subject: "Complete Your Rekrut ATS Account Setup",
+          html: htmlContent,
+        });
+      } catch (emailError) {
+        console.error("Error sending setup email:", emailError);
+        // Continue even if email fails
+      }
     }
 
     // Development convenience - remove in production

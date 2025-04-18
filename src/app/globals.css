@@ -87,8 +87,6 @@
   }
 }
 
-
-
 @layer base {
   * {
     @apply border-border;
@@ -96,4 +94,18 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@keyframes bounce-gentle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.animate-bounce-gentle {
+  animation: bounce-gentle 2s ease-in-out infinite;
 }
