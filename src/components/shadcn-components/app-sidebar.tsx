@@ -15,7 +15,8 @@ import {
 } from "@/components/shadcn-ui/sidebar";
 import { Logo } from "@/components/atoms/logo";
 import { Button } from "@/components/shadcn-ui/button";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
+import { LogoutButton } from "./logout-button";
 
 export function AppSidebar({ 
   navItems = [],
@@ -25,7 +26,7 @@ export function AppSidebar({
   navItems?: any[];
   userData?: { name: string; email: string; avatar: string } | null;
 }) {
-  const { logout } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
 
   // Default nav items if none are provided
@@ -45,39 +46,34 @@ export function AppSidebar({
 
   // Default user data if none is provided
   const defaultUserData = {
-    name: "User",
-    email: "user@example.com",
-    avatar: "/avatars/user.png",
+    name: user?.firstName ? `${user.firstName} ${user.lastName}` : "User",
+    email: user?.email || "user@example.com",
+    avatar: user?.profilePhoto || "/avatars/default.png",
   };
 
   const items = navItems.length > 0 ? navItems : defaultNavItems;
-  const user = userData || defaultUserData;
-
-  const handleLogout = async () => {
-    await logout();
-    router.push("/login");
-  };
+  const userProfile = userData || defaultUserData;
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="flex justify-center py-4">
-        <Logo size="lg" />
+        <Logo size="lg" hideTextInSidebar={true} />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={items} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser user={userProfile} />
         <div className="px-2 pb-4">
-          <Button 
+          <LogoutButton 
             variant="outline" 
             className="w-full justify-start" 
             size="sm"
-            onClick={handleLogout}
+            redirectTo="/auth/login"
           >
             <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>
-          </Button>
+          </LogoutButton>
         </div>
       </SidebarFooter>
       <SidebarRail />
