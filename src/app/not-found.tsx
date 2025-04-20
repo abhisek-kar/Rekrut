@@ -40,7 +40,7 @@ export default function NotFound({
 
         <h1 className="text-primary font-bold">
           <span className="block text-8xl animate-bounce-gentle">404</span>
-          <span className="mt-4 block text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
+          <span className="mt-6 block text-balance text-4xl font-semibold font-open-sans tracking-tight sm:text-5xl">
             {title}
           </span>
         </h1>
