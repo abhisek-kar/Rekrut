@@ -1,0 +1,90 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import mongoose from 'mongoose';
+import dbConnect from '@/lib/db/connect';
+import { authOptions } from '@/lib/auth/nextauth';
+import Job from '@/models/Job';
+import Activity from '@/models/Activity';
+
+// PUT: Update job status
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await dbConnect();
+
+    // Get session to verify authentication
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    // Validate the job ID
+    if (!mongoose.Types.ObjectId.isValid(params.id)) {
+      return NextResponse.json(
+        { error: 'Invalid job ID' },
+        { status: 400 }
+      );
+    }
+
+    // Parse status data from request
+    const { status, reason } = await request.json();
+
+    // Validate status
+    const validStatuses = ['draft', 'active', 'closed', 'archived'];
+    if (!validStatuses.includes(status)) {
+      return NextResponse.json(
+        { error: 'Invalid status value' },
+        { status: 400 }
+      );
+    }
+
+    // Find job and update status
+    const job = await Job.findByIdAndUpdate(
+      params.id,
+      { 
+        status,
+        updatedAt: new Date()
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!job) {
+      return NextResponse.json(
+        { error: 'Job not found' },
+        { status: 404 }
+      );
+    }
+
+    // Log the activity
+    await Activity.create({
+      userId: session.user.id,
+      action: 'status_update',
+      entityType: 'job',
+      entityId: job._id,
+      details: { 
+        jobTitle: job.title,
+        newStatus: status,
+        reason: reason || 'Status updated by user'
+      },
+      ipAddress: request.headers.get('x-forwarded-for') || request.ip,
+      userAgent: request.headers.get('user-agent') || 'unknown',
+    });
+
+    return NextResponse.json(
+      { job, message: `Job status updated to ${status}` },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('Error updating job status:', error);
+    return NextResponse.json(
+      { error: 'Failed to update job status' },
+      { status: 500 }
+    );
+  }
+}

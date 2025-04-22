@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,14 +9,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/shadcn-ui/alert-dialog";
+} from '@/components/shadcn-ui/alert-dialog';
 
 interface ConfirmationDialogProps {
   open: boolean;
   title: string;
   description: string;
   actionLabel: string;
-  actionVariant?: 'default' | 'destructive';
+  actionVariant?: 'default' | 'destructive' | 'outline';
+  cancelLabel?: string;
   onAction: () => void;
   onCancel: () => void;
 }
@@ -28,21 +28,20 @@ export function ConfirmationDialog({
   description,
   actionLabel,
   actionVariant = 'default',
+  cancelLabel = 'Cancel',
   onAction,
-  onCancel
+  onCancel,
 }: ConfirmationDialogProps) {
   return (
-    <AlertDialog open={open} onOpenChange={onCancel}>
+    <AlertDialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {description}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction 
+          <AlertDialogCancel onClick={onCancel}>{cancelLabel}</AlertDialogCancel>
+          <AlertDialogAction
             onClick={onAction}
             className={actionVariant === 'destructive' ? 'bg-destructive hover:bg-destructive/90' : ''}
           >

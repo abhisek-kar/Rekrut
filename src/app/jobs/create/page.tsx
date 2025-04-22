@@ -2,16 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { JobFormLayout } from "@/components/organisms/jobs/job-form/JobFormLayout";
-import { BasicInfoForm } from "@/components/organisms/jobs/job-form/BasicInfoForm";
-import { JobDetailsForm } from "@/components/organisms/jobs/job-form/JobDetailsForm";
-import { CompensationForm } from "@/components/organisms/jobs/job-form/CompensationForm";
-import { ApplicationSettingsForm } from "@/components/organisms/jobs/job-form/ApplicationSettingsForm";
-import { VisibilityForm } from "@/components/organisms/jobs/job-form/VisibilityForm";
-import { CustomFieldsForm } from "@/components/organisms/jobs/job-form/CustomFieldsForm";
-import { PreviewForm } from "@/components/organisms/jobs/job-form/PreviewForm";
 import { toast } from "sonner";
 import { JobType } from "@/types/job";
+
+// Import all form components from the index file
+import {
+  JobFormLayout,
+  BasicInfoForm,
+  JobDetailsForm,
+  CompensationForm,
+  ApplicationSettingsForm,
+  VisibilityForm,
+  CustomFieldsForm,
+  PreviewForm
+} from "@/components/organisms/jobs/job-form";
 
 // Define the steps of the job creation form
 const formSteps = [
@@ -80,11 +84,11 @@ export default function CreateJobPage() {
   const [formValidity, setFormValidity] = useState({
     step1: false,
     step2: false,
-    step3: false,
-    step4: false,
-    step5: false,
-    step6: true, // Custom fields are optional
-    step7: true, // Preview step is always valid
+    step3: true,  // Compensation is optional
+    step4: true,  // Application settings are optional
+    step5: true,  // Visibility settings are optional
+    step6: true,  // Custom fields are optional
+    step7: true,  // Preview step is always valid
   });
   const [formDirty, setFormDirty] = useState(false);
 
