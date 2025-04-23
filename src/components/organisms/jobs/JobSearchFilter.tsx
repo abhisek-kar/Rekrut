@@ -90,7 +90,7 @@ export function JobSearchFilter({
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="draft">Draft</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="closed">Closed</SelectItem>
@@ -106,7 +106,7 @@ export function JobSearchFilter({
                 <SelectValue placeholder="Location" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Locations</SelectItem>
+                <SelectItem value="all">All Locations</SelectItem>
                 <SelectItem value="remote">Remote</SelectItem>
                 <SelectItem value="onsite">Onsite</SelectItem>
                 <SelectItem value="hybrid">Hybrid</SelectItem>
@@ -121,7 +121,7 @@ export function JobSearchFilter({
                 <SelectValue placeholder="Job Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="full-time">Full-time</SelectItem>
                 <SelectItem value="part-time">Part-time</SelectItem>
                 <SelectItem value="contract">Contract</SelectItem>
@@ -137,7 +137,7 @@ export function JobSearchFilter({
                 <SelectValue placeholder="Experience" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Levels</SelectItem>
+                <SelectItem value="all">All Levels</SelectItem>
                 <SelectItem value="entry">Entry Level</SelectItem>
                 <SelectItem value="mid">Mid Level</SelectItem>
                 <SelectItem value="senior">Senior Level</SelectItem>
@@ -152,7 +152,7 @@ export function JobSearchFilter({
                 <SelectValue placeholder="Date Posted" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any Time</SelectItem>
+                <SelectItem value="all">Any Time</SelectItem>
                 <SelectItem value="today">Today</SelectItem>
                 <SelectItem value="week">Past Week</SelectItem>
                 <SelectItem value="month">Past Month</SelectItem>

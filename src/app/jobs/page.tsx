@@ -9,7 +9,11 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/shadcn-ui/breadcrumb";
-import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger
+} from "@/components/shadcn-ui/sidebar";
 import { Separator } from "@/components/shadcn-ui/separator";
 import { Button } from "@/components/shadcn-ui/button";
 import { Skeleton } from "@/components/shadcn-ui/skeleton";
@@ -395,104 +399,106 @@ export default function JobsPage() {
   const confirmationContent = getConfirmationContent();
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Header with Breadcrumb and Sidebar Trigger */}
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mx-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/jobs">Jobs</BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="flex-1 p-4 md:p-6">
-        <div className="flex flex-col gap-6">
-          {/* Page Header */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Job Management</h1>
-              <p className="text-muted-foreground">
-                Create, view and manage job postings
-              </p>
-            </div>
-            <Button onClick={() => router.push("/jobs/create")} className="gap-1">
-              <PlusCircle className="h-4 w-4" />
-              Create New Job
-            </Button>
+    <SidebarProvider>
+      <div className="flex flex-col min-h-screen">
+        {/* Header with Breadcrumb and Sidebar Trigger */}
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mx-2 h-4" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/jobs">Jobs</BreadcrumbLink>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
           </div>
+        </header>
 
-          {/* Job Filters and Search */}
-          <JobSearchFilter
-            searchTerm={searchTerm}
-            filters={filters}
-            viewMode={viewMode}
-            onSearchChange={handleSearch}
-            onFilterChange={handleFilterChange}
-            onResetFilters={resetFilters}
-            onViewModeChange={setViewMode}
-          />
-
-          {/* Job Tabs and Listing */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="all">All Jobs</TabsTrigger>
-              <TabsTrigger value="active">Active</TabsTrigger>
-              <TabsTrigger value="draft">Drafts</TabsTrigger>
-              <TabsTrigger value="closed">Closed</TabsTrigger>
-              <TabsTrigger value="archived">Archived</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="all" className="w-full">
-              {renderJobListing()}
-            </TabsContent>
-            <TabsContent value="active" className="w-full">
-              {renderJobListing()}
-            </TabsContent>
-            <TabsContent value="draft" className="w-full">
-              {renderJobListing()}
-            </TabsContent>
-            <TabsContent value="closed" className="w-full">
-              {renderJobListing()}
-            </TabsContent>
-            <TabsContent value="archived" className="w-full">
-              {renderJobListing()}
-            </TabsContent>
-          </Tabs>
-
-          {/* Pagination */}
-          {filteredJobs.length > 0 && totalPages > 1 && (
-            <div className="mt-4 flex justify-center">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
+        {/* Main Content */}
+        <main className="flex-1 p-4 md:p-6">
+          <div className="flex flex-col gap-6">
+            {/* Page Header */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Job Management</h1>
+                <p className="text-muted-foreground">
+                  Create, view and manage job postings
+                </p>
+              </div>
+              <Button onClick={() => router.push("/jobs/create")} className="gap-1">
+                <PlusCircle className="h-4 w-4" />
+                Create New Job
+              </Button>
             </div>
-          )}
-        </div>
-      </main>
 
-      {/* Confirmation Dialog for Bulk Actions */}
-      <ConfirmationDialog
-        open={!!confirmAction}
-        title={confirmationContent.title}
-        description={confirmationContent.description}
-        actionLabel={confirmationContent.actionLabel}
-        actionVariant={confirmationContent.actionVariant}
-        onAction={executeAction}
-        onCancel={() => setConfirmAction(null)}
-      />
-    </div>
+            {/* Job Filters and Search */}
+            <JobSearchFilter
+              searchTerm={searchTerm}
+              filters={filters}
+              viewMode={viewMode}
+              onSearchChange={handleSearch}
+              onFilterChange={handleFilterChange}
+              onResetFilters={resetFilters}
+              onViewModeChange={setViewMode}
+            />
+
+            {/* Job Tabs and Listing */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="mb-4">
+                <TabsTrigger value="all">All Jobs</TabsTrigger>
+                <TabsTrigger value="active">Active</TabsTrigger>
+                <TabsTrigger value="draft">Drafts</TabsTrigger>
+                <TabsTrigger value="closed">Closed</TabsTrigger>
+                <TabsTrigger value="archived">Archived</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="all" className="w-full">
+                {renderJobListing()}
+              </TabsContent>
+              <TabsContent value="active" className="w-full">
+                {renderJobListing()}
+              </TabsContent>
+              <TabsContent value="draft" className="w-full">
+                {renderJobListing()}
+              </TabsContent>
+              <TabsContent value="closed" className="w-full">
+                {renderJobListing()}
+              </TabsContent>
+              <TabsContent value="archived" className="w-full">
+                {renderJobListing()}
+              </TabsContent>
+            </Tabs>
+
+            {/* Pagination */}
+            {filteredJobs.length > 0 && totalPages > 1 && (
+              <div className="mt-4 flex justify-center">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
+              </div>
+            )}
+          </div>
+        </main>
+
+        {/* Confirmation Dialog for Bulk Actions */}
+        <ConfirmationDialog
+          open={!!confirmAction}
+          title={confirmationContent.title}
+          description={confirmationContent.description}
+          actionLabel={confirmationContent.actionLabel}
+          actionVariant={confirmationContent.actionVariant}
+          onAction={executeAction}
+          onCancel={() => setConfirmAction(null)}
+        />
+      </div>
+    </SidebarProvider>
   );
 }

@@ -9,7 +9,10 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/shadcn-ui/breadcrumb";
-import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
+import {
+  SidebarProvider,
+  SidebarTrigger
+} from "@/components/shadcn-ui/sidebar";
 import { Separator } from "@/components/shadcn-ui/separator";
 import { Button } from "@/components/shadcn-ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn-ui/tabs";
@@ -305,116 +308,118 @@ export default function ApplicationsPage() {
   const statusCounts = getStatusCounts();
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Header with Breadcrumb and Sidebar Trigger */}
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mx-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/applications">Applications</BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+    <SidebarProvider>
+      <div className="flex flex-col min-h-screen">
+        {/* Header with Breadcrumb and Sidebar Trigger */}
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mx-2 h-4" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="/applications">Applications</BreadcrumbLink>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </header>
 
-      {/* Main Content */}
-      <main className="flex-1 p-4 md:p-6">
-        <div className="max-w-7xl mx-auto space-y-6">
-          {/* Page Header */}
-          <ApplicationsHeader 
-            totalApplications={applications.length}
-            selectedCount={selectedApplications.length}
-            onBulkStatusUpdate={handleBulkStatusUpdate}
-            showBackButton={false}
-          />
+        {/* Main Content */}
+        <main className="flex-1 p-4 md:p-6">
+          <div className="max-w-7xl mx-auto space-y-6">
+            {/* Page Header */}
+            <ApplicationsHeader 
+              totalApplications={applications.length}
+              selectedCount={selectedApplications.length}
+              onBulkStatusUpdate={handleBulkStatusUpdate}
+              showBackButton={false}
+            />
 
-          {/* Applications Filter */}
-          <ApplicationsFilter
-            searchTerm={searchTerm}
-            filters={filters}
-            onSearchChange={handleSearch}
-            onFilterChange={handleFilterChange}
-            onResetFilters={resetFilters}
-          />
+            {/* Applications Filter */}
+            <ApplicationsFilter
+              searchTerm={searchTerm}
+              filters={filters}
+              onSearchChange={handleSearch}
+              onFilterChange={handleFilterChange}
+              onResetFilters={resetFilters}
+            />
 
-          {/* Status Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="all">
-                All ({statusCounts.all})
-              </TabsTrigger>
-              <TabsTrigger value="applied">
-                Applied ({statusCounts.applied})
-              </TabsTrigger>
-              <TabsTrigger value="screening">
-                Screening ({statusCounts.screening})
-              </TabsTrigger>
-              <TabsTrigger value="interview">
-                Interview ({statusCounts.interview})
-              </TabsTrigger>
-              <TabsTrigger value="offer">
-                Offer ({statusCounts.offer})
-              </TabsTrigger>
-              <TabsTrigger value="hired">
-                Hired ({statusCounts.hired})
-              </TabsTrigger>
-              <TabsTrigger value="rejected">
-                Rejected ({statusCounts.rejected})
-              </TabsTrigger>
-            </TabsList>
+            {/* Status Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="mb-4">
+                <TabsTrigger value="all">
+                  All ({statusCounts.all})
+                </TabsTrigger>
+                <TabsTrigger value="applied">
+                  Applied ({statusCounts.applied})
+                </TabsTrigger>
+                <TabsTrigger value="screening">
+                  Screening ({statusCounts.screening})
+                </TabsTrigger>
+                <TabsTrigger value="interview">
+                  Interview ({statusCounts.interview})
+                </TabsTrigger>
+                <TabsTrigger value="offer">
+                  Offer ({statusCounts.offer})
+                </TabsTrigger>
+                <TabsTrigger value="hired">
+                  Hired ({statusCounts.hired})
+                </TabsTrigger>
+                <TabsTrigger value="rejected">
+                  Rejected ({statusCounts.rejected})
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value={activeTab} className="w-full">
-              {loading ? (
-                <div className="space-y-4">
-                  {/* Loading skeleton would go here */}
-                  <p>Loading applications...</p>
-                </div>
-              ) : filteredApplications.length === 0 ? (
-                <EmptyState
-                  icon={Users}
-                  title="No applications found"
-                  description={
-                    Object.values(filters).some((filter) => !!filter) || searchTerm
-                      ? "Try adjusting your search or filters"
-                      : `No ${activeTab !== 'all' ? activeTab : ''} applications found`
-                  }
+              <TabsContent value={activeTab} className="w-full">
+                {loading ? (
+                  <div className="space-y-4">
+                    {/* Loading skeleton would go here */}
+                    <p>Loading applications...</p>
+                  </div>
+                ) : filteredApplications.length === 0 ? (
+                  <EmptyState
+                    icon={Users}
+                    title="No applications found"
+                    description={
+                      Object.values(filters).some((filter) => !!filter) || searchTerm
+                        ? "Try adjusting your search or filters"
+                        : `No ${activeTab !== 'all' ? activeTab : ''} applications found`
+                    }
+                  />
+                ) : (
+                  <ApplicationsTable
+                    applications={filteredApplications}
+                    selectedApplications={selectedApplications}
+                    sortBy={sortBy}
+                    sortOrder={sortOrder}
+                    onSort={handleSort}
+                    onSelect={toggleApplicationSelection}
+                    onSelectAll={toggleSelectAll}
+                    onStatusUpdate={handleBulkStatusUpdate}
+                    onViewApplication={(id) => router.push(`/applications/${id}`)}
+                  />
+                )}
+              </TabsContent>
+            </Tabs>
+
+            {/* Pagination */}
+            {filteredApplications.length > 0 && totalPages > 1 && (
+              <div className="mt-4 flex justify-center">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
                 />
-              ) : (
-                <ApplicationsTable
-                  applications={filteredApplications}
-                  selectedApplications={selectedApplications}
-                  sortBy={sortBy}
-                  sortOrder={sortOrder}
-                  onSort={handleSort}
-                  onSelect={toggleApplicationSelection}
-                  onSelectAll={toggleSelectAll}
-                  onStatusUpdate={handleBulkStatusUpdate}
-                  onViewApplication={(id) => router.push(`/applications/${id}`)}
-                />
-              )}
-            </TabsContent>
-          </Tabs>
-
-          {/* Pagination */}
-          {filteredApplications.length > 0 && totalPages > 1 && (
-            <div className="mt-4 flex justify-center">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+    </SidebarProvider>
   );
 }
