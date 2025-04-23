@@ -38,6 +38,7 @@ export type FilterOptions = {
   jobType: string;
   experienceLevel: string;
   datePosted: string;
+  assignedToMe?: boolean;
 };
 
 interface JobSearchFilterProps {

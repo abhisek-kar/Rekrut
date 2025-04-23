@@ -10,15 +10,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/shadcn-ui/dropdown-menu";
 import { ArrowLeft, ChevronDown, Download, Mail } from "lucide-react";
-import { JobType } from "@/types/job";
 
 interface ApplicationsHeaderProps {
-  job: JobType | null;
-  loading: boolean;
+  job?: any;
+  loading?: boolean;
   totalApplications: number;
   selectedCount: number;
   onBulkStatusUpdate: (status: string) => void;
-  onBackToJob: () => void;
+  onBackToJob?: () => void;
+  showBackButton?: boolean;
 }
 
 export function ApplicationsHeader({
@@ -28,6 +28,7 @@ export function ApplicationsHeader({
   selectedCount,
   onBulkStatusUpdate,
   onBackToJob,
+  showBackButton = true,
 }: ApplicationsHeaderProps) {
   if (loading) {
     return (
@@ -45,23 +46,25 @@ export function ApplicationsHeader({
   return (
     <div>
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight">{job?.title || "Job Applications"}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{job?.title || "Applications"}</h1>
         <p className="text-muted-foreground">
-          {job?.company} • {job?.location.type}
+          {job ? `${job.company} • ${job.location.type}` : "Manage all job applications"}
         </p>
       </div>
       
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-6">
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1 h-9"
-            onClick={onBackToJob}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Job
-          </Button>
+          {showBackButton && onBackToJob && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1 h-9"
+              onClick={onBackToJob}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Job
+            </Button>
+          )}
           <span className="text-sm text-muted-foreground">
             {totalApplications} {totalApplications === 1 ? "application" : "applications"}
           </span>

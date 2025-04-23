@@ -57,6 +57,7 @@ export default function JobsPage() {
     jobType: "",
     experienceLevel: "",
     datePosted: "",
+    assignedToMe: false,
   });
   const [selectedJobs, setSelectedJobs] = useState<string[]>([]);
   const [confirmAction, setConfirmAction] = useState<{
@@ -76,6 +77,18 @@ export default function JobsPage() {
     applyFilters();
   }, [jobs, searchTerm, filters]);
 
+  // Check if user is a subadmin and get assigned jobs only
+  useEffect(() => {
+    // Read the 'assigned' query parameter from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const showAssignedOnly = urlParams.get('assigned') === 'true';
+    
+    // If we're showing assigned jobs only and the user is a subadmin
+    if (showAssignedOnly && user?.role === 'subadmin') {
+      setFilters(prev => ({ ...prev, assignedToMe: true }));
+    }
+  }, [user?.role]);
+
   // Fetch jobs from API
   const fetchJobs = async () => {
     try {
@@ -92,6 +105,11 @@ export default function JobsPage() {
       // Apply status filter based on active tab
       if (activeTab !== "all") {
         params.set("status", activeTab);
+      }
+      
+      // If the user is a subadmin and we're filtering for assigned jobs
+      if (user?.role === 'subadmin' && filters.assignedToMe) {
+        params.set("assignedTo", user.id);
       }
       
       const response = await fetch(`/api/jobs?${params.toString()}`);
@@ -196,12 +214,16 @@ export default function JobsPage() {
 
   // Reset all filters
   const resetFilters = () => {
+    // Preserve the assignedToMe filter for subadmins coming from the subadmin dashboard
+    const assignedToMe = filters.assignedToMe && user?.role === 'subadmin';
+    
     setFilters({
       status: "",
       location: "",
       jobType: "",
       experienceLevel: "",
       datePosted: "",
+      assignedToMe, // Maintain this value if it was set for subadmin
     });
     setSearchTerm("");
   };
