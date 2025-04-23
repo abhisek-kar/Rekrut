@@ -3,10 +3,13 @@ import { getServerSession } from 'next-auth/next';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/db/connect';
 import { authOptions } from '@/lib/auth/nextauth';
+import { jobAssignmentSchema } from '@/lib/validators/job';
+import { canAssignJob } from '@/lib/permissions';
 import Job from '@/models/Job';
 import User from '@/models/User';
 import Activity from '@/models/Activity';
 import Notification from '@/models/Notification';
+import { ZodError } from 'zod';
 
 // PUT: Assign job to a SubAdmin
 export async function PUT(
@@ -26,15 +29,6 @@ export async function PUT(
       );
     }
 
-    // Check if user is admin (only admins can assign jobs)
-    const currentUser = await User.findById(session.user.id);
-    if (!currentUser || currentUser.role !== 'admin') {
-      return NextResponse.json(
-        { error: 'Only admins can assign jobs' },
-        { status: 403 }
-      );
-    }
-
     // Validate the job ID
     if (!mongoose.Types.ObjectId.isValid(params.id)) {
       return NextResponse.json(
@@ -43,14 +37,46 @@ export async function PUT(
       );
     }
 
-    // Parse request data
-    const { subadminId, notifySubadmin } = await request.json();
-
-    // Validate subadminId
-    if (!mongoose.Types.ObjectId.isValid(subadminId)) {
+    // Check permission
+    const hasPermission = await canAssignJob(params.id, session);
+    if (!hasPermission) {
       return NextResponse.json(
-        { error: 'Invalid subadmin ID' },
-        { status: 400 }
+        { error: 'You do not have permission to assign this job' },
+        { status: 403 }
+      );
+    }
+
+    // Parse request data
+    const data = await request.json();
+    
+    // Validate input
+    try {
+      jobAssignmentSchema.parse(data);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return NextResponse.json(
+          { 
+            error: 'Validation failed', 
+            details: error.errors.map(err => ({
+              path: err.path.join('.'),
+              message: err.message
+            }))
+          },
+          { status: 400 }
+        );
+      }
+      throw error;
+    }
+
+    const { subadminId, notifySubadmin } = data;
+
+    // Check if job exists
+    const job = await Job.findById(params.id);
+    
+    if (!job) {
+      return NextResponse.json(
+        { error: 'Job not found' },
+        { status: 404 }
       );
     }
 
@@ -64,7 +90,7 @@ export async function PUT(
     }
 
     // Find job and update
-    const job = await Job.findByIdAndUpdate(
+    const updatedJob = await Job.findByIdAndUpdate(
       params.id,
       { 
         assignedTo: subadminId,
@@ -72,13 +98,6 @@ export async function PUT(
       },
       { new: true }
     ).populate('assignedTo', 'firstName lastName email');
-
-    if (!job) {
-      return NextResponse.json(
-        { error: 'Job not found' },
-        { status: 404 }
-      );
-    }
 
     // Log the activity
     await Activity.create({
@@ -91,7 +110,7 @@ export async function PUT(
         assignedTo: subadminId,
         assigneeName: `${subadmin.firstName} ${subadmin.lastName}`
       },
-      ipAddress: request.headers.get('x-forwarded-for') || request.ip,
+      ipAddress: request.headers.get('x-forwarded-for') || request.ip || 'unknown',
       userAgent: request.headers.get('user-agent') || 'unknown',
     });
 
@@ -109,13 +128,16 @@ export async function PUT(
     }
 
     return NextResponse.json(
-      { job, message: 'Job assigned successfully' },
+      { job: updatedJob, message: 'Job assigned successfully' },
       { status: 200 }
     );
   } catch (error) {
     console.error('Error assigning job:', error);
     return NextResponse.json(
-      { error: 'Failed to assign job' },
+      { 
+        error: 'Failed to assign job',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }

@@ -35,6 +35,8 @@ export interface IJob extends Document {
   visibility: string; // 'public', 'private'
   featured: boolean;
   status: string; // 'draft', 'active', 'closed', 'archived'
+  isTemplate?: boolean; // Whether this is a job template
+  templateId?: mongoose.Types.ObjectId; // Reference to template if created from one
   createdBy: mongoose.Types.ObjectId;
   assignedTo?: mongoose.Types.ObjectId;
   createdAt: Date;
@@ -95,6 +97,8 @@ const JobSchema = new Schema<IJob>(
       default: 'draft',
       enum: ['draft', 'active', 'closed', 'archived']
     },
+    isTemplate: { type: Boolean, default: false },
+    templateId: { type: Schema.Types.ObjectId, ref: 'Job' },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     assignedTo: { type: Schema.Types.ObjectId, ref: 'User' },
   },
@@ -108,6 +112,8 @@ JobSchema.index({ createdBy: 1 });
 JobSchema.index({ visibility: 1, status: 1 });
 JobSchema.index({ skills: 1 });
 JobSchema.index({ createdAt: -1 });
+JobSchema.index({ isTemplate: 1 });
+JobSchema.index({ templateId: 1 });
 
 // Use function to avoid issues with model compilation in Next.js hot reloading
 export default (mongoose.models.Job as Model<IJob>) || 

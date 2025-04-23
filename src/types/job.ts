@@ -45,6 +45,8 @@ export interface JobType {
   visibility: JobVisibility;
   featured: boolean;
   status: JobStatus;
+  isTemplate?: boolean;
+  templateId?: string;
   createdBy: string;
   assignedTo?: string;
   createdAt: string;

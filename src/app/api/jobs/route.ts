@@ -3,7 +3,10 @@ import { getServerSession } from 'next-auth/next';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/db/connect';
 import { authOptions } from '@/lib/auth/nextauth';
+import { createJobSchema } from '@/lib/validators/job';
 import Job from '@/models/Job';
+import { ZodError } from 'zod';
+import Activity from '@/models/Activity';
 
 export async function GET(request: NextRequest) {
   try {
@@ -93,14 +96,48 @@ export async function POST(request: NextRequest) {
     // Parse job data from request
     const data = await request.json();
     
+    // Validate job data
+    try {
+      createJobSchema.parse(data);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        return NextResponse.json(
+          { 
+            error: 'Validation failed', 
+            details: error.errors.map(err => ({
+              path: err.path.join('.'),
+              message: err.message
+            }))
+          },
+          { status: 400 }
+        );
+      }
+      throw error;
+    }
+    
     // Add the current user as creator
     data.createdBy = session.user.id;
     
     // Create new job
     const job = await Job.create(data);
     
+    // Log activity
+    await Activity.create({
+      userId: session.user.id,
+      action: data.isTemplate ? 'create_template' : 'create',
+      entityType: data.isTemplate ? 'job_template' : 'job',
+      entityId: job._id,
+      details: { 
+        title: job.title,
+        company: job.company,
+        status: job.status
+      },
+      ipAddress: request.headers.get('x-forwarded-for') || request.ip || 'unknown',
+      userAgent: request.headers.get('user-agent') || 'unknown',
+    });
+    
     return NextResponse.json(
-      { job, message: 'Job created successfully' },
+      { job, message: data.isTemplate ? 'Job template created successfully' : 'Job created successfully' },
       { status: 201 }
     );
   } catch (error) {
@@ -114,7 +151,7 @@ export async function POST(request: NextRequest) {
     }
     
     return NextResponse.json(
-      { error: 'Failed to create job' },
+      { error: 'Failed to create job', message: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

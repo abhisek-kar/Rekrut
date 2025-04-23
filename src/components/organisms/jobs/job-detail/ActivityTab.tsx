@@ -4,18 +4,42 @@ import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/shadcn-ui/card";
-import { Activity, Clock } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn-ui/avatar";
+import { Button } from "@/components/shadcn-ui/button";
+import { Skeleton } from "@/components/shadcn-ui/skeleton";
+import { 
+  Calendar, 
+  User, 
+  FileEdit, 
+  Clock, 
+  ChevronDown, 
+  UserCheck, 
+  FileText,
+  ArrowUpRight,
+  MessageCircle
+} from "lucide-react";
+import { format, formatDistanceToNow } from 'date-fns';
+import { getInitials } from '@/lib/utils';
 
-interface ActivityItem {
-  id: string;
+// Activity type definition (to be moved to types)
+interface Activity {
+  _id: string;
   action: string;
-  user: string;
-  timestamp: string;
-  details?: string;
+  entityType: string;
+  entityId: string;
+  details: Record<string, any>;
+  userId: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    profilePhoto?: string;
+  };
+  createdAt: string;
 }
 
 interface ActivityTabProps {
@@ -23,110 +47,193 @@ interface ActivityTabProps {
 }
 
 export function ActivityTab({ jobId }: ActivityTabProps) {
-  const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  
+  // Fetch job activities when component mounts
   useEffect(() => {
-    const fetchActivities = async () => {
-      try {
-        setLoading(true);
-        // In a real implementation, this would fetch from an API
-        // const response = await fetch(`/api/jobs/${jobId}/activity`);
-        // const data = await response.json();
-        // setActivities(data.activities);
-        
-        // Mock data for demonstration
-        const mockActivities: ActivityItem[] = [
-          {
-            id: '1',
-            action: 'Job Created',
-            user: 'Admin User',
-            timestamp: new Date().toISOString(),
-            details: 'Job posting was created'
-          },
-          {
-            id: '2',
-            action: 'Status Updated',
-            user: 'Admin User',
-            timestamp: new Date(Date.now() - 86400000).toISOString(),
-            details: 'Status changed from Draft to Active'
-          },
-          {
-            id: '3',
-            action: 'Job Edited',
-            user: 'Admin User',
-            timestamp: new Date(Date.now() - 172800000).toISOString(),
-            details: 'Job description was updated'
-          }
-        ];
-        
-        setActivities(mockActivities);
-      } catch (error) {
-        console.error('Error fetching activities:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     fetchActivities();
   }, [jobId]);
-
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  
+  // Fetch activities from API
+  const fetchActivities = async (reset = false) => {
+    try {
+      const currentPage = reset ? 1 : page;
+      setLoading(true);
+      
+      const response = await fetch(`/api/admin/activity?entityId=${jobId}&entityType=job&page=${currentPage}&limit=10`);
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch activities");
+      }
+      
+      const data = await response.json();
+      
+      if (reset) {
+        setActivities(data.activities);
+      } else {
+        setActivities(prev => [...prev, ...data.activities]);
+      }
+      
+      setHasMore(data.pagination.page < data.pagination.pages);
+      setPage(reset ? 2 : page + 1);
+    } catch (error) {
+      console.error("Error fetching activities:", error);
+    } finally {
+      setLoading(false);
+    }
   };
-
+  
+  // Load more activities
+  const handleLoadMore = () => {
+    if (!loading && hasMore) {
+      fetchActivities();
+    }
+  };
+  
+  // Get icon for activity action
+  const getActionIcon = (action: string) => {
+    switch (action) {
+      case 'create':
+        return <FileText className="h-4 w-4" />;
+      case 'update':
+        return <FileEdit className="h-4 w-4" />;
+      case 'job_assignment':
+        return <UserCheck className="h-4 w-4" />;
+      case 'status_change':
+        return <ArrowUpRight className="h-4 w-4" />;
+      case 'comment':
+        return <MessageCircle className="h-4 w-4" />;
+      default:
+        return <Clock className="h-4 w-4" />;
+    }
+  };
+  
+  // Get description for activity
+  const getActivityDescription = (activity: Activity) => {
+    switch (activity.action) {
+      case 'create':
+        return "created this job";
+      case 'update':
+        return "updated the job details";
+      case 'job_assignment':
+        return `assigned this job to ${activity.details.assigneeName || 'a recruiter'}`;
+      case 'status_change':
+        return `changed job status to "${activity.details.status}"`;
+      case 'comment':
+        return `commented: "${activity.details.comment}"`;
+      default:
+        return "performed an action";
+    }
+  };
+  
+  // Format date in human-readable format
+  const formatActivityDate = (date: string) => {
+    try {
+      const activityDate = new Date(date);
+      return {
+        relative: formatDistanceToNow(activityDate, { addSuffix: true }),
+        absolute: format(activityDate, "MMM d, yyyy 'at' h:mm a")
+      };
+    } catch (e) {
+      return {
+        relative: "Invalid date",
+        absolute: "Invalid date"
+      };
+    }
+  };
+  
+  // Render loading state
+  const renderLoading = () => {
+    return Array(3).fill(0).map((_, index) => (
+      <div key={index} className="flex gap-3 items-start mb-6">
+        <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
+        <div className="flex-1">
+          <Skeleton className="h-4 w-1/3 mb-2" />
+          <Skeleton className="h-3 w-2/3 mb-2" />
+          <Skeleton className="h-3 w-1/4" />
+        </div>
+      </div>
+    ));
+  };
+  
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Activity Log</CardTitle>
-        <CardDescription>
-          Recent activity related to this job posting
-        </CardDescription>
+        <CardTitle>Activity Timeline</CardTitle>
+        <CardDescription>History of actions performed on this job</CardDescription>
       </CardHeader>
       <CardContent>
-        {loading ? (
-          <div className="py-8 text-center">
-            <Clock className="h-8 w-8 text-muted-foreground animate-spin mx-auto mb-4" />
-            <p>Loading activities...</p>
-          </div>
+        {loading && activities.length === 0 ? (
+          renderLoading()
         ) : activities.length === 0 ? (
-          <div className="py-8 text-center">
-            <Activity className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium">No Activities</h3>
-            <p className="text-muted-foreground mt-1 max-w-md mx-auto">
-              There's no recorded activity for this job yet. Actions like editing the job or changing its status will appear here.
+          <div className="text-center py-8">
+            <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+            <h3 className="text-lg font-medium">No activity yet</h3>
+            <p className="text-muted-foreground mt-1">
+              Activities will be recorded when changes are made to this job.
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
-            <ol className="relative border-l border-gray-200 dark:border-gray-700">
-              {activities.map((activity) => (
-                <li key={activity.id} className="mb-10 ml-6">
-                  <span className="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -left-3 ring-8 ring-white">
-                    <Activity className="w-3 h-3 text-blue-800" />
-                  </span>
-                  <h3 className="flex items-center mb-1 text-lg font-semibold text-gray-900">
-                    {activity.action}
-                  </h3>
-                  <time className="block mb-2 text-sm font-normal leading-none text-gray-400">
-                    {formatDate(activity.timestamp)} by {activity.user}
-                  </time>
-                  {activity.details && (
-                    <p className="mb-4 text-base font-normal text-gray-500">
-                      {activity.details}
-                    </p>
-                  )}
-                </li>
-              ))}
-            </ol>
+          <div className="space-y-6">
+            {activities.map((activity) => {
+              const dateFormatted = formatActivityDate(activity.createdAt);
+              
+              return (
+                <div key={activity._id} className="flex gap-3 items-start">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage 
+                      src={activity.userId.profilePhoto} 
+                      alt={`${activity.userId.firstName} ${activity.userId.lastName}`} 
+                    />
+                    <AvatarFallback>
+                      {getInitials(`${activity.userId.firstName} ${activity.userId.lastName}`)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="flex items-center gap-1 mb-1">
+                      <span className="font-medium">
+                        {activity.userId.firstName} {activity.userId.lastName}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        {getActivityDescription(activity)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      {getActionIcon(activity.action)}
+                      <span title={dateFormatted.absolute}>
+                        {dateFormatted.relative}
+                      </span>
+                    </div>
+                    
+                    {/* Optional details based on action type */}
+                    {activity.action === 'status_change' && activity.details.reason && (
+                      <div className="mt-2 p-2 bg-muted rounded-md text-sm">
+                        <span className="font-medium">Reason:</span> {activity.details.reason}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            
+            {/* Load more button */}
+            {hasMore && (
+              <div className="flex justify-center mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleLoadMore}
+                  disabled={loading}
+                  className="gap-1"
+                >
+                  {loading ? "Loading..." : "Load more"}
+                  {!loading && <ChevronDown className="h-4 w-4" />}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </CardContent>

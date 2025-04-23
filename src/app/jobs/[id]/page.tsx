@@ -30,7 +30,8 @@ import {
   CustomFieldsCard,
   ApplicationsTab,
   AnalyticsTab,
-  ActivityTab
+  ActivityTab,
+  DocumentsTab
 } from "@/components/organisms/jobs/job-detail";
 
 import { JobType } from "@/types/job";
@@ -257,13 +258,14 @@ export default function JobDetailPage({ params }: JobDetailProps) {
           {/* Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="mb-4">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="applications">
-                Applications ({stats.applications})
-              </TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="applications">
+            Applications ({stats.applications})
+            </TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="activity">Activity</TabsTrigger>
-            </TabsList>
+          </TabsList>
             
             <TabsContent value="overview" className="space-y-6">
               {/* Job Details Card */}
@@ -284,6 +286,10 @@ export default function JobDetailPage({ params }: JobDetailProps) {
             
             <TabsContent value="applications" className="space-y-6">
               <ApplicationsTab jobId={params.id} applicationsCount={stats.applications} />
+            </TabsContent>
+            
+            <TabsContent value="documents" className="space-y-6">
+              <DocumentsTab jobId={params.id} />
             </TabsContent>
             
             <TabsContent value="analytics" className="space-y-6">

@@ -6,3 +6,4 @@ export * from './CustomFieldsCard';
 export * from './ApplicationsTab';
 export * from './AnalyticsTab';
 export * from './ActivityTab';
+export * from './DocumentsTab';
