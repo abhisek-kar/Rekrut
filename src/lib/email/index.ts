@@ -16,56 +16,58 @@ type EmailOptions = {
  */
 export async function sendEmail(options: EmailOptions): Promise<void> {
   const { to, subject, html, text, from } = options;
-  
+
   // Default sender address from environment variables
-  const sender = from || env.EMAIL_FROM || 'no-reply@rekrut.com';
-  
+  const sender = from || env.EMAIL_FROM || "no-reply@rekrut.com";
+
   // Always log the email in development
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('📧 Email sent:');
-    console.log('From:', sender);
-    console.log('To:', to);
-    console.log('Subject:', subject);
-    console.log('Text:', text || '(HTML email)');
-    console.log('HTML:', html);
-    
+  if (process.env.NODE_ENV !== "production") {
+    console.log("📧 Email sent:");
+    console.log("From:", sender);
+    console.log("To:", to);
+    console.log("Subject:", subject);
+    console.log("Text:", text || "(HTML email)");
+    console.log("HTML:", html);
+
     // In development, we can return here without actually sending if needed
-    if (process.env.SKIP_EMAIL_SEND === 'true') {
+    if (process.env.SKIP_EMAIL_SEND === "true") {
       return;
     }
   }
-  
+
   try {
     // Create nodemailer transporter
     const transporter = nodemailer.createTransport({
       host: env.EMAIL_HOST,
-      port: parseInt(env.EMAIL_PORT || '587', 10),
-      secure: env.EMAIL_SECURE === 'true',
+      port: parseInt(env.EMAIL_PORT || "587", 10),
+      secure: env.EMAIL_SECURE === "true",
       auth: {
         user: env.EMAIL_USER,
         pass: env.EMAIL_PASSWORD,
       },
       // Add this for development to avoid certificate validation issues
-      ...(process.env.NODE_ENV !== 'production' ? { 
-        tls: {
-          rejectUnauthorized: false
-        }
-      } : {})
+      ...(process.env.NODE_ENV !== "production"
+        ? {
+            tls: {
+              rejectUnauthorized: false,
+            },
+          }
+        : {}),
     });
-    
+
     // Send email
     await transporter.sendMail({
       from: `"Rekrut AI" <${sender}>`,
       to,
       subject,
-      text: text || '',
+      text: text || "",
       html,
     });
   } catch (error) {
-    console.error('Error sending email:', error);
-    
+    console.error("Error sending email:", error);
+
     // Don't throw in development
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       throw error;
     }
   }
@@ -74,7 +76,10 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
 /**
  * Generate a password reset email
  */
-export function generatePasswordResetEmail(resetUrl: string, userName?: string): string {
+export function generatePasswordResetEmail(
+  resetUrl: string,
+  userName?: string
+): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background-color: #f8f9fa; padding: 20px; text-align: center;">
@@ -82,7 +87,7 @@ export function generatePasswordResetEmail(resetUrl: string, userName?: string):
       </div>
       <div style="padding: 20px; border: 1px solid #e5e7eb; border-top: none;">
         <h3>Password Reset Request</h3>
-        <p>Hello ${userName || 'there'},</p>
+        <p>Hello ${userName || "there"},</p>
         <p>We received a request to reset your password for your Rekrut ATS account. If you didn't make this request, you can safely ignore this email.</p>
         <p>To reset your password, click the button below:</p>
         <div style="text-align: center; margin: 30px 0;">
@@ -103,7 +108,10 @@ export function generatePasswordResetEmail(resetUrl: string, userName?: string):
 /**
  * Generate an account setup email
  */
-export function generateAccountSetupEmail(setupUrl: string, email: string): string {
+export function generateAccountSetupEmail(
+  setupUrl: string,
+  email: string
+): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background-color: #f8f9fa; padding: 20px; text-align: center;">

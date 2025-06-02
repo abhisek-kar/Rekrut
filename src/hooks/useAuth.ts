@@ -20,7 +20,7 @@ type UseAuthReturn = {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string, role: "admin" | "subadmin") => Promise<any>;
+  login: (email: string, password: string, role: "admin" | "subadmin") => Promise<boolean>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
 };

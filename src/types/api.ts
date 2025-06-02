@@ -20,14 +20,14 @@ export interface ApiResponse<T> {
 }
 
 // Enhanced API response types for better error handling and consistency
-export interface ApiSuccess<T = any> {
+export interface ApiSuccess<T = unknown> {
   success: true;
   data: T;
   message?: string;
   meta?: {
     timestamp: string;
     requestId?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -36,17 +36,17 @@ export interface ApiError {
   error: {
     code: string;
     message: string;
-    details?: any;
+    details?: unknown;
     field?: string; // For validation errors
   };
   meta?: {
     timestamp: string;
     requestId?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
-export type ApiResult<T = any> = ApiSuccess<T> | ApiError;
+export type ApiResult<T = unknown> = ApiSuccess<T> | ApiError;
 
 // Specific response types for common operations
 export interface AuthResponse {
@@ -127,7 +127,7 @@ export interface FileUploadResponse {
 }
 
 // Bulk operation response
-export interface BulkOperationResponse<T = any> {
+export interface BulkOperationResponse<T = unknown> {
   success: T[];
   failed: {
     item: T;
@@ -143,9 +143,9 @@ export interface BulkOperationResponse<T = any> {
 // Search response
 export interface SearchResponse<T> extends PaginatedResponse<T> {
   query: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   suggestions?: string[];
-  facets?: Record<string, any>;
+  facets?: Record<string, unknown>;
 }
 
 // Export/Import response

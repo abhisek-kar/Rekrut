@@ -79,7 +79,8 @@ export function validateContentType(
  */
 export function setCORSHeaders(
   response: NextResponse,
-  allowedOrigins: string[] = [],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _allowedOrigins: string[] = [],
   allowedMethods: string[] = ["GET", "POST", "PUT", "DELETE"]
 ): NextResponse {
   const origin = "*"; // Configure based on your needs

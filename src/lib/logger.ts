@@ -14,7 +14,7 @@ export interface LogContext {
   method?: string;
   statusCode?: number;
   duration?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface LogEntry {

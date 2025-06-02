@@ -7,11 +7,11 @@ export interface PerformanceMetrics {
   duration: number;
   startTime: number;
   endTime: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 class PerformanceMonitor {
-  private timers: Map<string, number> = new Map();
+  private timers: Map<string, number | Record<string, unknown>> = new Map();
   private metrics: PerformanceMetrics[] = [];
   private isEnabled: boolean;
 
@@ -22,7 +22,7 @@ class PerformanceMonitor {
   /**
    * Start timing an operation
    */
-  start(name: string, metadata?: Record<string, any>): void {
+  start(name: string, metadata?: Record<string, unknown>): void {
     if (!this.isEnabled) return;
 
     const startTime = performance.now();
@@ -30,7 +30,7 @@ class PerformanceMonitor {
 
     // Store metadata for later use
     if (metadata) {
-      this.timers.set(`${name}_metadata`, metadata as any);
+      this.timers.set(`${name}_metadata`, metadata);
     }
   }
 

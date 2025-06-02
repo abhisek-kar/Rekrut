@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { 
   ApiSuccess, 
   ApiError, 
-  ApiResult, 
   ApiErrorCode, 
   HTTP_STATUS,
   ValidationError,
@@ -42,7 +41,7 @@ export function createApiSuccess<T>(
 export function createApiError(
   code: ApiErrorCode,
   message: string,
-  details?: any,
+  details?: unknown,
   statusCode: number = HTTP_STATUS.BAD_REQUEST,
   field?: string
 ): NextResponse {
@@ -213,7 +212,7 @@ export function handleApiError(error: unknown, context?: string): NextResponse {
 /**
  * Middleware wrapper for API routes with consistent error handling
  */
-export function withApiHandler<T extends any[]>(
+export function withApiHandler<T extends unknown[]>(
   handler: (...args: T) => Promise<NextResponse>
 ) {
   return async (...args: T): Promise<NextResponse> => {
@@ -248,7 +247,7 @@ export function validateMethod(
  */
 export async function parseJsonBody<T>(
   request: Request,
-  validator?: (data: any) => T
+  validator?: (data: unknown) => T
 ): Promise<T> {
   try {
     const body = await request.json();
@@ -257,7 +256,7 @@ export async function parseJsonBody<T>(
       return validator(body);
     }
     
-    return body;
+    return body as T;
   } catch (error) {
     if (error instanceof SyntaxError) {
       throw new Error('Invalid JSON in request body');
@@ -331,9 +330,11 @@ export function checkRole(
  * Rate limiting check
  */
 export function checkRateLimit(
-  identifier: string,
-  limit: number = 100,
-  windowMs: number = 15 * 60 * 1000
+  _identifier: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _limit: number = 100,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _windowMs: number = 15 * 60 * 1000
 ): NextResponse | null {
   // This would typically integrate with Redis or another rate limiting service
   // For now, it's a placeholder that always returns null (no rate limiting)

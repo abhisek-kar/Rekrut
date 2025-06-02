@@ -147,7 +147,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
                 <CardTitle>Page Error</CardTitle>
                 <CardDescription>
-                  This page encountered an error and couldn't load properly
+                  This page encountered an error and couldn&apos;t load properly
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -224,7 +224,7 @@ export function withErrorBoundary<P extends object>(
  * Hook for manual error reporting in functional components
  */
 export function useErrorHandler() {
-  return React.useCallback((error: Error, errorInfo?: any) => {
+  return React.useCallback((error: Error, errorInfo?: Record<string, unknown>) => {
     console.error("Manual error report:", error, errorInfo);
     
     // In production, report to error service

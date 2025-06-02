@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import {
   Form,
   FormControl,
@@ -14,13 +14,6 @@ import { Input } from "@/components/shadcn-ui/input";
 import { Textarea } from "@/components/shadcn-ui/textarea";
 import { Switch } from "@/components/shadcn-ui/switch";
 import { Card, CardContent } from "@/components/shadcn-ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/shadcn-ui/select";
 import {
   Tooltip,
   TooltipContent,
@@ -77,9 +70,9 @@ export function VisibilityForm({
   });
 
   // Update parent component when form values change
-  const onSubmit = (values: VisibilityFormValues) => {
+  const onSubmit = useCallback((values: VisibilityFormValues) => {
     onChange(values);
-  };
+  }, [onChange]);
 
   // Update parent on form validity changes
   useEffect(() => {
@@ -92,7 +85,7 @@ export function VisibilityForm({
     });
 
     return () => subscription.unsubscribe();
-  }, [form, onValidityChange, onChange]);
+  }, [form, onValidityChange, onSubmit]);
 
   // SEO description character count
   const seoDescriptionLength = form.watch("seoDescription")?.length || 0;

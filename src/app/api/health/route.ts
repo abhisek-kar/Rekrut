@@ -1,7 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import { checkDbHealth, getDbConnectionInfo } from "@/lib/db/connect";
 import { withSecurity } from "@/lib/security";
-import { log } from "@/lib/logger";
 import { createApiSuccess, handleApiError } from "@/lib/api";
 import { HealthCheckResponse } from "@/types/api";
 
@@ -10,7 +8,7 @@ import { HealthCheckResponse } from "@/types/api";
  * GET /api/health
  */
 export const GET = withSecurity(
-  async (request: NextRequest) => {
+  async () => {
     try {
       const startTime = Date.now();
       

@@ -70,7 +70,7 @@ export async function POST() {
     `;
 
     // Send test email to the admin's email
-    const info = await transporter.sendMail({
+    await transporter.sendMail({
       from: `"${settings.senderName}" <${settings.senderEmail}>`,
       to: session.user.email,
       subject: "Rekrut ATS - Test Email",
@@ -79,8 +79,7 @@ export async function POST() {
 
     return NextResponse.json({
       success: true,
-      message: "Test email sent successfully",
-      messageId: info.messageId,
+      message: "Test email sent successfully"
     });
   } catch (error: unknown) {
     console.error("Error sending test email:", error);

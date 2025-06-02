@@ -105,7 +105,7 @@ function generateStrongPassword(length = 12) {
 interface SubadminFormProps {
   initialData?: Partial<SubadminFormValues>;
   isEditing?: boolean;
-  onSuccess?: (data: any) => void;
+  onSuccess?: (data: SubadminFormValues) => void;
 }
 
 export function SubadminForm({
@@ -147,7 +147,7 @@ export function SubadminForm({
       permissions.length === availablePermissions.length &&
         availablePermissions.every((p) => permissions.includes(p.id))
     );
-  }, [form.watch("permissions")]);
+  }, [form]);
 
   // Handler for "select all permissions" checkbox
   const handleSelectAllPermissions = (checked: boolean) => {
