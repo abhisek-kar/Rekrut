@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { getDashboardRoute } from "@/lib/routes";
 import { Button } from "@/components/shadcn-ui/button";
-import { Skeleton } from "@/components/shadcn-ui/skeleton";
+import { PageLoader } from "@/components/atoms/loader";
 import Link from "next/link";
 import { Logo } from "@/components/atoms/logo";
 
@@ -23,34 +23,12 @@ export default function Home() {
 
   // Show loading while checking authentication
   if (isLoading) {
-    return (
-      <div className="min-h-screen p-4 bg-gray-50">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Skeleton className="h-12 w-48" />
-          </div>
-          <Skeleton className="h-10 w-24" />
-        </div>
-        <div className="flex items-center justify-center mt-32">
-          <div className="text-center">
-            <Skeleton className="h-8 w-64 mx-auto mb-4" />
-            <Skeleton className="h-4 w-96 mx-auto" />
-          </div>
-        </div>
-      </div>
-    );
+    return <PageLoader message="Checking authentication..." />;
   }
 
   // If authenticated, this will redirect, but show loading state briefly
   if (isAuthenticated && user) {
-    return (
-      <div className="min-h-screen p-4 bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Redirecting to your dashboard...</p>
-        </div>
-      </div>
-    );
+    return <PageLoader message="Redirecting to your dashboard..." />;
   }
 
   // Show homepage for non-authenticated users

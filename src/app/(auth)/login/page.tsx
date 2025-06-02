@@ -39,6 +39,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/shadcn-ui/card";
+import { PageLoader } from "@/components/atoms/loader";
 import { AppFooter } from "@/components/atoms/footer";
 
 // Form validation schema
@@ -81,26 +82,12 @@ export default function LoginPage() {
 
   // Show loading while checking authentication
   if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Checking authentication...</p>
-        </div>
-      </div>
-    );
+    return <PageLoader message="Checking authentication..." />;
   }
 
   // If authenticated, show redirect message
   if (isAuthenticated && user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Redirecting to your dashboard...</p>
-        </div>
-      </div>
-    );
+    return <PageLoader message="Redirecting to your dashboard..." />;
   }
 
   const onSubmit = async (data: LoginFormValues) => {
