@@ -1,17 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbSeparator,
-} from "@/components/shadcn-ui/breadcrumb";
+} from "@/components/shadcn-ui/breadcrumb"; 
 import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
 import { Separator } from "@/components/shadcn-ui/separator";
 import { useAuth } from "@/context/AuthContext";
-import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn-ui/tabs";
 import { DashboardMetricsPanel } from "@/components/organisms/subadmin/DashboardMetricsPanel";
 import { AssignedJobsPanel } from "@/components/organisms/subadmin/AssignedJobsPanel";
@@ -22,13 +21,12 @@ import { QuickActionsPanel } from "@/components/organisms/subadmin/QuickActionsP
 export default function SubAdminDashboardPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
-  const [isLoading, setIsLoading] = useState(false);
 
   if (!user) {
     return null;
   }
 
-  const firstName = user.firstName || user.name?.split(' ')[0] || 'SubAdmin';
+  const firstName = user.firstName || 'SubAdmin';
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -59,7 +57,7 @@ export default function SubAdminDashboardPage() {
               Welcome, {firstName}
             </h1>
             <p className="text-muted-foreground">
-              Here's an overview of your recruitment activities
+              Here&apos;s an overview of your recruitment activities
             </p>
           </div>
 

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,14 +11,11 @@ import {
 import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
 import { Separator } from "@/components/shadcn-ui/separator";
 import { SubAdminTable, SubAdmin } from "@/components/admin/subadmin-table";
-import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
 export default function SubAdminsPage() {
   const [subadmins, setSubadmins] = useState<SubAdmin[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
-  const { user } = useAuth();
 
   useEffect(() => {
     // Fetch the list of subadmins from the API

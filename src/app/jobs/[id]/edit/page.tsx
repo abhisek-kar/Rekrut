@@ -117,7 +117,7 @@ export default function EditJobPage({ params }: EditJobPageProps) {
   };
 
   // Handle field changes
-  const handleChange = (section: string, data: any) => {
+  const handleChange = (section: string, data: Record<string, unknown>) => {
     setJobData(prev => ({
       ...prev,
       ...data
@@ -161,7 +161,7 @@ export default function EditJobPage({ params }: EditJobPageProps) {
         throw new Error("Failed to update job");
       }
       
-      const result = await response.json();
+      await response.json();
       
       toast.success("Job updated successfully");
       setFormDirty(false);
@@ -200,7 +200,7 @@ export default function EditJobPage({ params }: EditJobPageProps) {
         throw new Error("Failed to publish job");
       }
       
-      const result = await response.json();
+      await response.json();
       
       toast.success("Job published successfully");
       

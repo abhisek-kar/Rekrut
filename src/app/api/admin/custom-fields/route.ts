@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     const entity = url.searchParams.get('entity');
 
     // Build query
-    const query: any = {};
+    const query: { entity?: string } = {};
     if (entity) {
       query.entity = entity;
     }

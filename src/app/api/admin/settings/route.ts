@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
     const category = url.searchParams.get('category');
 
     // Build query
-    const query: any = {};
+    const query: { category?: string } = {};
     if (category) {
       query.category = category;
     }
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     const settings = await Setting.find(query).lean();
     
     // Transform to key-value by category
-    const formattedSettings: Record<string, Record<string, any>> = {};
+    const formattedSettings: Record<string, Record<string, unknown>> = {};
     
     settings.forEach(setting => {
       if (!formattedSettings[setting.category]) {

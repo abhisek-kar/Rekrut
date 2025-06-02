@@ -83,7 +83,15 @@ export async function PUT(
     const body = await req.json();
 
     // Update fields
-    const updatedFields: any = {
+    const updatedFields: Partial<{
+      label: string;
+      type: string;
+      options: string[];
+      placeholder: string;
+      helpText: string;
+      required: boolean;
+      isActive: boolean;
+    }> = {
       label: body.label !== undefined ? body.label : existingField.label,
       type: body.type !== undefined ? body.type : existingField.type,
       options: body.options !== undefined ? body.options : existingField.options,

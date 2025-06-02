@@ -23,22 +23,54 @@ import {
 import { Activity } from "@/components/admin/dashboard/activity-feed";
 import { Button } from "@/components/shadcn-ui/button";
 
+// Define types for dashboard data
+type JobStatusItem = {
+  status: 'active' | 'draft' | 'closed' | 'archived';
+  count: number;
+  percentage: number;
+};
+
+// Define interfaces for dashboard data
+interface DashboardData {
+  metrics: {
+    totalJobs: number;
+    activeJobs: number;
+    totalApplications: number;
+    candidatesInPipeline: number;
+    hiringRate: number;
+  };
+  charts: {
+    jobStatusDistribution: Array<{
+      status: 'active' | 'draft' | 'closed' | 'archived';
+      count: number;
+      percentage: number;
+    }>;
+    applicationFunnel: Array<{
+      stage: string;
+      count: number;
+      percentage: number;
+    }>;
+    applicationsOverTime: Array<{
+      date: string;
+      value: number;
+    }>;
+  };
+}
+
 // Sample data for testing when API fails
 const sampleMetrics = {
   totalJobs: 42,
   activeJobs: 24,
   totalApplications: 342,
   candidatesInPipeline: 156,
-  hiringRate: 8.5,
-  totalCandidates: 415,
-  totalSubadmins: 12
+  hiringRate: 8.5
 };
 
-const sampleJobStatusData = [
-  { status: 'active', count: 24, percentage: 57 },
-  { status: 'draft', count: 8, percentage: 19 },
-  { status: 'closed', count: 7, percentage: 17 },
-  { status: 'archived', count: 3, percentage: 7 }
+const sampleJobStatusData: JobStatusItem[] = [
+  { status: 'active' as const, count: 24, percentage: 57 },
+  { status: 'draft' as const, count: 8, percentage: 19 },
+  { status: 'closed' as const, count: 7, percentage: 17 },
+  { status: 'archived' as const, count: 3, percentage: 7 }
 ];
 
 const sampleApplicationFunnelData = [
@@ -61,7 +93,7 @@ const sampleApplicationsOverTime = [
 const sampleActivities: Activity[] = [
   {
     id: '1',
-    userAvatar: null,
+    userAvatar: undefined,
     userInitials: 'JD',
     userName: 'Jane Doe',
     action: 'created a new job',
@@ -73,7 +105,7 @@ const sampleActivities: Activity[] = [
   },
   {
     id: '2',
-    userAvatar: null,
+    userAvatar: undefined,
     userInitials: 'MS',
     userName: 'Mike Smith',
     action: 'updated a candidate',
@@ -85,7 +117,7 @@ const sampleActivities: Activity[] = [
   },
   {
     id: '3',
-    userAvatar: null,
+    userAvatar: undefined,
     userInitials: 'AK',
     userName: 'Alice Kim',
     action: 'scheduled an interview',
@@ -102,9 +134,8 @@ export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [dateRange, setDateRange] = useState("30days");
   const [activityFilter, setActivityFilter] = useState("all");
-  const [timeRange, setTimeRange] = useState("week");
   const [isLoading, setIsLoading] = useState(true);
-  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
 
   // Fetch dashboard data
@@ -186,7 +217,8 @@ export default function AdminDashboardPage() {
 
   // Handle time range change for applications over time
   const handleTimeRangeChange = (range: string) => {
-    setTimeRange(range);
+    // For now, we'll use dateRange for time range as well
+    setDateRange(range);
     // We could fetch new data here if needed
   };
 
@@ -234,7 +266,7 @@ export default function AdminDashboardPage() {
               Welcome, {user?.firstName || 'Admin'}
             </h1>
             <p className="text-muted-foreground">
-              Here's an overview of your recruitment process
+              Here&apos;s an overview of your recruitment process
             </p>
           </div>
 

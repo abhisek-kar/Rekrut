@@ -12,8 +12,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn-ui/avat
 import { Button } from "@/components/shadcn-ui/button";
 import { Skeleton } from "@/components/shadcn-ui/skeleton";
 import { 
-  Calendar, 
-  User, 
   FileEdit, 
   Clock, 
   ChevronDown, 
@@ -137,7 +135,7 @@ export function ActivityTab({ jobId }: ActivityTabProps) {
         relative: formatDistanceToNow(activityDate, { addSuffix: true }),
         absolute: format(activityDate, "MMM d, yyyy 'at' h:mm a")
       };
-    } catch (e) {
+    } catch {
       return {
         relative: "Invalid date",
         absolute: "Invalid date"

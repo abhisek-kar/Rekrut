@@ -25,7 +25,7 @@ interface AssignmentHistoryProps {
   history: AssignmentEvent[];
 }
 
-export function AssignmentHistory({ jobId, loading, history }: AssignmentHistoryProps) {
+export function AssignmentHistory({ loading, history }: AssignmentHistoryProps) {
   // Format date function
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

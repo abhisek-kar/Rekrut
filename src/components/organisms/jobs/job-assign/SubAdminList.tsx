@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { SubAdminCard, SubAdminCardSkeleton } from './SubAdminCard';
 import { Pagination } from '@/components/molecules/Pagination';
 import { EmptyState } from '@/components/molecules/EmptyState';
-import { User, UserX } from 'lucide-react';
+import { UserX } from 'lucide-react';
 
 interface SubAdmin {
   _id: string;

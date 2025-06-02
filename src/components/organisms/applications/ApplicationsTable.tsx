@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 import {
   ColumnDef,
   flexRender,
@@ -12,7 +12,14 @@ import {
   ColumnFiltersState,
   getFilteredRowModel,
 } from "@tanstack/react-table";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/shadcn-ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/shadcn-ui/table";
 import { Checkbox } from "@/components/shadcn-ui/checkbox";
 import { Button } from "@/components/shadcn-ui/button";
 import {
@@ -23,18 +30,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/shadcn-ui/dropdown-menu";
 import { ApplicationStatusBadge } from "./ApplicationStatusBadge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn-ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/shadcn-ui/avatar";
 import { MoreHorizontal, ArrowUpDown } from "lucide-react";
 import { getInitials } from "@/lib/utils";
-import { format } from 'date-fns';
+import { format } from "date-fns";
 import { ApplicationType } from "@/types/application";
 
 interface ApplicationsTableProps {
   applications: ApplicationType[];
   selectedApplications: string[];
-  sortBy: string;
-  sortOrder: "asc" | "desc";
-  onSort: (field: string) => void;
   onSelect: (applicationId: string) => void;
   onSelectAll: () => void;
   onStatusUpdate: (status: string) => void;
@@ -44,9 +52,6 @@ interface ApplicationsTableProps {
 export function ApplicationsTable({
   applications,
   selectedApplications,
-  sortBy,
-  sortOrder,
-  onSort,
   onSelect,
   onSelectAll,
   onStatusUpdate,
@@ -60,7 +65,7 @@ export function ApplicationsTable({
   const formatDate = (dateString: string) => {
     try {
       return format(new Date(dateString), "MMM d, yyyy");
-    } catch (e) {
+    } catch {
       return "Invalid Date";
     }
   };
@@ -104,13 +109,13 @@ export function ApplicationsTable({
       cell: ({ row }) => {
         const candidate = row.original.candidate;
         if (!candidate) return null;
-        
+
         return (
           <div className="flex items-center gap-3">
             <Avatar>
-              <AvatarImage 
-                src={candidate.profilePhoto} 
-                alt={`${candidate.firstName} ${candidate.lastName}`} 
+              <AvatarImage
+                src={candidate.profilePhoto}
+                alt={`${candidate.firstName} ${candidate.lastName}`}
               />
               <AvatarFallback>
                 {getInitials(`${candidate.firstName} ${candidate.lastName}`)}
@@ -128,8 +133,8 @@ export function ApplicationsTable({
         );
       },
       sortingFn: (rowA, rowB) => {
-        const a = rowA.original.candidate?.lastName || '';
-        const b = rowB.original.candidate?.lastName || '';
+        const a = rowA.original.candidate?.lastName || "";
+        const b = rowB.original.candidate?.lastName || "";
         return a.localeCompare(b);
       },
     },
@@ -146,7 +151,9 @@ export function ApplicationsTable({
           </Button>
         );
       },
-      cell: ({ row }) => <ApplicationStatusBadge status={row.original.status} />,
+      cell: ({ row }) => (
+        <ApplicationStatusBadge status={row.original.status} />
+      ),
       filterFn: (row, id, value) => {
         return value.includes(row.getValue(id));
       },
@@ -181,9 +188,11 @@ export function ApplicationsTable({
       },
       cell: ({ row }) => {
         const score = row.original.matchingScore?.overall;
-        return score
-          ? <span className="font-medium">{score}%</span>
-          : <span className="text-muted-foreground text-sm">N/A</span>;
+        return score ? (
+          <span className="font-medium">{score}%</span>
+        ) : (
+          <span className="text-muted-foreground text-sm">N/A</span>
+        );
       },
       sortingFn: (rowA, rowB) => {
         const a = rowA.original.matchingScore?.overall || 0;
@@ -204,13 +213,15 @@ export function ApplicationsTable({
           </Button>
         );
       },
-      cell: ({ row }) => <span className="capitalize">{row.original.source || "Direct"}</span>,
+      cell: ({ row }) => (
+        <span className="capitalize">{row.original.source || "Direct"}</span>
+      ),
     },
     {
       id: "actions",
       cell: ({ row }) => {
         const application = row.original;
-        
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -220,7 +231,9 @@ export function ApplicationsTable({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onViewApplication(application._id)}>
+              <DropdownMenuItem
+                onClick={() => onViewApplication(application._id)}
+              >
                 View Details
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -237,7 +250,7 @@ export function ApplicationsTable({
                 Mark as Hired
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={() => onStatusUpdate("rejected")}
                 className="text-destructive"
               >
@@ -257,8 +270,9 @@ export function ApplicationsTable({
     state: {
       sorting,
       rowSelection: Object.fromEntries(
-        selectedApplications.map(id => [
-          applications.findIndex(app => app._id === id), true
+        selectedApplications.map((id) => [
+          applications.findIndex((app) => app._id === id),
+          true,
         ])
       ),
       columnFilters,
@@ -266,26 +280,27 @@ export function ApplicationsTable({
     enableRowSelection: true,
     onRowSelectionChange: (updaterOrValue) => {
       // Map row selection changes back to our component state
-      const updatedSelection = typeof updaterOrValue === 'function'
-        ? updaterOrValue(table.getState().rowSelection)
-        : updaterOrValue;
-      
+      const updatedSelection =
+        typeof updaterOrValue === "function"
+          ? updaterOrValue(table.getState().rowSelection)
+          : updaterOrValue;
+
       // Convert row indices back to application IDs
       const selectedIds = Object.entries(updatedSelection)
-        .filter(([_, selected]) => selected)
+        .filter(([, selected]) => selected)
         .map(([index]) => applications[parseInt(index)]._id);
-      
+
       // Update parent component with selected applications
       if (selectedIds.length === applications.length) {
         onSelectAll();
       } else {
-        selectedIds.forEach(id => {
+        selectedIds.forEach((id) => {
           if (!selectedApplications.includes(id)) {
             onSelect(id);
           }
         });
-        
-        selectedApplications.forEach(id => {
+
+        selectedApplications.forEach((id) => {
           if (!selectedIds.includes(id)) {
             onSelect(id);
           }

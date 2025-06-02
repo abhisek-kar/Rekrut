@@ -110,7 +110,7 @@ export default function CreateTemplateJobPage() {
   };
 
   // Handle field changes
-  const handleChange = (section: string, data: any) => {
+  const handleChange = (section: string, data: Record<string, unknown>) => {
     setTemplateData(prev => ({
       ...prev,
       ...data
@@ -153,7 +153,7 @@ export default function CreateTemplateJobPage() {
         throw new Error("Failed to save template");
       }
       
-      const result = await response.json();
+      await response.json();
       
       toast.success("Template saved as draft successfully");
       setFormDirty(false);
@@ -192,7 +192,7 @@ export default function CreateTemplateJobPage() {
         throw new Error("Failed to save template");
       }
       
-      const result = await response.json();
+      await response.json();
       
       toast.success("Template saved successfully");
       

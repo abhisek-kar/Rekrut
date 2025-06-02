@@ -1,20 +1,19 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from '@/components/shadcn-ui/form';
-import { Input } from '@/components/shadcn-ui/input';
-import { Button } from '@/components/shadcn-ui/button';
-import { Textarea } from '@/components/shadcn-ui/textarea';
-import { Checkbox } from '@/components/shadcn-ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/shadcn-ui/radio-group';
+import React, { useEffect, useState } from "react";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/shadcn-ui/form";
+import { Input } from "@/components/shadcn-ui/input";
+import { Textarea } from "@/components/shadcn-ui/textarea";
+import { Checkbox } from "@/components/shadcn-ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/shadcn-ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -22,19 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn-ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/shadcn-ui/card";
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { JobType } from '@/types/job';
-import { Info, Loader2 } from 'lucide-react';
+import { Card, CardContent } from "@/components/shadcn-ui/card";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { JobType } from "@/types/job";
+import { Info, Loader2 } from "lucide-react";
 
 // We'll build this schema dynamically based on the custom fields
 const customFieldsSchema = z.object({
@@ -47,12 +39,20 @@ interface CustomFieldDefinition {
   id: string;
   name: string;
   label: string;
-  type: 'text' | 'textarea' | 'select' | 'multiselect' | 'checkbox' | 'radio' | 'date' | 'number';
+  type:
+    | "text"
+    | "textarea"
+    | "select"
+    | "multiselect"
+    | "checkbox"
+    | "radio"
+    | "date"
+    | "number";
   required: boolean;
   options?: string[];
   placeholder?: string;
   helpText?: string;
-  entity: 'job' | 'candidate' | 'application';
+  entity: "job" | "candidate" | "application";
 }
 
 interface CustomFieldsFormProps {
@@ -61,17 +61,21 @@ interface CustomFieldsFormProps {
   onValidityChange: (isValid: boolean) => void;
 }
 
-export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFieldsFormProps) {
+export function CustomFieldsForm({
+  data,
+  onChange,
+  onValidityChange,
+}: CustomFieldsFormProps) {
   const [customFields, setCustomFields] = useState<CustomFieldDefinition[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Initialize the form with existing data
   const form = useForm<CustomFieldsFormValues>({
     resolver: zodResolver(customFieldsSchema),
     defaultValues: {
       customFields: data.customFields || {},
     },
-    mode: 'onChange',
+    mode: "onChange",
   });
 
   // Fetch custom field definitions when component mounts
@@ -80,23 +84,23 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
       setLoading(true);
       try {
         // Fetch custom fields for jobs
-        const response = await fetch('/api/custom-fields/entities/job');
+        const response = await fetch("/api/custom-fields/entities/job");
         if (!response.ok) {
-          throw new Error('Failed to fetch custom fields');
+          throw new Error("Failed to fetch custom fields");
         }
-        
+
         const data = await response.json();
         setCustomFields(data.fields || []);
-        
+
         // This form is always valid
         onValidityChange(true);
       } catch (error) {
-        console.error('Error fetching custom fields:', error);
+        console.error("Error fetching custom fields:", error);
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchCustomFields();
   }, [onValidityChange]);
 
@@ -111,14 +115,14 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
       // Auto-submit the form with current values
       onSubmit(form.getValues());
     });
-    
+
     return () => subscription.unsubscribe();
   }, [form, onChange]);
 
   // Render a custom field based on its type
   const renderCustomField = (field: CustomFieldDefinition) => {
     switch (field.type) {
-      case 'text':
+      case "text":
         return (
           <FormField
             key={field.id}
@@ -128,13 +132,15 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
               <FormItem>
                 <FormLabel>
                   {field.label}
-                  {field.required && <span className="text-destructive ml-1">*</span>}
+                  {field.required && (
+                    <span className="text-destructive ml-1">*</span>
+                  )}
                 </FormLabel>
                 <FormControl>
-                  <Input 
-                    placeholder={field.placeholder || ''} 
+                  <Input
+                    placeholder={field.placeholder || ""}
                     {...formField}
-                    value={formField.value || ''}
+                    value={formField.value || ""}
                   />
                 </FormControl>
                 {field.helpText && (
@@ -145,8 +151,8 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
             )}
           />
         );
-        
-      case 'textarea':
+
+      case "textarea":
         return (
           <FormField
             key={field.id}
@@ -156,14 +162,16 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
               <FormItem>
                 <FormLabel>
                   {field.label}
-                  {field.required && <span className="text-destructive ml-1">*</span>}
+                  {field.required && (
+                    <span className="text-destructive ml-1">*</span>
+                  )}
                 </FormLabel>
                 <FormControl>
-                  <Textarea 
-                    placeholder={field.placeholder || ''} 
+                  <Textarea
+                    placeholder={field.placeholder || ""}
                     className="min-h-20"
                     {...formField}
-                    value={formField.value || ''}
+                    value={formField.value || ""}
                   />
                 </FormControl>
                 {field.helpText && (
@@ -174,8 +182,8 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
             )}
           />
         );
-        
-      case 'select':
+
+      case "select":
         return (
           <FormField
             key={field.id}
@@ -185,15 +193,21 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
               <FormItem>
                 <FormLabel>
                   {field.label}
-                  {field.required && <span className="text-destructive ml-1">*</span>}
+                  {field.required && (
+                    <span className="text-destructive ml-1">*</span>
+                  )}
                 </FormLabel>
                 <Select
-                  value={formField.value || ''}
+                  value={formField.value || ""}
                   onValueChange={formField.onChange}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder={field.placeholder || `Select ${field.label}`} />
+                      <SelectValue
+                        placeholder={
+                          field.placeholder || `Select ${field.label}`
+                        }
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -212,8 +226,8 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
             )}
           />
         );
-        
-      case 'checkbox':
+
+      case "checkbox":
         return (
           <FormField
             key={field.id}
@@ -230,7 +244,9 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
                 <div className="space-y-1 leading-none">
                   <FormLabel>
                     {field.label}
-                    {field.required && <span className="text-destructive ml-1">*</span>}
+                    {field.required && (
+                      <span className="text-destructive ml-1">*</span>
+                    )}
                   </FormLabel>
                   {field.helpText && (
                     <FormDescription>{field.helpText}</FormDescription>
@@ -241,8 +257,8 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
             )}
           />
         );
-        
-      case 'radio':
+
+      case "radio":
         return (
           <FormField
             key={field.id}
@@ -252,7 +268,9 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
               <FormItem className="space-y-3">
                 <FormLabel>
                   {field.label}
-                  {field.required && <span className="text-destructive ml-1">*</span>}
+                  {field.required && (
+                    <span className="text-destructive ml-1">*</span>
+                  )}
                 </FormLabel>
                 <FormControl>
                   <RadioGroup
@@ -261,13 +279,14 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
                     className="flex flex-col space-y-1"
                   >
                     {field.options?.map((option) => (
-                      <FormItem key={option} className="flex items-center space-x-3 space-y-0">
+                      <FormItem
+                        key={option}
+                        className="flex items-center space-x-3 space-y-0"
+                      >
                         <FormControl>
                           <RadioGroupItem value={option} />
                         </FormControl>
-                        <FormLabel className="font-normal">
-                          {option}
-                        </FormLabel>
+                        <FormLabel className="font-normal">{option}</FormLabel>
                       </FormItem>
                     ))}
                   </RadioGroup>
@@ -280,8 +299,8 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
             )}
           />
         );
-        
-      case 'date':
+
+      case "date":
         return (
           <FormField
             key={field.id}
@@ -291,13 +310,15 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
               <FormItem>
                 <FormLabel>
                   {field.label}
-                  {field.required && <span className="text-destructive ml-1">*</span>}
+                  {field.required && (
+                    <span className="text-destructive ml-1">*</span>
+                  )}
                 </FormLabel>
                 <FormControl>
-                  <Input 
+                  <Input
                     type="date"
                     {...formField}
-                    value={formField.value || ''}
+                    value={formField.value || ""}
                   />
                 </FormControl>
                 {field.helpText && (
@@ -308,8 +329,8 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
             )}
           />
         );
-        
-      case 'number':
+
+      case "number":
         return (
           <FormField
             key={field.id}
@@ -319,14 +340,16 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
               <FormItem>
                 <FormLabel>
                   {field.label}
-                  {field.required && <span className="text-destructive ml-1">*</span>}
+                  {field.required && (
+                    <span className="text-destructive ml-1">*</span>
+                  )}
                 </FormLabel>
                 <FormControl>
-                  <Input 
+                  <Input
                     type="number"
-                    placeholder={field.placeholder || ''} 
+                    placeholder={field.placeholder || ""}
                     {...formField}
-                    value={formField.value || ''}
+                    value={formField.value || ""}
                   />
                 </FormControl>
                 {field.helpText && (
@@ -337,7 +360,7 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
             )}
           />
         );
-        
+
       default:
         return null;
     }
@@ -349,7 +372,9 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
         {loading ? (
           <div className="flex flex-col items-center justify-center py-10">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="mt-2 text-sm text-muted-foreground">Loading custom fields...</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Loading custom fields...
+            </p>
           </div>
         ) : customFields.length === 0 ? (
           <Card>
@@ -357,8 +382,8 @@ export function CustomFieldsForm({ data, onChange, onValidityChange }: CustomFie
               <Info className="h-10 w-10 text-muted-foreground mb-2" />
               <h3 className="text-lg font-medium">No Custom Fields</h3>
               <p className="text-center text-muted-foreground mt-1 max-w-md">
-                No custom fields have been configured for jobs. Custom fields can be
-                added by an administrator in the settings area.
+                No custom fields have been configured for jobs. Custom fields
+                can be added by an administrator in the settings area.
               </p>
             </CardContent>
           </Card>

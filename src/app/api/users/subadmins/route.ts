@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build query
-    const query: any = { role: "subadmin" };
+    const query: Record<string, unknown> = { role: "subadmin" };
     
     if (search) {
       query.$or = [

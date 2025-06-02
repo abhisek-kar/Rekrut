@@ -11,18 +11,16 @@ import {
 } from "@/components/shadcn-ui/breadcrumb";
 import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
 import { Separator } from "@/components/shadcn-ui/separator";
-import { Button } from "@/components/shadcn-ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn-ui/tabs";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { JobType } from "@/types/job";
 
 // Import application components that will be created next
-import { 
+import {
   ApplicationsHeader, 
   ApplicationsTable, 
-  ApplicationsFilter,
-  ApplicationStatusBadge
+  ApplicationsFilter
 } from "@/components/organisms/applications";
 import { Pagination } from "@/components/molecules/Pagination";
 import { EmptyState } from "@/components/molecules/EmptyState";

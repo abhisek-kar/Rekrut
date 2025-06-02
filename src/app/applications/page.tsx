@@ -11,20 +11,24 @@ import {
 } from "@/components/shadcn-ui/breadcrumb";
 import {
   SidebarProvider,
-  SidebarTrigger
+  SidebarTrigger,
 } from "@/components/shadcn-ui/sidebar";
 import { Separator } from "@/components/shadcn-ui/separator";
-import { Button } from "@/components/shadcn-ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn-ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/shadcn-ui/tabs";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { Users } from "lucide-react";
 
 // Import application components
-import { 
-  ApplicationsHeader, 
-  ApplicationsTable, 
-  ApplicationsFilter 
+import {
+  ApplicationsHeader,
+  ApplicationsTable,
+  ApplicationsFilter,
 } from "@/components/organisms/applications";
 import { Pagination } from "@/components/molecules/Pagination";
 import { EmptyState } from "@/components/molecules/EmptyState";
@@ -37,7 +41,9 @@ export default function ApplicationsPage() {
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const [applications, setApplications] = useState<ApplicationType[]>([]);
-  const [filteredApplications, setFilteredApplications] = useState<ApplicationType[]>([]);
+  const [filteredApplications, setFilteredApplications] = useState<
+    ApplicationType[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
@@ -52,16 +58,18 @@ export default function ApplicationsPage() {
   });
   const [sortBy, setSortBy] = useState("applicationDate");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [selectedApplications, setSelectedApplications] = useState<string[]>([]);
+  const [selectedApplications, setSelectedApplications] = useState<string[]>(
+    []
+  );
 
   // Items per page for pagination
   const itemsPerPage = 10;
 
   // Check if we should only show applications for jobs assigned to the subadmin
   useEffect(() => {
-    const assigned = searchParams.get('assigned') === 'true';
-    if (assigned && user?.role === 'subadmin') {
-      setFilters(prev => ({ ...prev, assignedToMe: true }));
+    const assigned = searchParams.get("assigned") === "true";
+    if (assigned && user?.role === "subadmin") {
+      setFilters((prev) => ({ ...prev, assignedToMe: true }));
     }
   }, [searchParams, user?.role]);
 
@@ -79,7 +87,7 @@ export default function ApplicationsPage() {
   const fetchApplications = async () => {
     try {
       setLoading(true);
-      
+
       // Build query parameters
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -87,23 +95,23 @@ export default function ApplicationsPage() {
         sortBy,
         sortOrder,
       });
-      
+
       // Apply status filter based on active tab
       if (activeTab !== "all") {
         params.set("status", activeTab);
       }
-      
+
       // If the user is a subadmin and we're filtering for assigned applications
-      if (user?.role === 'subadmin' && filters.assignedToMe) {
+      if (user?.role === "subadmin" && filters.assignedToMe) {
         params.set("assignedTo", user.id);
       }
-      
+
       const response = await fetch(`/api/applications?${params.toString()}`);
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch applications");
       }
-      
+
       const data = await response.json();
       setApplications(data.applications || []);
       setFilteredApplications(data.applications || []);
@@ -119,7 +127,7 @@ export default function ApplicationsPage() {
   // Apply search and filters
   const applyFilters = () => {
     let filtered = [...applications];
-    
+
     // Apply search term
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
@@ -130,22 +138,26 @@ export default function ApplicationsPage() {
           application.candidate?.email?.toLowerCase().includes(term)
       );
     }
-    
+
     // Apply status filter
     if (filters.status) {
-      filtered = filtered.filter((application) => application.status === filters.status);
+      filtered = filtered.filter(
+        (application) => application.status === filters.status
+      );
     }
-    
+
     // Apply source filter
     if (filters.source) {
-      filtered = filtered.filter((application) => application.source === filters.source);
+      filtered = filtered.filter(
+        (application) => application.source === filters.source
+      );
     }
-    
+
     // Apply date filter
     if (filters.date) {
       const now = new Date();
       const pastDate = new Date();
-      
+
       switch (filters.date) {
         case "today":
           pastDate.setDate(now.getDate() - 1);
@@ -159,28 +171,28 @@ export default function ApplicationsPage() {
         default:
           break;
       }
-      
+
       filtered = filtered.filter((application) => {
         const applicationDate = new Date(application.applicationDate);
         return applicationDate >= pastDate;
       });
     }
-    
+
     // Apply score filter
     if (filters.score) {
-      const scoreRange = filters.score.split('-');
+      const scoreRange = filters.score.split("-");
       if (scoreRange.length === 2) {
         const minScore = parseInt(scoreRange[0]);
         const maxScore = parseInt(scoreRange[1]);
-        
+
         filtered = filtered.filter(
-          (application) => 
-            application.matchingScore?.overall >= minScore && 
+          (application) =>
+            application.matchingScore?.overall >= minScore &&
             application.matchingScore?.overall <= maxScore
         );
       }
     }
-    
+
     setFilteredApplications(filtered);
   };
 
@@ -200,8 +212,8 @@ export default function ApplicationsPage() {
   // Reset all filters
   const resetFilters = () => {
     // Preserve the assignedToMe filter for subadmins coming from the subadmin dashboard
-    const assignedToMe = filters.assignedToMe && user?.role === 'subadmin';
-    
+    const assignedToMe = filters.assignedToMe && user?.role === "subadmin";
+
     setFilters({
       status: "",
       source: "",
@@ -251,7 +263,7 @@ export default function ApplicationsPage() {
       toast.error("No applications selected");
       return;
     }
-    
+
     try {
       const response = await fetch(`/api/applications/bulk-status`, {
         method: "POST",
@@ -265,18 +277,20 @@ export default function ApplicationsPage() {
           notify: true,
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to update applications");
       }
-      
+
       // Refresh applications
       fetchApplications();
-      
+
       // Clear selection
       setSelectedApplications([]);
-      
-      toast.success(`${selectedApplications.length} applications updated to ${status}`);
+
+      toast.success(
+        `${selectedApplications.length} applications updated to ${status}`
+      );
     } catch (error) {
       console.error("Error updating applications:", error);
       toast.error("Failed to update applications");
@@ -294,14 +308,14 @@ export default function ApplicationsPage() {
       hired: 0,
       rejected: 0,
     };
-    
+
     applications.forEach((app) => {
       const status = app.status as keyof typeof counts;
       if (counts.hasOwnProperty(status)) {
         counts[status]++;
       }
     });
-    
+
     return counts;
   };
 
@@ -322,7 +336,9 @@ export default function ApplicationsPage() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/applications">Applications</BreadcrumbLink>
+                  <BreadcrumbLink href="/applications">
+                    Applications
+                  </BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -333,7 +349,7 @@ export default function ApplicationsPage() {
         <main className="flex-1 p-4 md:p-6">
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Page Header */}
-            <ApplicationsHeader 
+            <ApplicationsHeader
               totalApplications={applications.length}
               selectedCount={selectedApplications.length}
               onBulkStatusUpdate={handleBulkStatusUpdate}
@@ -350,11 +366,13 @@ export default function ApplicationsPage() {
             />
 
             {/* Status Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
               <TabsList className="mb-4">
-                <TabsTrigger value="all">
-                  All ({statusCounts.all})
-                </TabsTrigger>
+                <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
                 <TabsTrigger value="applied">
                   Applied ({statusCounts.applied})
                 </TabsTrigger>
@@ -386,9 +404,12 @@ export default function ApplicationsPage() {
                     icon={Users}
                     title="No applications found"
                     description={
-                      Object.values(filters).some((filter) => !!filter) || searchTerm
+                      Object.values(filters).some((filter) => !!filter) ||
+                      searchTerm
                         ? "Try adjusting your search or filters"
-                        : `No ${activeTab !== 'all' ? activeTab : ''} applications found`
+                        : `No ${
+                            activeTab !== "all" ? activeTab : ""
+                          } applications found`
                     }
                   />
                 ) : (
@@ -401,7 +422,9 @@ export default function ApplicationsPage() {
                     onSelect={toggleApplicationSelection}
                     onSelectAll={toggleSelectAll}
                     onStatusUpdate={handleBulkStatusUpdate}
-                    onViewApplication={(id) => router.push(`/applications/${id}`)}
+                    onViewApplication={(id) =>
+                      router.push(`/applications/${id}`)
+                    }
                   />
                 )}
               </TabsContent>

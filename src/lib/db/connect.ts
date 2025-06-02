@@ -1,10 +1,11 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/rekrut';
+const MONGODB_URI =
+  process.env.MONGODB_URI || "mongodb://localhost:27017/rekrut";
 
 if (!MONGODB_URI) {
   throw new Error(
-    'Please define the MONGODB_URI environment variable inside .env.local'
+    "Please define the MONGODB_URI environment variable inside .env.local"
   );
 }
 
@@ -25,13 +26,13 @@ declare global {
   var mongoose: Cached | undefined; // Use var to avoid TypeScript's block scoping
 }
 
-let cached: Cached = global.mongoose || { conn: null, promise: null };
+const cached: Cached = global.mongoose || { conn: null, promise: null };
 
-if (process.env.NODE_ENV !== 'production') global.mongoose = cached;
+if (process.env.NODE_ENV !== "production") global.mongoose = cached;
 
 async function dbConnect() {
   if (cached.conn) {
-    console.log('🔄 Using existing MongoDB connection');
+    console.log("🔄 Using existing MongoDB connection");
     return cached.conn;
   }
 
@@ -40,20 +41,20 @@ async function dbConnect() {
       bufferCommands: false,
     };
 
-    console.log('🔌 Creating new MongoDB connection');
+    console.log("🔌 Creating new MongoDB connection");
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      console.log('✅ MongoDB connected successfully');
+      console.log("✅ MongoDB connected successfully");
       return mongoose;
     });
   } else {
-    console.log('⏳ Waiting for existing MongoDB connection promise');
+    console.log("⏳ Waiting for existing MongoDB connection promise");
   }
 
   try {
     cached.conn = await cached.promise;
   } catch (e) {
     cached.promise = null;
-    console.error('❌ MongoDB connection error:', e);
+    console.error("❌ MongoDB connection error:", e);
     throw e;
   }
 

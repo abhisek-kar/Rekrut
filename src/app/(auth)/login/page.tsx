@@ -38,7 +38,6 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/shadcn-ui/card";
-import { Logo } from "@/components/atoms/logo";
 import { AppFooter } from "@/components/atoms/footer";
 
 // Form validation schema
@@ -59,7 +58,7 @@ export default function LoginPage() {
   const redirectUrl = searchParams.get("redirect") || "";
   const [showPassword, setShowPassword] = useState(false);
   const { isAuthenticated } = useAuth();
-  const { isLoading, error, setError, handleLogin } = useAuthForm();
+  const { isLoading, error, handleLogin } = useAuthForm();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -118,7 +117,7 @@ export default function LoginPage() {
                           className="w-full"
                         >
                           <TabsList className="grid w-full grid-cols-2">
-                            {["admin", "subadmin"].map((item, index) => (
+                            {["admin", "subadmin"].map((item) => (
                               <TabsTrigger
                                 key={item}
                                 value={item}

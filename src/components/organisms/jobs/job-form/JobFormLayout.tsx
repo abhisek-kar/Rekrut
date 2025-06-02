@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -19,13 +19,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/shadcn-ui/breadcrumb";
 import { Separator } from "@/components/shadcn-ui/separator";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Save,
-  Check,
-  AlertCircle,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, Check } from "lucide-react";
 import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
 
 interface Step {
@@ -65,10 +59,10 @@ export function JobFormLayout({
   onSubmit,
 }: JobFormLayoutProps) {
   const router = useRouter();
-  
+
   const isFirstStep = currentStep === 1;
   const isLastStep = currentStep === totalSteps;
-  
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header with Breadcrumb and Sidebar Trigger */}
@@ -87,7 +81,9 @@ export function JobFormLayout({
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href={isEdit ? `/jobs/${isEdit}` : "/jobs/create"}>
+                <BreadcrumbLink
+                  href={isEdit ? `/jobs/${isEdit}` : "/jobs/create"}
+                >
                   {isEdit ? "Edit Job" : "Create Job"}
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -103,7 +99,8 @@ export function JobFormLayout({
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
             <p className="text-muted-foreground mt-2">
-              Complete the form below to {isEdit ? "update" : "create"} a job posting
+              Complete the form below to {isEdit ? "update" : "create"} a job
+              posting
             </p>
           </div>
 
@@ -113,28 +110,36 @@ export function JobFormLayout({
               const stepNumber = index + 1;
               const isActive = stepNumber === currentStep;
               const isCompleted = stepNumber < currentStep;
-              
+
               return (
-                <div 
+                <div
                   key={stepNumber}
-                  className={`flex items-center ${index > 0 ? 'ml-2' : ''}`}
+                  className={`flex items-center ${index > 0 ? "ml-2" : ""}`}
                 >
-                  {index > 0 && (
-                    <div className="h-0.5 w-4 bg-gray-200 mr-2" />
-                  )}
-                  <div 
+                  {index > 0 && <div className="h-0.5 w-4 bg-gray-200 mr-2" />}
+                  <div
                     className={`
                       flex items-center justify-center rounded-full w-8 h-8 text-sm font-medium
-                      ${isActive ? 'bg-primary text-primary-foreground' : 
-                        isCompleted ? 'bg-primary/20 text-primary' : 'bg-gray-100 text-gray-500'}
+                      ${
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : isCompleted
+                          ? "bg-primary/20 text-primary"
+                          : "bg-gray-100 text-gray-500"
+                      }
                     `}
                   >
                     {isCompleted ? <Check className="h-4 w-4" /> : stepNumber}
                   </div>
-                  <span 
+                  <span
                     className={`ml-2 text-sm font-medium hidden sm:inline-block
-                      ${isActive ? 'text-foreground' : 
-                        isCompleted ? 'text-primary' : 'text-muted-foreground'}
+                      ${
+                        isActive
+                          ? "text-foreground"
+                          : isCompleted
+                          ? "text-primary"
+                          : "text-muted-foreground"
+                      }
                     `}
                   >
                     {step.title}
@@ -148,16 +153,16 @@ export function JobFormLayout({
           <Card>
             <CardHeader>
               <CardTitle>{steps[currentStep - 1]?.title}</CardTitle>
-              <CardDescription>{steps[currentStep - 1]?.description}</CardDescription>
+              <CardDescription>
+                {steps[currentStep - 1]?.description}
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              {children}
-            </CardContent>
+            <CardContent>{children}</CardContent>
             <CardFooter className="flex justify-between pt-6 border-t">
               <div>
                 <Button
                   variant="outline"
-                  onClick={() => router.push('/jobs')}
+                  onClick={() => router.push("/jobs")}
                   disabled={isSubmitting}
                 >
                   Cancel
@@ -174,17 +179,14 @@ export function JobFormLayout({
                     Previous
                   </Button>
                 )}
-                
+
                 {!isLastStep && (
-                  <Button
-                    onClick={onNext}
-                    disabled={isSubmitting || !isValid}
-                  >
+                  <Button onClick={onNext} disabled={isSubmitting || !isValid}>
                     Next
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 )}
-                
+
                 {isDirty && (
                   <Button
                     variant="outline"
@@ -195,7 +197,7 @@ export function JobFormLayout({
                     Save as Draft
                   </Button>
                 )}
-                
+
                 {isLastStep && (
                   <Button
                     onClick={onSubmit}
@@ -209,17 +211,21 @@ export function JobFormLayout({
               </div>
             </CardFooter>
           </Card>
-          
+
           {/* Form Progress */}
           <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>Step {currentStep} of {totalSteps}</span>
+            <span>
+              Step {currentStep} of {totalSteps}
+            </span>
             <div className="w-full max-w-xs bg-gray-200 rounded-full h-2 mx-4">
-              <div 
-                className="bg-primary h-2 rounded-full" 
+              <div
+                className="bg-primary h-2 rounded-full"
                 style={{ width: `${(currentStep / totalSteps) * 100}%` }}
               ></div>
             </div>
-            <span>{Math.round((currentStep / totalSteps) * 100)}% Complete</span>
+            <span>
+              {Math.round((currentStep / totalSteps) * 100)}% Complete
+            </span>
           </div>
         </div>
       </main>

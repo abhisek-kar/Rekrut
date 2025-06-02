@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('sortOrder') || 'desc';
     
     // Build query
-    const query: any = {};
+    const query: Record<string, unknown> = {};
     
     // Status filter
     if (status) {

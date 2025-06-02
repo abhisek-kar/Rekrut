@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || '';
     
     // Build query for templates
-    const query: any = {
+    const query: Record<string, unknown> = {
       isTemplate: true,
     };
     

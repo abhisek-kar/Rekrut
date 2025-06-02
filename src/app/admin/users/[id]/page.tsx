@@ -17,7 +17,6 @@ import {
 } from "@/components/admin/subadmin-form";
 import { toast } from "sonner";
 import { Button } from "@/components/shadcn-ui/button";
-import { AlertTriangle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,

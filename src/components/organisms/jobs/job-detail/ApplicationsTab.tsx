@@ -48,7 +48,7 @@ export function ApplicationsTab({ jobId, applicationsCount }: ApplicationsTabPro
             <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium">No Applications Yet</h3>
             <p className="text-muted-foreground mt-1 max-w-md mx-auto">
-              This job hasn't received any applications yet. Applications will appear here once candidates apply.
+              This job hasn&apos;t received any applications yet. Applications will appear here once candidates apply.
             </p>
             <Button className="mt-4" onClick={() => router.push(`/jobs/${jobId}/applications`)}>
               View Applications Page

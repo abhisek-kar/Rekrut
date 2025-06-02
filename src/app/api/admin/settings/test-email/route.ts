@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/nextauth';
 import dbConnect from '@/lib/db/connect';
 import Setting from '@/models/Setting';
 import nodemailer from 'nodemailer';
 
-export async function POST(req: NextRequest) {
+export async function POST() {
   try {
     // Check authentication
     const session = await getServerSession(authOptions);
@@ -78,12 +78,13 @@ export async function POST(req: NextRequest) {
       message: "Test email sent successfully",
       messageId: info.messageId,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error sending test email:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
       { 
         error: "Failed to send test email", 
-        details: error.message || String(error)
+        details: errorMessage
       }, 
       { status: 500 }
     );

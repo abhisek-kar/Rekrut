@@ -14,39 +14,39 @@ import {
   ApplicationSettingsForm,
   VisibilityForm,
   CustomFieldsForm,
-  PreviewForm
+  PreviewForm,
 } from "@/components/organisms/jobs/job-form";
 
 // Define the steps of the job creation form
 const formSteps = [
   {
     title: "Basic Information",
-    description: "Enter the fundamental details about the job"
+    description: "Enter the fundamental details about the job",
   },
   {
     title: "Job Details",
-    description: "Describe the job responsibilities and requirements"
+    description: "Describe the job responsibilities and requirements",
   },
   {
     title: "Compensation & Benefits",
-    description: "Specify salary range and benefits offered"
+    description: "Specify salary range and benefits offered",
   },
   {
     title: "Application Settings",
-    description: "Set up the application process and requirements"
+    description: "Set up the application process and requirements",
   },
   {
     title: "Visibility & Promotion",
-    description: "Configure how the job will be promoted"
+    description: "Configure how the job will be promoted",
   },
   {
     title: "Custom Fields",
-    description: "Add any additional fields specific to your organization"
+    description: "Add any additional fields specific to your organization",
   },
   {
     title: "Preview & Publish",
-    description: "Review the job posting before publishing"
-  }
+    description: "Review the job posting before publishing",
+  },
 ];
 
 // Initial job data
@@ -84,11 +84,11 @@ export default function CreateJobPage() {
   const [formValidity, setFormValidity] = useState({
     step1: false,
     step2: false,
-    step3: true,  // Compensation is optional
-    step4: true,  // Application settings are optional
-    step5: true,  // Visibility settings are optional
-    step6: true,  // Custom fields are optional
-    step7: true,  // Preview step is always valid
+    step3: true, // Compensation is optional
+    step4: true, // Application settings are optional
+    step5: true, // Visibility settings are optional
+    step6: true, // Custom fields are optional
+    step7: true, // Preview step is always valid
   });
   const [formDirty, setFormDirty] = useState(false);
 
@@ -109,36 +109,37 @@ export default function CreateJobPage() {
   };
 
   // Handle field changes
-  const handleChange = (section: string, data: any) => {
-    setJobData(prev => ({
+  const handleChange = (section: string, data: Record<string, unknown>) => {
+    setJobData((prev) => ({
       ...prev,
-      ...data
+      ...data,
     }));
     setFormDirty(true);
   };
 
   // Handle form validity changes
   const handleValidityChange = (step: number, isValid: boolean) => {
-    setFormValidity(prev => ({
+    setFormValidity((prev) => ({
       ...prev,
-      [`step${step}`]: isValid
+      [`step${step}`]: isValid,
     }));
   };
 
   // Check if current step is valid
-  const isCurrentStepValid = formValidity[`step${currentStep}` as keyof typeof formValidity];
+  const isCurrentStepValid =
+    formValidity[`step${currentStep}` as keyof typeof formValidity];
 
   // Save job as draft
   const handleSaveAsDraft = async () => {
     try {
       setIsSubmitting(true);
-      
+
       // Prepare job data for saving
       const jobToSave = {
         ...jobData,
-        status: "draft"
+        status: "draft",
       };
-      
+
       // API call to save job
       const response = await fetch("/api/jobs", {
         method: "POST",
@@ -147,16 +148,16 @@ export default function CreateJobPage() {
         },
         body: JSON.stringify(jobToSave),
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to save job");
       }
-      
+
       const result = await response.json();
-      
+
       toast.success("Job saved as draft successfully");
       setFormDirty(false);
-      
+
       // Navigate to job detail page
       router.push(`/jobs/${result.job._id}`);
     } catch (error) {
@@ -171,13 +172,13 @@ export default function CreateJobPage() {
   const handlePublishJob = async () => {
     try {
       setIsSubmitting(true);
-      
+
       // Prepare job data for publishing
       const jobToPublish = {
         ...jobData,
-        status: "active"
+        status: "active",
       };
-      
+
       // API call to publish job
       const response = await fetch("/api/jobs", {
         method: "POST",
@@ -186,15 +187,15 @@ export default function CreateJobPage() {
         },
         body: JSON.stringify(jobToPublish),
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to publish job");
       }
-      
+
       const result = await response.json();
-      
+
       toast.success("Job published successfully");
-      
+
       // Navigate to job detail page
       router.push(`/jobs/${result.job._id}`);
     } catch (error) {
@@ -210,56 +211,56 @@ export default function CreateJobPage() {
     switch (currentStep) {
       case 1:
         return (
-          <BasicInfoForm 
-            data={jobData} 
+          <BasicInfoForm
+            data={jobData}
             onChange={(data) => handleChange("basicInfo", data)}
             onValidityChange={(isValid) => handleValidityChange(1, isValid)}
           />
         );
       case 2:
         return (
-          <JobDetailsForm 
-            data={jobData} 
+          <JobDetailsForm
+            data={jobData}
             onChange={(data) => handleChange("jobDetails", data)}
             onValidityChange={(isValid) => handleValidityChange(2, isValid)}
           />
         );
       case 3:
         return (
-          <CompensationForm 
-            data={jobData} 
+          <CompensationForm
+            data={jobData}
             onChange={(data) => handleChange("compensation", data)}
             onValidityChange={(isValid) => handleValidityChange(3, isValid)}
           />
         );
       case 4:
         return (
-          <ApplicationSettingsForm 
-            data={jobData} 
+          <ApplicationSettingsForm
+            data={jobData}
             onChange={(data) => handleChange("applicationSettings", data)}
             onValidityChange={(isValid) => handleValidityChange(4, isValid)}
           />
         );
       case 5:
         return (
-          <VisibilityForm 
-            data={jobData} 
+          <VisibilityForm
+            data={jobData}
             onChange={(data) => handleChange("visibility", data)}
             onValidityChange={(isValid) => handleValidityChange(5, isValid)}
           />
         );
       case 6:
         return (
-          <CustomFieldsForm 
-            data={jobData} 
+          <CustomFieldsForm
+            data={jobData}
             onChange={(data) => handleChange("customFields", data)}
             onValidityChange={(isValid) => handleValidityChange(6, isValid)}
           />
         );
       case 7:
         return (
-          <PreviewForm 
-            data={jobData} 
+          <PreviewForm
+            data={jobData}
             onChange={(data) => handleChange("preview", data)}
             onValidityChange={(isValid) => handleValidityChange(7, isValid)}
           />

@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/nextauth';
 import dbConnect from '@/lib/db/connect';
 import Activity from '@/models/Activity';
-import User from '@/models/User';
 import { formatDistanceToNow } from 'date-fns';
 
 export async function GET(req: NextRequest) {
@@ -27,7 +26,7 @@ export async function GET(req: NextRequest) {
     const activityType = url.searchParams.get('type') || undefined;
 
     // Build filter
-    const filter: any = {};
+    const filter: { entityType?: string } = {};
     if (activityType && activityType !== 'all') {
       filter.entityType = activityType;
     }
@@ -46,7 +45,7 @@ export async function GET(req: NextRequest) {
 
     // Process and format activities
     const formattedActivities = activities.map(activity => {
-      const user = activity.userId as any;
+      const user = activity.userId as { firstName: string; lastName: string; profilePhoto?: string } | null;
       const userInitials = user ? 
         `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() : 'UN';
       

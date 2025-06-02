@@ -1,14 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  ChevronsUpDown,
-  LogOut,
-  User,
-  Settings,
-} from "lucide-react";
+import { ChevronsUpDown, LogOut, User, Settings } from "lucide-react";
 
 import {
   Avatar,
@@ -44,20 +38,21 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar();
   const { user: authUser } = useAuth();
-  const router = useRouter();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   // Get user's role to determine profile link
-  const isAdmin = authUser?.role === 'admin';
-  const profileLink = isAdmin ? '/admin/profile' : '/subadmin/profile';
-  const settingsLink = isAdmin ? '/admin/settings' : '/subadmin/profile/settings';
+  const isAdmin = authUser?.role === "admin";
+  const profileLink = isAdmin ? "/admin/profile" : "/subadmin/profile";
+  const settingsLink = isAdmin
+    ? "/admin/settings"
+    : "/subadmin/profile/settings";
 
   // Get initials for avatar fallback
   const getInitials = (name: string) => {
     return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
       .toUpperCase()
       .substring(0, 2);
   };
@@ -78,7 +73,9 @@ export function NavUser({
               >
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">{getInitials(user.name)}</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {getInitials(user.name)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{user.name}</span>
@@ -97,7 +94,9 @@ export function NavUser({
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="rounded-lg">{getInitials(user.name)}</AvatarFallback>
+                    <AvatarFallback className="rounded-lg">
+                      {getInitials(user.name)}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">{user.name}</span>
@@ -131,7 +130,7 @@ export function NavUser({
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
-      
+
       <LogoutConfirmationModal
         isOpen={isLogoutModalOpen}
         onClose={() => setIsLogoutModalOpen(false)}

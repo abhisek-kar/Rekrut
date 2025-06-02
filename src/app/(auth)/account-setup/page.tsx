@@ -28,7 +28,6 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter,
 } from "@/components/shadcn-ui/card";
 import { Logo } from "@/components/atoms/logo";
 

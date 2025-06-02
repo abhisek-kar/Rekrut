@@ -31,7 +31,7 @@ import {
   ApplicationsTab,
   AnalyticsTab,
   ActivityTab,
-  DocumentsTab
+  DocumentsTab,
 } from "@/components/organisms/jobs/job-detail";
 
 import { JobType } from "@/types/job";
@@ -63,24 +63,26 @@ export default function JobDetailPage({ params }: JobDetailProps) {
       try {
         setLoading(true);
         const response = await fetch(`/api/jobs/${params.id}`);
-        
+
         if (!response.ok) {
           throw new Error("Failed to fetch job");
         }
-        
+
         const data = await response.json();
         setJob(data.job);
-        
+
         // Fetch job statistics
         const statsResponse = await fetch(`/api/jobs/stats/${params.id}`);
         if (statsResponse.ok) {
           const statsData = await statsResponse.json();
           setStats(statsData.stats);
         }
-        
+
         // Fetch assigned recruiter if any
         if (data.job.assignedTo) {
-          const userResponse = await fetch(`/api/users/subadmins/${data.job.assignedTo}`);
+          const userResponse = await fetch(
+            `/api/users/subadmins/${data.job.assignedTo}`
+          );
           if (userResponse.ok) {
             const userData = await userResponse.json();
             setAssignedRecruiter(userData.user);
@@ -93,7 +95,7 @@ export default function JobDetailPage({ params }: JobDetailProps) {
         setLoading(false);
       }
     };
-    
+
     fetchJob();
   }, [params.id]);
 
@@ -105,19 +107,19 @@ export default function JobDetailPage({ params }: JobDetailProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           status: newStatus,
-          reason: `Status updated by ${user?.firstName || 'admin'}`
+          reason: `Status updated by ${user?.firstName || "admin"}`,
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to update job status");
       }
-      
+
       const data = await response.json();
       setJob(data.job);
-      
+
       toast.success(`Job status updated to ${newStatus}`);
     } catch (error) {
       console.error("Error updating job status:", error);
@@ -127,19 +129,23 @@ export default function JobDetailPage({ params }: JobDetailProps) {
 
   // Handle job deletion
   const handleDeleteJob = async () => {
-    if (!confirm("Are you sure you want to delete this job? This action cannot be undone.")) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this job? This action cannot be undone."
+      )
+    ) {
       return;
     }
-    
+
     try {
       const response = await fetch(`/api/jobs/${params.id}`, {
         method: "DELETE",
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to delete job");
       }
-      
+
       toast.success("Job deleted successfully");
       router.push("/jobs");
     } catch (error) {
@@ -157,12 +163,12 @@ export default function JobDetailPage({ params }: JobDetailProps) {
         title: `${job?.title} (Copy)`,
         status: "draft",
       };
-      
+
       // Remove id and timestamps
       delete jobToDuplicate._id;
       delete jobToDuplicate.createdAt;
       delete jobToDuplicate.updatedAt;
-      
+
       const response = await fetch("/api/jobs", {
         method: "POST",
         headers: {
@@ -170,13 +176,13 @@ export default function JobDetailPage({ params }: JobDetailProps) {
         },
         body: JSON.stringify(jobToDuplicate),
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to duplicate job");
       }
-      
+
       const data = await response.json();
-      
+
       toast.success("Job duplicated successfully");
       router.push(`/jobs/${data.job._id}`);
     } catch (error) {
@@ -209,7 +215,10 @@ export default function JobDetailPage({ params }: JobDetailProps) {
       <div className="flex flex-col items-center justify-center min-h-screen">
         <Briefcase className="h-16 w-16 text-muted-foreground mb-4" />
         <h2 className="text-2xl font-bold mb-2">Job Not Found</h2>
-        <p className="text-muted-foreground mb-6">The job you're looking for doesn't exist or has been removed.</p>
+        <p className="text-muted-foreground mb-6">
+          The job you&apos;re looking for doesn&apos;t exist or has been
+          removed.
+        </p>
         <Button onClick={() => router.push("/jobs")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Jobs
@@ -236,7 +245,9 @@ export default function JobDetailPage({ params }: JobDetailProps) {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href={`/jobs/${params.id}`}>{job.title}</BreadcrumbLink>
+                <BreadcrumbLink href={`/jobs/${params.id}`}>
+                  {job.title}
+                </BreadcrumbLink>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -247,7 +258,7 @@ export default function JobDetailPage({ params }: JobDetailProps) {
       <main className="flex-1 p-4 md:p-6">
         <div className="flex flex-col gap-6 max-w-6xl mx-auto">
           {/* Job Header */}
-          <JobHeader 
+          <JobHeader
             job={job}
             onStatusUpdate={handleStatusUpdate}
             onDuplicate={handleDuplicateJob}
@@ -256,46 +267,53 @@ export default function JobDetailPage({ params }: JobDetailProps) {
           />
 
           {/* Content Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
             <TabsList className="mb-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="applications">
-            Applications ({stats.applications})
-            </TabsTrigger>
-            <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="applications">
+                Applications ({stats.applications})
+              </TabsTrigger>
+              <TabsTrigger value="documents">Documents</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="activity">Activity</TabsTrigger>
-          </TabsList>
-            
+            </TabsList>
+
             <TabsContent value="overview" className="space-y-6">
               {/* Job Details Card */}
               <JobDetailsCard job={job} />
 
               {/* Application Settings Card */}
               <ApplicationSettingsCard job={job} />
-              
+
               {/* Job Assignment Card */}
-              <JobAssignmentCard 
+              <JobAssignmentCard
                 assignedRecruiter={assignedRecruiter}
                 onAssignRecruiter={handleAssignRecruiter}
               />
-              
+
               {/* Custom Fields Card (Only shown if there are custom fields) */}
               <CustomFieldsCard job={job} />
             </TabsContent>
-            
+
             <TabsContent value="applications" className="space-y-6">
-              <ApplicationsTab jobId={params.id} applicationsCount={stats.applications} />
+              <ApplicationsTab
+                jobId={params.id}
+                applicationsCount={stats.applications}
+              />
             </TabsContent>
-            
+
             <TabsContent value="documents" className="space-y-6">
               <DocumentsTab jobId={params.id} />
             </TabsContent>
-            
+
             <TabsContent value="analytics" className="space-y-6">
               <AnalyticsTab stats={stats} />
             </TabsContent>
-            
+
             <TabsContent value="activity" className="space-y-6">
               <ActivityTab jobId={params.id} />
             </TabsContent>

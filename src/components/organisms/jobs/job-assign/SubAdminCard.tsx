@@ -1,6 +1,6 @@
 'use client';
 
-import { User, Briefcase, Calendar, Check } from 'lucide-react';
+import { Briefcase, Calendar, Check } from 'lucide-react';
 import { Button } from '@/components/shadcn-ui/button';
 import { Badge } from '@/components/shadcn-ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/shadcn-ui/avatar';

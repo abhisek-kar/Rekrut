@@ -10,17 +10,13 @@ import {
   BreadcrumbSeparator,
 } from "@/components/shadcn-ui/breadcrumb";
 import {
-  SidebarInset,
   SidebarProvider,
-  SidebarTrigger
+  SidebarTrigger,
 } from "@/components/shadcn-ui/sidebar";
 import { Separator } from "@/components/shadcn-ui/separator";
 import { Button } from "@/components/shadcn-ui/button";
 import { Skeleton } from "@/components/shadcn-ui/skeleton";
-import {
-  Card,
-  CardContent,
-} from "@/components/shadcn-ui/card";
+import { Card, CardContent } from "@/components/shadcn-ui/card";
 import {
   Tabs,
   TabsContent,
@@ -32,7 +28,10 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
 // Import our custom components
-import { JobSearchFilter, FilterOptions } from "@/components/organisms/jobs/JobSearchFilter";
+import {
+  JobSearchFilter,
+  FilterOptions,
+} from "@/components/organisms/jobs/JobSearchFilter";
 import { JobTableView } from "@/components/organisms/jobs/JobTableView";
 import { JobGridView } from "@/components/organisms/jobs/JobGridView";
 import { Pagination } from "@/components/molecules/Pagination";
@@ -85,11 +84,11 @@ export default function JobsPage() {
   useEffect(() => {
     // Read the 'assigned' query parameter from the URL
     const urlParams = new URLSearchParams(window.location.search);
-    const showAssignedOnly = urlParams.get('assigned') === 'true';
-    
+    const showAssignedOnly = urlParams.get("assigned") === "true";
+
     // If we're showing assigned jobs only and the user is a subadmin
-    if (showAssignedOnly && user?.role === 'subadmin') {
-      setFilters(prev => ({ ...prev, assignedToMe: true }));
+    if (showAssignedOnly && user?.role === "subadmin") {
+      setFilters((prev) => ({ ...prev, assignedToMe: true }));
     }
   }, [user?.role]);
 
@@ -97,7 +96,7 @@ export default function JobsPage() {
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      
+
       // Build query parameters
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -105,23 +104,23 @@ export default function JobsPage() {
         sortBy,
         sortOrder,
       });
-      
+
       // Apply status filter based on active tab
       if (activeTab !== "all") {
         params.set("status", activeTab);
       }
-      
+
       // If the user is a subadmin and we're filtering for assigned jobs
-      if (user?.role === 'subadmin' && filters.assignedToMe) {
+      if (user?.role === "subadmin" && filters.assignedToMe) {
         params.set("assignedTo", user.id);
       }
-      
+
       const response = await fetch(`/api/jobs?${params.toString()}`);
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch jobs");
       }
-      
+
       const data = await response.json();
       setJobs(data.jobs);
       setFilteredJobs(data.jobs);
@@ -137,7 +136,7 @@ export default function JobsPage() {
   // Apply search and filters to jobs
   const applyFilters = () => {
     let filtered = [...jobs];
-    
+
     // Apply search term
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
@@ -148,31 +147,36 @@ export default function JobsPage() {
           (job.description && job.description.toLowerCase().includes(term))
       );
     }
-    
+
     // Apply filters
     if (filters.status) {
       filtered = filtered.filter((job) => job.status === filters.status);
     }
-    
+
     if (filters.location) {
-      filtered = filtered.filter((job) => 
-        job.location.type.toLowerCase() === filters.location.toLowerCase()
+      filtered = filtered.filter(
+        (job) =>
+          job.location.type.toLowerCase() === filters.location.toLowerCase()
       );
     }
-    
+
     if (filters.jobType) {
-      filtered = filtered.filter((job) => job.employmentType === filters.jobType);
+      filtered = filtered.filter(
+        (job) => job.employmentType === filters.jobType
+      );
     }
-    
+
     if (filters.experienceLevel) {
-      filtered = filtered.filter((job) => job.experienceLevel === filters.experienceLevel);
+      filtered = filtered.filter(
+        (job) => job.experienceLevel === filters.experienceLevel
+      );
     }
-    
+
     // Date posted filter logic
     if (filters.datePosted) {
       const now = new Date();
       const pastDate = new Date();
-      
+
       switch (filters.datePosted) {
         case "today":
           pastDate.setDate(now.getDate() - 1);
@@ -186,13 +190,13 @@ export default function JobsPage() {
         default:
           break;
       }
-      
+
       filtered = filtered.filter((job) => {
         const jobDate = new Date(job.createdAt);
         return jobDate >= pastDate;
       });
     }
-    
+
     setFilteredJobs(filtered);
   };
 
@@ -219,8 +223,8 @@ export default function JobsPage() {
   // Reset all filters
   const resetFilters = () => {
     // Preserve the assignedToMe filter for subadmins coming from the subadmin dashboard
-    const assignedToMe = filters.assignedToMe && user?.role === 'subadmin';
-    
+    const assignedToMe = filters.assignedToMe && user?.role === "subadmin";
+
     setFilters({
       status: "",
       location: "",
@@ -264,17 +268,17 @@ export default function JobsPage() {
       toast.error("No jobs selected");
       return;
     }
-    
+
     setConfirmAction({ action, ids: selectedJobs });
   };
 
   // Execute confirmed bulk action
   const executeAction = async () => {
     if (!confirmAction) return;
-    
+
     try {
       const { action, ids } = confirmAction;
-      
+
       switch (action) {
         case "archive":
           // Implementation for archiving jobs
@@ -287,7 +291,7 @@ export default function JobsPage() {
         default:
           break;
       }
-      
+
       // Refresh jobs list
       fetchJobs();
       // Clear selection
@@ -302,44 +306,46 @@ export default function JobsPage() {
 
   // Create confirmation dialog content
   const getConfirmationContent = () => {
-    if (!confirmAction) return { title: '', description: '', actionLabel: '' };
-    
+    if (!confirmAction) return { title: "", description: "", actionLabel: "" };
+
     const { action, ids } = confirmAction;
-    
+
     if (action === "archive") {
       return {
         title: "Archive Jobs",
         description: `Are you sure you want to archive ${ids.length} selected jobs? This will remove them from public view.`,
-        actionLabel: "Archive Jobs"
+        actionLabel: "Archive Jobs",
       };
     } else if (action === "delete") {
       return {
         title: "Delete Jobs",
         description: `Are you sure you want to delete ${ids.length} selected jobs? This action cannot be undone.`,
         actionLabel: "Delete Jobs",
-        actionVariant: 'destructive' as const
+        actionVariant: "destructive" as const,
       };
     }
-    
-    return { title: '', description: '', actionLabel: '' };
+
+    return { title: "", description: "", actionLabel: "" };
   };
 
   // Render loading state
   const renderLoading = () => {
     return (
       <div className="space-y-4">
-        {Array(5).fill(0).map((_, index) => (
-          <Card key={index}>
-            <CardContent className="p-4">
-              <div className="space-y-3">
-                <Skeleton className="h-5 w-1/3" />
-                <Skeleton className="h-4 w-1/4" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        {Array(5)
+          .fill(0)
+          .map((_, index) => (
+            <Card key={index}>
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <Skeleton className="h-5 w-1/3" />
+                  <Skeleton className="h-4 w-1/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
       </div>
     );
   };
@@ -356,17 +362,17 @@ export default function JobsPage() {
           icon={Briefcase}
           title="No jobs found"
           description={
-            Object.values(filters).some(filter => !!filter) || searchTerm
+            Object.values(filters).some((filter) => !!filter) || searchTerm
               ? "Try adjusting your search or filters"
               : "Create your first job posting to get started"
           }
           actionLabel={
-            !Object.values(filters).some(filter => !!filter) && !searchTerm
+            !Object.values(filters).some((filter) => !!filter) && !searchTerm
               ? "Create New Job"
               : undefined
           }
           onAction={
-            !Object.values(filters).some(filter => !!filter) && !searchTerm
+            !Object.values(filters).some((filter) => !!filter) && !searchTerm
               ? () => router.push("/jobs/create")
               : undefined
           }
@@ -426,12 +432,17 @@ export default function JobsPage() {
             {/* Page Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">Job Management</h1>
+                <h1 className="text-3xl font-bold tracking-tight">
+                  Job Management
+                </h1>
                 <p className="text-muted-foreground">
                   Create, view and manage job postings
                 </p>
               </div>
-              <Button onClick={() => router.push("/jobs/create")} className="gap-1">
+              <Button
+                onClick={() => router.push("/jobs/create")}
+                className="gap-1"
+              >
                 <PlusCircle className="h-4 w-4" />
                 Create New Job
               </Button>
@@ -449,7 +460,11 @@ export default function JobsPage() {
             />
 
             {/* Job Tabs and Listing */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
               <TabsList className="mb-4">
                 <TabsTrigger value="all">All Jobs</TabsTrigger>
                 <TabsTrigger value="active">Active</TabsTrigger>

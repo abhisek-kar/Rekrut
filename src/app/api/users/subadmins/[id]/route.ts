@@ -3,8 +3,6 @@ import { z } from "zod";
 import User from "@/models/User";
 import dbConnect from "@/lib/db/connect";
 import { Types } from "mongoose";
-import crypto from "crypto";
-import { sendEmail, generatePasswordResetEmail } from "@/lib/email";
 
 // Validation schema for updating a SubAdmin
 const updateSubadminSchema = z.object({

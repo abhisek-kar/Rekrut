@@ -1,8 +1,8 @@
-import React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { Button } from '@/components/shadcn-ui/button';
+import React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/shadcn-ui/button";
 import {
   Form,
   FormControl,
@@ -11,26 +11,27 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/shadcn-ui/form';
-import { Input } from '@/components/shadcn-ui/input';
-import { Textarea } from '@/components/shadcn-ui/textarea';
+} from "@/components/shadcn-ui/form";
+import { Input } from "@/components/shadcn-ui/input";
+import { Textarea } from "@/components/shadcn-ui/textarea";
+import { Switch } from "@/components/shadcn-ui/switch";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/shadcn-ui/select';
-import { Switch } from '@/components/shadcn-ui/switch';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/shadcn-ui/card';
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn-ui/card";
 
 const emailSettingsSchema = z.object({
-  senderName: z.string().min(2, { message: 'Sender name is required' }),
-  senderEmail: z.string().email({ message: 'Invalid email address' }),
-  smtpHost: z.string().min(1, { message: 'SMTP host is required' }),
-  smtpPort: z.coerce.number().positive({ message: 'SMTP port must be a positive number' }),
-  smtpUser: z.string().min(1, { message: 'SMTP username is required' }),
-  smtpPassword: z.string().min(1, { message: 'SMTP password is required' }),
+  senderName: z.string().min(2, { message: "Sender name is required" }),
+  senderEmail: z.string().email({ message: "Invalid email address" }),
+  smtpHost: z.string().min(1, { message: "SMTP host is required" }),
+  smtpPort: z.coerce
+    .number()
+    .positive({ message: "SMTP port must be a positive number" }),
+  smtpUser: z.string().min(1, { message: "SMTP username is required" }),
+  smtpPassword: z.string().min(1, { message: "SMTP password is required" }),
   smtpSecure: z.boolean().default(true),
   emailSignature: z.string().optional(),
   applicationConfirmationEnabled: z.boolean().default(true),
@@ -43,34 +44,50 @@ const emailSettingsSchema = z.object({
 type EmailSettingsFormValues = z.infer<typeof emailSettingsSchema>;
 
 interface EmailSettingsProps {
-  initialData: any;
+  initialData: Partial<EmailSettingsFormValues>;
   onSave: (data: EmailSettingsFormValues) => Promise<void>;
   onTestEmail: () => Promise<void>;
   isLoading: boolean;
 }
 
-export function EmailSettings({ initialData, onSave, onTestEmail, isLoading }: EmailSettingsProps) {
+export function EmailSettings({
+  initialData,
+  onSave,
+  onTestEmail,
+  isLoading,
+}: EmailSettingsProps) {
   const form = useForm<EmailSettingsFormValues>({
     resolver: zodResolver(emailSettingsSchema),
     defaultValues: {
-      senderName: initialData?.senderName || '',
-      senderEmail: initialData?.senderEmail || '',
-      smtpHost: initialData?.smtpHost || '',
+      senderName: initialData?.senderName || "",
+      senderEmail: initialData?.senderEmail || "",
+      smtpHost: initialData?.smtpHost || "",
       smtpPort: initialData?.smtpPort || 587,
-      smtpUser: initialData?.smtpUser || '',
-      smtpPassword: initialData?.smtpPassword || '',
-      smtpSecure: initialData?.smtpSecure !== undefined ? initialData.smtpSecure : true,
-      emailSignature: initialData?.emailSignature || '',
-      applicationConfirmationEnabled: initialData?.applicationConfirmationEnabled !== undefined
-        ? initialData.applicationConfirmationEnabled : true,
-      statusChangeNotificationEnabled: initialData?.statusChangeNotificationEnabled !== undefined
-        ? initialData.statusChangeNotificationEnabled : true,
-      interviewScheduleEnabled: initialData?.interviewScheduleEnabled !== undefined
-        ? initialData.interviewScheduleEnabled : true,
-      rejectionEnabled: initialData?.rejectionEnabled !== undefined
-        ? initialData.rejectionEnabled : true,
-      offerEnabled: initialData?.offerEnabled !== undefined
-        ? initialData.offerEnabled : true,
+      smtpUser: initialData?.smtpUser || "",
+      smtpPassword: initialData?.smtpPassword || "",
+      smtpSecure:
+        initialData?.smtpSecure !== undefined ? initialData.smtpSecure : true,
+      emailSignature: initialData?.emailSignature || "",
+      applicationConfirmationEnabled:
+        initialData?.applicationConfirmationEnabled !== undefined
+          ? initialData.applicationConfirmationEnabled
+          : true,
+      statusChangeNotificationEnabled:
+        initialData?.statusChangeNotificationEnabled !== undefined
+          ? initialData.statusChangeNotificationEnabled
+          : true,
+      interviewScheduleEnabled:
+        initialData?.interviewScheduleEnabled !== undefined
+          ? initialData.interviewScheduleEnabled
+          : true,
+      rejectionEnabled:
+        initialData?.rejectionEnabled !== undefined
+          ? initialData.rejectionEnabled
+          : true,
+      offerEnabled:
+        initialData?.offerEnabled !== undefined
+          ? initialData.offerEnabled
+          : true,
     },
   });
 
@@ -78,7 +95,7 @@ export function EmailSettings({ initialData, onSave, onTestEmail, isLoading }: E
     try {
       await onSave(data);
     } catch (error) {
-      console.error('Error saving email settings:', error);
+      console.error("Error saving email settings:", error);
     }
   };
 
@@ -86,7 +103,7 @@ export function EmailSettings({ initialData, onSave, onTestEmail, isLoading }: E
     try {
       await onTestEmail();
     } catch (error) {
-      console.error('Error sending test email:', error);
+      console.error("Error sending test email:", error);
     }
   };
 
@@ -111,10 +128,13 @@ export function EmailSettings({ initialData, onSave, onTestEmail, isLoading }: E
                     <FormItem>
                       <FormLabel>Sender Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your Company Recruitment" {...field} />
+                        <Input
+                          placeholder="Your Company Recruitment"
+                          {...field}
+                        />
                       </FormControl>
                       <FormDescription>
-                        The name that will appear in the "From" field
+                        The name that will appear in the &quot;From&quot; field
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -127,7 +147,10 @@ export function EmailSettings({ initialData, onSave, onTestEmail, isLoading }: E
                     <FormItem>
                       <FormLabel>Sender Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="recruitment@example.com" {...field} />
+                        <Input
+                          placeholder="recruitment@example.com"
+                          {...field}
+                        />
                       </FormControl>
                       <FormDescription>
                         The email address that will be used to send emails
@@ -262,7 +285,7 @@ export function EmailSettings({ initialData, onSave, onTestEmail, isLoading }: E
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="statusChangeNotificationEnabled"
@@ -271,7 +294,8 @@ export function EmailSettings({ initialData, onSave, onTestEmail, isLoading }: E
                       <div className="space-y-0.5">
                         <FormLabel>Status Change Notifications</FormLabel>
                         <FormDescription>
-                          Notify candidates when their application status changes
+                          Notify candidates when their application status
+                          changes
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -283,7 +307,7 @@ export function EmailSettings({ initialData, onSave, onTestEmail, isLoading }: E
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="interviewScheduleEnabled"
@@ -304,7 +328,7 @@ export function EmailSettings({ initialData, onSave, onTestEmail, isLoading }: E
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="rejectionEnabled"
@@ -325,7 +349,7 @@ export function EmailSettings({ initialData, onSave, onTestEmail, isLoading }: E
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="offerEnabled"
@@ -351,9 +375,14 @@ export function EmailSettings({ initialData, onSave, onTestEmail, isLoading }: E
 
             <div className="flex items-center justify-between">
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? 'Saving...' : 'Save Settings'}
+                {isLoading ? "Saving..." : "Save Settings"}
               </Button>
-              <Button type="button" variant="outline" onClick={handleTestEmail} disabled={isLoading}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleTestEmail}
+                disabled={isLoading}
+              >
                 Send Test Email
               </Button>
             </div>

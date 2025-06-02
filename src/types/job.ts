@@ -1,7 +1,5 @@
-import { Types } from 'mongoose';
-
 export type JobLocation = {
-  type: 'remote' | 'onsite' | 'hybrid';
+  type: "remote" | "onsite" | "hybrid";
   address?: string;
   city?: string;
   state?: string;
@@ -16,10 +14,14 @@ export type JobSalary = {
   visible: boolean;
 };
 
-export type JobStatus = 'draft' | 'active' | 'closed' | 'archived';
-export type JobEmploymentType = 'full-time' | 'part-time' | 'contract' | 'internship';
-export type JobExperienceLevel = 'entry' | 'mid' | 'senior';
-export type JobVisibility = 'public' | 'private';
+export type JobStatus = "draft" | "active" | "closed" | "archived";
+export type JobEmploymentType =
+  | "full-time"
+  | "part-time"
+  | "contract"
+  | "internship";
+export type JobExperienceLevel = "entry" | "mid" | "senior";
+export type JobVisibility = "public" | "private";
 
 export interface JobType {
   _id: string;
@@ -37,12 +39,17 @@ export interface JobType {
   salary?: JobSalary;
   benefits?: string[];
   perks?: string[];
+  workingHours?: string;
+  referralBonus?: string;
   applicationDeadline?: Date;
   expectedStartDate?: Date;
   applicationInstructions?: string;
   requiredDocuments?: string[];
   customFields?: Record<string, any>;
   visibility: JobVisibility;
+  seoTitle?: string;
+  seoDescription?: string;
+  internalNotes?: string;
   featured: boolean;
   status: JobStatus;
   isTemplate?: boolean;

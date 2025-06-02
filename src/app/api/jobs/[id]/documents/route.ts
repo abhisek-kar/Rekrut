@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import dbConnect from '@/lib/db/connect';
 import { authOptions } from '@/lib/auth/nextauth';
-import { uploadFile, getFileUrl, deleteFile } from '@/lib/aws/s3';
+import { uploadFile, getFileUrl } from '@/lib/aws/s3';
 import Job from '@/models/Job';
 import Activity from '@/models/Activity';
 

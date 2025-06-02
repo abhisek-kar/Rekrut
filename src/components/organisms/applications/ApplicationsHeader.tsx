@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Button } from "@/components/shadcn-ui/button";
 import { Skeleton } from "@/components/shadcn-ui/skeleton";
@@ -12,7 +12,12 @@ import {
 import { ArrowLeft, ChevronDown, Download, Mail } from "lucide-react";
 
 interface ApplicationsHeaderProps {
-  job?: any;
+  job?: {
+    title: string;
+    id: string;
+    company?: string;
+    location?: { type: string };
+  };
   loading?: boolean;
   totalApplications: number;
   selectedCount: number;
@@ -46,12 +51,16 @@ export function ApplicationsHeader({
   return (
     <div>
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight">{job?.title || "Applications"}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {job?.title || "Applications"}
+        </h1>
         <p className="text-muted-foreground">
-          {job ? `${job.company} • ${job.location.type}` : "Manage all job applications"}
+          {job
+            ? `${job.company || ""} • ${job.location?.type || ""}`
+            : "Manage all job applications"}
         </p>
       </div>
-      
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-6">
         <div className="flex items-center gap-2">
           {showBackButton && onBackToJob && (
@@ -66,10 +75,11 @@ export function ApplicationsHeader({
             </Button>
           )}
           <span className="text-sm text-muted-foreground">
-            {totalApplications} {totalApplications === 1 ? "application" : "applications"}
+            {totalApplications}{" "}
+            {totalApplications === 1 ? "application" : "applications"}
           </span>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-0">
           {selectedCount > 0 && (
             <DropdownMenu>
@@ -80,10 +90,14 @@ export function ApplicationsHeader({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onBulkStatusUpdate("screening")}>
+                <DropdownMenuItem
+                  onClick={() => onBulkStatusUpdate("screening")}
+                >
                   Move to Screening
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onBulkStatusUpdate("interview")}>
+                <DropdownMenuItem
+                  onClick={() => onBulkStatusUpdate("interview")}
+                >
                   Move to Interview
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onBulkStatusUpdate("offer")}>
@@ -93,7 +107,7 @@ export function ApplicationsHeader({
                   Mark as Hired
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => onBulkStatusUpdate("rejected")}
                   className="text-destructive"
                 >
@@ -102,7 +116,7 @@ export function ApplicationsHeader({
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="gap-1 h-9">
@@ -117,7 +131,7 @@ export function ApplicationsHeader({
               <DropdownMenuItem>Export to PDF</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          
+
           {selectedCount > 0 && (
             <Button variant="outline" size="sm" className="gap-1 h-9">
               <Mail className="h-4 w-4" />

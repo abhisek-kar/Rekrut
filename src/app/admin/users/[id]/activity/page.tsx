@@ -16,23 +16,14 @@ import { Button } from "@/components/shadcn-ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/shadcn-ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn-ui/avatar";
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/shadcn-ui/dropdown-menu";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/shadcn-ui/select";
-import { CalendarIcon, ChevronDown, FilterIcon } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/shadcn-ui/badge";
 
 // Types
@@ -42,7 +33,7 @@ type Activity = {
   action: string;
   entityType: string;
   entityId: string;
-  details: any;
+  details: Record<string, unknown>;
   ipAddress: string;
   userAgent: string;
   createdAt: string;

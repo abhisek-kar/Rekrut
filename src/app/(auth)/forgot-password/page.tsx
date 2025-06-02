@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
               Forgot your password?
             </CardTitle>
             <CardDescription className="text-center text-gray-600">
-              Enter your email address and we'll send you a link to reset your
+              Enter your email address and we&apos;ll send you a link to reset your
               password
             </CardDescription>
           </CardHeader>
@@ -119,7 +119,7 @@ export default function ForgotPasswordPage() {
                     <Link href="/login">Return to Login</Link>
                   </Button>
                   <p className="text-center text-sm text-gray-500">
-                    Didn't receive an email?{" "}
+                    Didn&apos;t receive an email?{" "}
                     <button
                       type="button"
                       onClick={() => form.handleSubmit(onSubmit)()}
@@ -140,7 +140,7 @@ export default function ForgotPasswordPage() {
                     <div className="flex items-start gap-2 text-gray-700">
                       <InfoIcon className="" />
                       <span className="text-sm ">
-                        We'll send you an email with instructions to reset your
+                        We&apos;ll send you an email with instructions to reset your
                         password. Make sure to check your spam folder.
                       </span>
                     </div>

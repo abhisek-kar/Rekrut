@@ -16,20 +16,22 @@ interface LogoProps {
   hideTextInSidebar?: boolean;
 }
 
-export function Logo({ 
-  size = "md", 
-  className, 
+export function Logo({
+  size = "md",
+  className,
   asLink = true,
-  hideTextInSidebar = false
+  hideTextInSidebar = false,
 }: LogoProps) {
-  // Try to get sidebar context - this will work in sidebar, otherwise return null
-  const sidebarContext = React.useMemo(() => {
-    try {
-      return useSidebar();
-    } catch (e) {
-      return null;
-    }
-  }, []);
+  // Call hook at top level, but handle the error case
+  let sidebarState = null;
+  let sidebarError = false;
+
+  try {
+    const sidebar = useSidebar();
+    sidebarState = sidebar.state;
+  } catch {
+    sidebarError = true;
+  }
 
   // Define size classes
   const sizeClasses = {
@@ -48,9 +50,8 @@ export function Logo({
   };
 
   // In a collapsed sidebar, only show the icon
-  const isCollapsedSidebar = sidebarContext && 
-    sidebarContext.state === "collapsed" && 
-    hideTextInSidebar;
+  const isCollapsedSidebar =
+    !sidebarError && sidebarState === "collapsed" && hideTextInSidebar;
 
   // Logo content component
   const LogoContent = () => (
@@ -62,14 +63,14 @@ export function Logo({
       )}
     >
       {/* SVG Logo */}
-      <Image 
-        src={LogoSVG} 
-        alt="Rekrut Logo" 
-        width={logoDimensions[size].width} 
+      <Image
+        src={LogoSVG}
+        alt="Rekrut Logo"
+        width={logoDimensions[size].width}
         height={logoDimensions[size].height}
         className="transition-all duration-200"
       />
-      
+
       {/* Text Logo - hide when sidebar is collapsed */}
       {!isCollapsedSidebar && (
         <h1 className="text-primary whitespace-nowrap transition-opacity duration-200 group-data-[collapsible=icon]:opacity-0">

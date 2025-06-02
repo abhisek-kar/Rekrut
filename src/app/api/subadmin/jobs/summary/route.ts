@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
     
     // Build filter based on query parameters
-    const filter: any = { assignedTo: subadminId };
+    const filter: Record<string, unknown> = { assignedTo: subadminId };
     if (status !== "all") {
       filter.status = status;
     }

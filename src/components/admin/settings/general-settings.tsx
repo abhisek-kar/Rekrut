@@ -1,8 +1,8 @@
-import React from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { Button } from '@/components/shadcn-ui/button';
+import React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/shadcn-ui/button";
 import {
   Form,
   FormControl,
@@ -11,25 +11,35 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/shadcn-ui/form';
-import { Input } from '@/components/shadcn-ui/input';
-import { Textarea } from '@/components/shadcn-ui/textarea';
+} from "@/components/shadcn-ui/form";
+import { Input } from "@/components/shadcn-ui/input";
+import { Textarea } from "@/components/shadcn-ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/shadcn-ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
+} from "@/components/shadcn-ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn-ui/card";
 
 const generalSettingsSchema = z.object({
-  companyName: z.string().min(2, { message: 'Company name is required' }),
-  companyEmail: z.string().email({ message: 'Invalid email address' }),
+  companyName: z.string().min(2, { message: "Company name is required" }),
+  companyEmail: z.string().email({ message: "Invalid email address" }),
   companyPhone: z.string().optional(),
-  companyWebsite: z.string().url({ message: 'Invalid URL' }).optional().or(z.literal('')),
+  companyWebsite: z
+    .string()
+    .url({ message: "Invalid URL" })
+    .optional()
+    .or(z.literal("")),
   companyAddress: z.string().optional(),
-  jobBoardTitle: z.string().min(2, { message: 'Job board title is required' }),
+  jobBoardTitle: z.string().min(2, { message: "Job board title is required" }),
   jobBoardDescription: z.string().optional(),
   defaultLanguage: z.string(),
   defaultCurrency: z.string(),
@@ -41,27 +51,31 @@ const generalSettingsSchema = z.object({
 type GeneralSettingsFormValues = z.infer<typeof generalSettingsSchema>;
 
 interface GeneralSettingsProps {
-  initialData: any;
+  initialData: Partial<GeneralSettingsFormValues>;
   onSave: (data: GeneralSettingsFormValues) => Promise<void>;
   isLoading: boolean;
 }
 
-export function GeneralSettings({ initialData, onSave, isLoading }: GeneralSettingsProps) {
+export function GeneralSettings({
+  initialData,
+  onSave,
+  isLoading,
+}: GeneralSettingsProps) {
   const form = useForm<GeneralSettingsFormValues>({
     resolver: zodResolver(generalSettingsSchema),
     defaultValues: {
-      companyName: initialData?.companyName || '',
-      companyEmail: initialData?.companyEmail || '',
-      companyPhone: initialData?.companyPhone || '',
-      companyWebsite: initialData?.companyWebsite || '',
-      companyAddress: initialData?.companyAddress || '',
-      jobBoardTitle: initialData?.jobBoardTitle || '',
-      jobBoardDescription: initialData?.jobBoardDescription || '',
-      defaultLanguage: initialData?.defaultLanguage || 'en',
-      defaultCurrency: initialData?.defaultCurrency || 'USD',
-      timezone: initialData?.timezone || 'UTC',
-      dateFormat: initialData?.dateFormat || 'MM/DD/YYYY',
-      timeFormat: initialData?.timeFormat || '12h',
+      companyName: initialData?.companyName || "",
+      companyEmail: initialData?.companyEmail || "",
+      companyPhone: initialData?.companyPhone || "",
+      companyWebsite: initialData?.companyWebsite || "",
+      companyAddress: initialData?.companyAddress || "",
+      jobBoardTitle: initialData?.jobBoardTitle || "",
+      jobBoardDescription: initialData?.jobBoardDescription || "",
+      defaultLanguage: initialData?.defaultLanguage || "en",
+      defaultCurrency: initialData?.defaultCurrency || "USD",
+      timezone: initialData?.timezone || "UTC",
+      dateFormat: initialData?.dateFormat || "MM/DD/YYYY",
+      timeFormat: initialData?.timeFormat || "12h",
     },
   });
 
@@ -69,7 +83,7 @@ export function GeneralSettings({ initialData, onSave, isLoading }: GeneralSetti
     try {
       await onSave(data);
     } catch (error) {
-      console.error('Error saving settings:', error);
+      console.error("Error saving settings:", error);
     }
   };
 
@@ -77,7 +91,9 @@ export function GeneralSettings({ initialData, onSave, isLoading }: GeneralSetti
     <Card>
       <CardHeader>
         <CardTitle>General Settings</CardTitle>
-        <CardDescription>Configure your company information and system defaults</CardDescription>
+        <CardDescription>
+          Configure your company information and system defaults
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -144,7 +160,10 @@ export function GeneralSettings({ initialData, onSave, isLoading }: GeneralSetti
                     <FormItem className="md:col-span-2">
                       <FormLabel>Company Address</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="123 Business St, City, Country" {...field} />
+                        <Textarea
+                          placeholder="123 Business St, City, Country"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -163,7 +182,10 @@ export function GeneralSettings({ initialData, onSave, isLoading }: GeneralSetti
                     <FormItem>
                       <FormLabel>Job Board Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="Careers at Your Company" {...field} />
+                        <Input
+                          placeholder="Careers at Your Company"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -200,7 +222,10 @@ export function GeneralSettings({ initialData, onSave, isLoading }: GeneralSetti
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Default Language</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select language" />
@@ -225,7 +250,10 @@ export function GeneralSettings({ initialData, onSave, isLoading }: GeneralSetti
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Default Currency</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select currency" />
@@ -250,7 +278,10 @@ export function GeneralSettings({ initialData, onSave, isLoading }: GeneralSetti
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Timezone</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select timezone" />
@@ -258,12 +289,24 @@ export function GeneralSettings({ initialData, onSave, isLoading }: GeneralSetti
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="UTC">UTC</SelectItem>
-                          <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
-                          <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
-                          <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
-                          <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
-                          <SelectItem value="Europe/London">London (GMT)</SelectItem>
-                          <SelectItem value="Europe/Paris">Central European Time</SelectItem>
+                          <SelectItem value="America/New_York">
+                            Eastern Time (ET)
+                          </SelectItem>
+                          <SelectItem value="America/Chicago">
+                            Central Time (CT)
+                          </SelectItem>
+                          <SelectItem value="America/Denver">
+                            Mountain Time (MT)
+                          </SelectItem>
+                          <SelectItem value="America/Los_Angeles">
+                            Pacific Time (PT)
+                          </SelectItem>
+                          <SelectItem value="Europe/London">
+                            London (GMT)
+                          </SelectItem>
+                          <SelectItem value="Europe/Paris">
+                            Central European Time
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -276,7 +319,10 @@ export function GeneralSettings({ initialData, onSave, isLoading }: GeneralSetti
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Date Format</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select date format" />
@@ -286,7 +332,9 @@ export function GeneralSettings({ initialData, onSave, isLoading }: GeneralSetti
                           <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
                           <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
                           <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
-                          <SelectItem value="MMM DD, YYYY">MMM DD, YYYY</SelectItem>
+                          <SelectItem value="MMM DD, YYYY">
+                            MMM DD, YYYY
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -299,7 +347,10 @@ export function GeneralSettings({ initialData, onSave, isLoading }: GeneralSetti
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Time Format</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select time format" />
@@ -318,7 +369,7 @@ export function GeneralSettings({ initialData, onSave, isLoading }: GeneralSetti
             </div>
 
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Saving...' : 'Save Settings'}
+              {isLoading ? "Saving..." : "Save Settings"}
             </Button>
           </form>
         </Form>

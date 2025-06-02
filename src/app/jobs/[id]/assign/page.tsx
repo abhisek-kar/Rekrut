@@ -279,7 +279,7 @@ export default function JobAssignPage({ params }: JobAssignPageProps) {
         throw new Error("Failed to assign job");
       }
       
-      const data = await response.json();
+      await response.json();
       
       toast.success("Job assigned successfully");
       

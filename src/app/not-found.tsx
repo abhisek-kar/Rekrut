@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, ArrowLeft, Home } from "lucide-react";
+import { ArrowLeft, Home } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/shadcn-ui/button";

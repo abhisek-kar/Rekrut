@@ -11,11 +11,42 @@ import {
 } from '@/components/shadcn-ui/breadcrumb';
 import { SidebarTrigger } from '@/components/shadcn-ui/sidebar';
 import { Separator } from '@/components/shadcn-ui/separator';
-import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { GeneralSettings } from '@/components/admin/settings/general-settings';
 import { EmailSettings } from '@/components/admin/settings/email-settings';
 import { CustomFieldsManager, CustomField } from '@/components/admin/settings/custom-fields-manager';
+
+// Types
+interface GeneralSettings {
+  companyName?: string;
+  companyEmail?: string;
+  companyPhone?: string;
+  companyWebsite?: string;
+  companyAddress?: string;
+  jobBoardTitle?: string;
+  jobBoardDescription?: string;
+  defaultLanguage?: string;
+  defaultCurrency?: string;
+  timezone?: string;
+  dateFormat?: string;
+  timeFormat?: string;
+}
+
+interface EmailSettings {
+  senderName?: string;
+  senderEmail?: string;
+  smtpHost?: string;
+  smtpPort?: number;
+  smtpUser?: string;
+  smtpPassword?: string;
+  smtpSecure?: boolean;
+  emailSignature?: string;
+  applicationConfirmationEnabled?: boolean;
+  statusChangeNotificationEnabled?: boolean;
+  interviewScheduleEnabled?: boolean;
+  rejectionEnabled?: boolean;
+  offerEnabled?: boolean;
+}
 
 // Sample data for testing when API fails
 const sampleGeneralSettings = {
@@ -88,11 +119,10 @@ const sampleCustomFields: CustomField[] = [
 ];
 
 export default function SettingsPage() {
-  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('general');
   const [isLoading, setIsLoading] = useState(true);
-  const [generalSettings, setGeneralSettings] = useState<any>(null);
-  const [emailSettings, setEmailSettings] = useState<any>(null);
+  const [generalSettings, setGeneralSettings] = useState<GeneralSettings | null>(null);
+  const [emailSettings, setEmailSettings] = useState<EmailSettings | null>(null);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
 
   // Fetch general settings
@@ -198,7 +228,7 @@ export default function SettingsPage() {
   }, [activeTab]);
 
   // Save general settings
-  const handleSaveGeneralSettings = async (data: any) => {
+  const handleSaveGeneralSettings = async (data: GeneralSettings) => {
     try {
       setIsLoading(true);
       const response = await fetch('/api/admin/settings', {
@@ -227,7 +257,7 @@ export default function SettingsPage() {
   };
 
   // Save email settings
-  const handleSaveEmailSettings = async (data: any) => {
+  const handleSaveEmailSettings = async (data: EmailSettings) => {
     try {
       setIsLoading(true);
       const response = await fetch('/api/admin/settings', {
@@ -279,7 +309,7 @@ export default function SettingsPage() {
   };
 
   // Add custom field
-  const handleAddCustomField = async (field: any) => {
+  const handleAddCustomField = async (field: Omit<CustomField, '_id'>) => {
     try {
       setIsLoading(true);
       const response = await fetch('/api/admin/custom-fields', {
@@ -306,7 +336,7 @@ export default function SettingsPage() {
   };
 
   // Edit custom field
-  const handleEditCustomField = async (id: string, field: any) => {
+  const handleEditCustomField = async (id: string, field: Partial<CustomField>) => {
     try {
       setIsLoading(true);
       const response = await fetch(`/api/admin/custom-fields/${id}`, {
@@ -418,7 +448,7 @@ export default function SettingsPage() {
           <div className="flex flex-col gap-2">
             <h1 className="text-3xl font-bold tracking-tight">System Settings</h1>
             <p className="text-muted-foreground">
-              Configure your application's global settings and preferences
+              Configure your application&apos;s global settings and preferences
             </p>
           </div>
 

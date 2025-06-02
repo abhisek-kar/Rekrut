@@ -9,8 +9,6 @@ import {
   CardTitle,
 } from "@/components/shadcn-ui/card";
 import { Button } from "@/components/shadcn-ui/button";
-import { Input } from "@/components/shadcn-ui/input";
-import { Label } from "@/components/shadcn-ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn-ui/tabs";
 import { ScrollArea } from "@/components/shadcn-ui/scroll-area";
 import { Skeleton } from "@/components/shadcn-ui/skeleton";
@@ -40,7 +38,6 @@ import {
   FileImage,
   FileCode,
   FileSpreadsheet,
-  FilePdf,
   FileArchive,
   FileQuestion,
 } from "lucide-react";
@@ -48,7 +45,7 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 
 // Document type definition (to be moved to types)
-interface Document {
+interface JobDocument {
   _id: string;
   name: string;
   fileName: string;
@@ -69,15 +66,15 @@ interface DocumentsTabProps {
 }
 
 export function DocumentsTab({ jobId }: DocumentsTabProps) {
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const [documents, setDocuments] = useState<JobDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState('all');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [documentToPreview, setDocumentToPreview] = useState<Document | null>(null);
+  const [documentToPreview, setDocumentToPreview] = useState<JobDocument | null>(null);
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
+  const [documentToDelete, setDocumentToDelete] = useState<JobDocument | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Fetch documents when component mounts
@@ -171,28 +168,28 @@ export function DocumentsTab({ jobId }: DocumentsTabProps) {
   };
   
   // Handle document preview
-  const handlePreviewDocument = (document: Document) => {
-    setDocumentToPreview(document);
+  const handlePreviewDocument = (doc: JobDocument) => {
+    setDocumentToPreview(doc);
     setShowPreviewDialog(true);
   };
   
   // Handle document download
-  const handleDownloadDocument = (document: Document) => {
+  const handleDownloadDocument = (doc: JobDocument) => {
     // Create a temporary anchor element
     const a = document.createElement('a');
-    a.href = document.fileUrl;
-    a.download = document.fileName;
+    a.href = doc.fileUrl;
+    a.download = doc.fileName;
     a.target = '_blank';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     
-    toast.success(`Downloading ${document.fileName}`);
+    toast.success(`Downloading ${doc.fileName}`);
   };
   
   // Handle document delete confirmation
-  const handleDeleteConfirmation = (document: Document) => {
-    setDocumentToDelete(document);
+  const handleDeleteConfirmation = (doc: JobDocument) => {
+    setDocumentToDelete(doc);
     setShowDeleteDialog(true);
   };
   
@@ -234,7 +231,7 @@ export function DocumentsTab({ jobId }: DocumentsTabProps) {
   // Get icon for document based on mime type
   const getDocumentIcon = (mimeType: string) => {
     if (mimeType.includes('pdf')) {
-      return <FilePdf className="h-6 w-6 text-red-500" />;
+      return <FileText className="h-6 w-6 text-red-500" />;
     } else if (mimeType.includes('word') || mimeType.includes('document')) {
       return <FileText className="h-6 w-6 text-blue-500" />;
     } else if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) {
@@ -418,7 +415,7 @@ export function DocumentsTab({ jobId }: DocumentsTabProps) {
           <DialogHeader>
             <DialogTitle>Delete Document</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the document "{documentToDelete?.name}"? This action cannot be undone.
+              Are you sure you want to delete the document &quot;{documentToDelete?.name}&quot;? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

@@ -29,7 +29,11 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('sortOrder') || 'desc';
     
     // Build query
-    const query: any = {
+    const query: {
+      assignedTo: mongoose.Types.ObjectId;
+      status?: string;
+      $or?: Array<{ title: { $regex: string; $options: string } } | { company: { $regex: string; $options: string } }>;
+    } = {
       assignedTo: new mongoose.Types.ObjectId(session.user.id)
     };
     

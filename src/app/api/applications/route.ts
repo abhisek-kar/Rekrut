@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/db/connect';
-import { authOptions } from '@/lib/auth/nextauth';
 import Application from '@/models/Application';
 
 export async function GET(request: NextRequest) {
@@ -21,7 +19,11 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('sortOrder') || 'desc';
     
     // Build query
-    const query: any = {};
+    const query: { 
+      jobId?: mongoose.Types.ObjectId; 
+      candidateId?: mongoose.Types.ObjectId; 
+      status?: string;
+    } = {};
     
     // Job filter
     if (jobId) {

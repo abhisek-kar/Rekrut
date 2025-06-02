@@ -13,11 +13,9 @@ import { Separator } from "@/components/shadcn-ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn-ui/tabs";
 import { ProfileForm } from "@/components/admin/profile-form";
 import { PasswordForm } from "@/components/admin/password-form";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
 export default function ProfilePage() {
-  const router = useRouter();
   const { user } = useAuth();
 
   if (!user) {

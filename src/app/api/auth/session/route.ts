@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/nextauth";
 
 // This route is maintained for backward compatibility
 // It returns information about the current session
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Get the session from NextAuth
     const session = await getServerSession(authOptions);

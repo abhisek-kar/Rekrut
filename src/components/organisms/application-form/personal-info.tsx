@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/shadcn-ui/button";
 import { Input } from "@/components/shadcn-ui/input";
-import { Label } from "@/components/shadcn-ui/label";
 import {
   Form,
   FormControl,
@@ -98,7 +97,7 @@ export function PersonalInfo({
                 />
               </FormControl>
               <FormDescription>
-                We'll use this email to communicate with you about your
+                We&apos;ll use this email to communicate with you about your
                 application.
               </FormDescription>
               <FormMessage />
