@@ -76,7 +76,7 @@ export default function AdminLayout({
       url: "/admin/notifications",
       icon: Bell,
       isActive: pathname.startsWith("/admin/notifications"),
-      badge: "4" // This would be dynamic in real implementation
+      badge: "4"
     }
   ];
 
