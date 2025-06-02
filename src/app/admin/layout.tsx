@@ -4,7 +4,7 @@ import React from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { 
   Users, LayoutDashboard, Briefcase, 
-  UserCircle, Settings, FileText, Bell
+  UserCircle, FileText, Bell
 } from "lucide-react";
 
 import { AppSidebar } from "@/components/shadcn-components/app-sidebar";
@@ -39,7 +39,7 @@ export default function AdminLayout({
     );
   }
 
-  // Navigation items for admin
+  // Single unified navigation for admin (Settings moved to profile section)
   const navItems = [
     {
       title: "Dashboard",
@@ -75,13 +75,8 @@ export default function AdminLayout({
       title: "Notifications",
       url: "/admin/notifications",
       icon: Bell,
-      isActive: pathname.startsWith("/admin/notifications")
-    },
-    {
-      title: "Settings",
-      url: "/admin/settings",
-      icon: Settings,
-      isActive: pathname.startsWith("/admin/settings")
+      isActive: pathname.startsWith("/admin/notifications"),
+      badge: "4" // This would be dynamic in real implementation
     }
   ];
 

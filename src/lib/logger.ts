@@ -3,7 +3,7 @@
  * Provides different log levels and formatting for development and production
  */
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+export type LogLevel = "debug" | "info" | "warn" | "error" | "fatal";
 
 export interface LogContext {
   userId?: string;
@@ -35,8 +35,10 @@ class Logger {
   private minLevel: LogLevel;
 
   constructor() {
-    this.isDevelopment = process.env.NODE_ENV === 'development';
-    this.minLevel = (process.env.LOG_LEVEL as LogLevel) || (this.isDevelopment ? 'debug' : 'info');
+    this.isDevelopment = process.env.NODE_ENV === "development";
+    this.minLevel =
+      (process.env.LOG_LEVEL as LogLevel) ||
+      (this.isDevelopment ? "debug" : "info");
   }
 
   private getLevelPriority(level: LogLevel): number {
@@ -54,12 +56,17 @@ class Logger {
     return this.getLevelPriority(level) >= this.getLevelPriority(this.minLevel);
   }
 
-  private formatLog(level: LogLevel, message: string, context?: LogContext, error?: Error): LogEntry {
+  private formatLog(
+    level: LogLevel,
+    message: string,
+    context?: LogContext,
+    error?: Error
+  ): LogEntry {
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),
       level,
       message,
-      environment: process.env.NODE_ENV || 'development',
+      environment: process.env.NODE_ENV || "development",
     };
 
     if (context) {
@@ -81,26 +88,30 @@ class Logger {
     if (this.isDevelopment) {
       // Development: Pretty formatted console output
       const emoji = {
-        debug: '🐛',
-        info: 'ℹ️',
-        warn: '⚠️',
-        error: '❌',
-        fatal: '💀',
+        debug: "🐛",
+        info: "ℹ️",
+        warn: "⚠️",
+        error: "❌",
+        fatal: "💀",
       };
 
       const color = {
-        debug: '\x1b[36m', // Cyan
-        info: '\x1b[34m',  // Blue
-        warn: '\x1b[33m',  // Yellow
-        error: '\x1b[31m', // Red
-        fatal: '\x1b[35m', // Magenta
+        debug: "\x1b[36m", // Cyan
+        info: "\x1b[34m", // Blue
+        warn: "\x1b[33m", // Yellow
+        error: "\x1b[31m", // Red
+        fatal: "\x1b[35m", // Magenta
       };
 
-      const reset = '\x1b[0m';
+      const reset = "\x1b[0m";
       const timestamp = new Date(entry.timestamp).toLocaleTimeString();
-      
+
       console.log(
-        `${color[entry.level]}${emoji[entry.level]} [${entry.level.toUpperCase()}]${reset} ${timestamp} - ${entry.message}`
+        `${color[entry.level]}${
+          emoji[entry.level]
+        } [${entry.level.toUpperCase()}]${reset} ${timestamp} - ${
+          entry.message
+        }`
       );
 
       if (entry.context) {
@@ -117,32 +128,32 @@ class Logger {
   }
 
   debug(message: string, context?: LogContext): void {
-    if (!this.shouldLog('debug')) return;
-    const entry = this.formatLog('debug', message, context);
+    if (!this.shouldLog("debug")) return;
+    const entry = this.formatLog("debug", message, context);
     this.output(entry);
   }
 
   info(message: string, context?: LogContext): void {
-    if (!this.shouldLog('info')) return;
-    const entry = this.formatLog('info', message, context);
+    if (!this.shouldLog("info")) return;
+    const entry = this.formatLog("info", message, context);
     this.output(entry);
   }
 
   warn(message: string, context?: LogContext): void {
-    if (!this.shouldLog('warn')) return;
-    const entry = this.formatLog('warn', message, context);
+    if (!this.shouldLog("warn")) return;
+    const entry = this.formatLog("warn", message, context);
     this.output(entry);
   }
 
   error(message: string, error?: Error, context?: LogContext): void {
-    if (!this.shouldLog('error')) return;
-    const entry = this.formatLog('error', message, context, error);
+    if (!this.shouldLog("error")) return;
+    const entry = this.formatLog("error", message, context, error);
     this.output(entry);
   }
 
   fatal(message: string, error?: Error, context?: LogContext): void {
-    if (!this.shouldLog('fatal')) return;
-    const entry = this.formatLog('fatal', message, context, error);
+    if (!this.shouldLog("fatal")) return;
+    const entry = this.formatLog("fatal", message, context, error);
     this.output(entry);
   }
 
@@ -155,15 +166,25 @@ class Logger {
     });
   }
 
-  apiResponse(method: string, url: string, statusCode: number, duration: number, context?: LogContext): void {
-    const level = statusCode >= 500 ? 'error' : statusCode >= 400 ? 'warn' : 'info';
-    this[level](`API Response: ${method} ${url} - ${statusCode} (${duration}ms)`, {
-      method,
-      url,
-      statusCode,
-      duration,
-      ...context,
-    });
+  apiResponse(
+    method: string,
+    url: string,
+    statusCode: number,
+    duration: number,
+    context?: LogContext
+  ): void {
+    const level =
+      statusCode >= 500 ? "error" : statusCode >= 400 ? "warn" : "info";
+    this[level](
+      `API Response: ${method} ${url} - ${statusCode} (${duration}ms)`,
+      {
+        method,
+        url,
+        statusCode,
+        duration,
+        ...context,
+      }
+    );
   }
 
   auth(action: string, userId?: string, context?: LogContext): void {
@@ -175,11 +196,14 @@ class Logger {
   }
 
   database(operation: string, collection?: string, context?: LogContext): void {
-    this.debug(`Database: ${operation}${collection ? ` on ${collection}` : ''}`, {
-      operation,
-      collection,
-      ...context,
-    });
+    this.debug(
+      `Database: ${operation}${collection ? ` on ${collection}` : ""}`,
+      {
+        operation,
+        collection,
+        ...context,
+      }
+    );
   }
 
   security(event: string, context?: LogContext): void {
@@ -187,7 +211,7 @@ class Logger {
   }
 
   performance(operation: string, duration: number, context?: LogContext): void {
-    const level = duration > 1000 ? 'warn' : 'debug';
+    const level = duration > 1000 ? "warn" : "debug";
     this[level](`Performance: ${operation} took ${duration}ms`, {
       operation,
       duration,
@@ -217,23 +241,27 @@ export const log = {
 // Client-side logger (simplified)
 export const clientLogger = {
   debug: (message: string, context?: Record<string, unknown>) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🐛 [DEBUG]', message, context);
+    if (process.env.NODE_ENV === "development") {
+      console.log("🐛 [DEBUG]", message, context);
     }
   },
   info: (message: string, context?: Record<string, unknown>) => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('ℹ️ [INFO]', message, context);
+    if (process.env.NODE_ENV === "development") {
+      console.log("ℹ️ [INFO]", message, context);
     }
   },
   warn: (message: string, context?: Record<string, unknown>) => {
-    console.warn('⚠️ [WARN]', message, context);
+    console.warn("⚠️ [WARN]", message, context);
   },
-  error: (message: string, error?: Error, context?: Record<string, unknown>) => {
-    console.error('❌ [ERROR]', message, error, context);
-    
+  error: (
+    message: string,
+    error?: Error,
+    context?: Record<string, unknown>
+  ) => {
+    console.error("❌ [ERROR]", message, error, context);
+
     // In production, you might want to send errors to a logging service
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       // Example: sendToLoggingService({ message, error, context });
     }
   },

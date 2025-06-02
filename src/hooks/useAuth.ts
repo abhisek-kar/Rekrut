@@ -20,7 +20,11 @@ type UseAuthReturn = {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string, role: "admin" | "subadmin") => Promise<boolean>;
+  login: (
+    email: string,
+    password: string,
+    role: "admin" | "subadmin"
+  ) => Promise<boolean>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
 };
@@ -50,7 +54,7 @@ export function useAuth(): UseAuthReturn {
     console.error("Invalid user session data:", {
       hasRole: !!user.role,
       hasId: !!user.id,
-      email: user.email
+      email: user.email,
     });
     // Force logout if session is corrupted
     signOut({ redirect: false });

@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Bell, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
@@ -23,32 +22,29 @@ import { Logo } from "@/components/atoms/logo";
 import { Badge } from "@/components/shadcn-ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 
+type NavItem = {
+  title: string;
+  url: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  isActive: boolean;
+  badge?: string;
+};
+
 export function AppSidebar({
   navItems = [],
   userData = null,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
-  navItems?: Array<{
-    title: string;
-    label?: string;
-    icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-    variant?: "default" | "ghost";
-    href?: string;
-    items?: Array<{ title: string; href: string }>;
-  }>;
+  navItems?: NavItem[];
   userData?: { name: string; email: string; avatar: string } | null;
 }) {
   const { user } = useAuth();
-  const pathname = usePathname();
-
-  // Get user's role to determine which menu items to show
-  const isAdmin = user?.role === "admin";
 
   // Default user data if none is provided
   const defaultUserData = {
     name: user?.firstName ? `${user.firstName} ${user.lastName}` : "User",
     email: user?.email || "user@example.com",
-    avatar: user?.profilePhoto || "/avatars/default.png",
+    avatar: user?.profilePhoto || "https://docs.material-tailwind.com/img/face-2.jpg",
   };
 
   const userProfile = userData || defaultUserData;
@@ -57,15 +53,16 @@ export function AppSidebar({
     <Sidebar className="border-r border-border" collapsible="icon" {...props}>
       <SidebarHeader className="flex flex-col items-center py-6">
         <div className="w-full flex justify-center">
-          <Logo size="lg" hideTextInSidebar={true} />
+          <Logo size="lg" />
         </div>
       </SidebarHeader>
 
       <SidebarSeparator />
 
       <SidebarContent className="px-2 py-2">
+        {/* Single unified navigation group */}
         <SidebarGroup>
-          <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarMenu>
             {navItems.map((item, index) => (
               <SidebarMenuItem key={index}>
@@ -96,52 +93,6 @@ export function AppSidebar({
             ))}
           </SidebarMenu>
         </SidebarGroup>
-
-        {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel>System</SidebarGroupLabel>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <Link href="/admin/notifications" className="w-full">
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname?.startsWith("/admin/notifications")}
-                    tooltip="Notifications"
-                    className="w-full transition-colors"
-                  >
-                    <div className="flex items-center w-full justify-between">
-                      <div className="flex items-center">
-                        <Bell className="h-5 w-5 mr-3" />
-                        <span>Notifications</span>
-                      </div>
-                      <Badge
-                        variant="destructive"
-                        className="ml-auto text-xs h-5"
-                      >
-                        4
-                      </Badge>
-                    </div>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <Link href="/admin/settings" className="w-full">
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname?.startsWith("/admin/settings")}
-                    tooltip="Settings"
-                    className="w-full transition-colors"
-                  >
-                    <div className="flex items-center">
-                      <Settings className="h-5 w-5 mr-3" />
-                      <span>Settings</span>
-                    </div>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroup>
-        )}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border/50 mt-auto">

@@ -55,7 +55,7 @@ export interface AuthResponse {
     email: string;
     firstName: string;
     lastName: string;
-    role: 'admin' | 'subadmin';
+    role: "admin" | "subadmin";
     profilePhoto?: string;
   };
   token?: string;
@@ -70,7 +70,7 @@ export interface ValidationError {
 
 export interface ValidationErrorResponse extends ApiError {
   error: {
-    code: 'VALIDATION_ERROR';
+    code: "VALIDATION_ERROR";
     message: string;
     details: ValidationError[];
   };
@@ -78,7 +78,7 @@ export interface ValidationErrorResponse extends ApiError {
 
 // Health check response
 export interface HealthCheckResponse {
-  status: 'healthy' | 'unhealthy' | 'error';
+  status: "healthy" | "unhealthy" | "error";
   timestamp: string;
   uptime: number;
   database: {
@@ -98,7 +98,7 @@ export interface HealthCheckResponse {
 
 // Status check response
 export interface StatusResponse {
-  status: 'ok' | 'error';
+  status: "ok" | "error";
   timestamp: string;
   environment: string;
   features: {
@@ -159,7 +159,7 @@ export interface ExportResponse {
 
 export interface ImportResponse {
   jobId: string;
-  status: 'queued' | 'processing' | 'completed' | 'failed';
+  status: "queued" | "processing" | "completed" | "failed";
   progress?: {
     processed: number;
     total: number;
@@ -169,7 +169,9 @@ export interface ImportResponse {
 }
 
 // Type guards for API responses
-export function isApiSuccess<T>(response: ApiResult<T>): response is ApiSuccess<T> {
+export function isApiSuccess<T>(
+  response: ApiResult<T>
+): response is ApiSuccess<T> {
   return response.success === true;
 }
 
@@ -177,43 +179,46 @@ export function isApiError(response: ApiResult): response is ApiError {
   return response.success === false;
 }
 
-export function isValidationError(response: ApiResult): response is ValidationErrorResponse {
-  return isApiError(response) && response.error.code === 'VALIDATION_ERROR';
+export function isValidationError(
+  response: ApiResult
+): response is ValidationErrorResponse {
+  return isApiError(response) && response.error.code === "VALIDATION_ERROR";
 }
 
 // Common error codes
 export const API_ERROR_CODES = {
   // Authentication & Authorization
-  UNAUTHORIZED: 'UNAUTHORIZED',
-  FORBIDDEN: 'FORBIDDEN',
-  TOKEN_EXPIRED: 'TOKEN_EXPIRED',
-  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
-  
+  UNAUTHORIZED: "UNAUTHORIZED",
+  FORBIDDEN: "FORBIDDEN",
+  TOKEN_EXPIRED: "TOKEN_EXPIRED",
+  INVALID_CREDENTIALS: "INVALID_CREDENTIALS",
+
   // Validation
-  VALIDATION_ERROR: 'VALIDATION_ERROR',
-  INVALID_INPUT: 'INVALID_INPUT',
-  MISSING_REQUIRED_FIELD: 'MISSING_REQUIRED_FIELD',
-  
+  VALIDATION_ERROR: "VALIDATION_ERROR",
+  INVALID_INPUT: "INVALID_INPUT",
+  MISSING_REQUIRED_FIELD: "MISSING_REQUIRED_FIELD",
+
   // Resources
-  NOT_FOUND: 'NOT_FOUND',
-  ALREADY_EXISTS: 'ALREADY_EXISTS',
-  CONFLICT: 'CONFLICT',
-  
+  NOT_FOUND: "NOT_FOUND",
+  ALREADY_EXISTS: "ALREADY_EXISTS",
+  CONFLICT: "CONFLICT",
+
   // Server
-  INTERNAL_ERROR: 'INTERNAL_ERROR',
-  DATABASE_ERROR: 'DATABASE_ERROR',
-  EXTERNAL_SERVICE_ERROR: 'EXTERNAL_SERVICE_ERROR',
-  
+  INTERNAL_ERROR: "INTERNAL_ERROR",
+  DATABASE_ERROR: "DATABASE_ERROR",
+  EXTERNAL_SERVICE_ERROR: "EXTERNAL_SERVICE_ERROR",
+
   // Rate limiting
-  RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
-  
+  RATE_LIMIT_EXCEEDED: "RATE_LIMIT_EXCEEDED",
+
   // File operations
-  FILE_TOO_LARGE: 'FILE_TOO_LARGE',
-  INVALID_FILE_TYPE: 'INVALID_FILE_TYPE',
-  UPLOAD_FAILED: 'UPLOAD_FAILED',
+  FILE_TOO_LARGE: "FILE_TOO_LARGE",
+  INVALID_FILE_TYPE: "INVALID_FILE_TYPE",
+  UPLOAD_FAILED: "UPLOAD_FAILED",
 } as const;
 
-export type ApiErrorCode = typeof API_ERROR_CODES[keyof typeof API_ERROR_CODES];
+export type ApiErrorCode =
+  (typeof API_ERROR_CODES)[keyof typeof API_ERROR_CODES];
 
 // HTTP status codes mapping
 export const HTTP_STATUS = {

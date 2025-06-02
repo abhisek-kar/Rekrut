@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { 
   Briefcase, LayoutDashboard, FileText, 
   UserCircle, CheckSquare, FileBarChart2, CalendarCheck,
-  Bell, Settings
+  Bell
 } from "lucide-react";
 
 import { AppSidebar } from "@/components/shadcn-components/app-sidebar";
@@ -40,7 +40,7 @@ export default function SubAdminLayout({
     );
   }
 
-  // Navigation items for subadmin - match the same structure as admin
+  // Single unified navigation for subadmin (Settings moved to profile section)
   const navItems = [
     {
       title: "Dashboard",
@@ -93,12 +93,6 @@ export default function SubAdminLayout({
       icon: Bell,
       isActive: pathname.startsWith("/subadmin/notifications"),
       badge: "3" // This would be dynamic in a real implementation
-    },
-    {
-      title: "Settings",
-      url: "/subadmin/profile/settings",
-      icon: Settings,
-      isActive: pathname.startsWith("/subadmin/profile/settings")
     }
   ];
 

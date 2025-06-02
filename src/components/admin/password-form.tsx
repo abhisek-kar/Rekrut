@@ -25,7 +25,9 @@ import { Progress } from "@/components/shadcn-ui/progress";
 // Password form validation schema
 const passwordFormSchema = z
   .object({
-    currentPassword: z.string().min(1, { message: "Current password is required" }),
+    currentPassword: z
+      .string()
+      .min(1, { message: "Current password is required" }),
     newPassword: z
       .string()
       .min(6, { message: "Password must be at least 6 characters" })
@@ -114,10 +116,10 @@ export function PasswordForm() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/users/password', {
-        method: 'PUT',
+      const response = await fetch("/api/users/password", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           currentPassword: data.currentPassword,
@@ -127,14 +129,16 @@ export function PasswordForm() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update password');
+        throw new Error(errorData.message || "Failed to update password");
       }
 
       toast.success("Password updated successfully");
       form.reset();
     } catch (error) {
-      console.error('Error updating password:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to update password');
+      console.error("Error updating password:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update password"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -167,7 +171,9 @@ export function PasswordForm() {
                           variant="ghost"
                           size="sm"
                           className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
-                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                          onClick={() =>
+                            setShowCurrentPassword(!showCurrentPassword)
+                          }
                         >
                           {showCurrentPassword ? (
                             <EyeOff className="h-4 w-4" />
@@ -219,15 +225,13 @@ export function PasswordForm() {
                           <span>Password strength</span>
                           <span>{strengthDetails.label}</span>
                         </div>
-                        <Progress
-                          value={passwordStrength}
-                          className="h-1"
-                        />
+                        <Progress value={passwordStrength} className="h-1" />
                       </div>
                     )}
 
                     <FormDescription>
-                      Password must be at least 6 characters and include uppercase, lowercase, and numbers
+                      Password must be at least 6 characters and include
+                      uppercase, lowercase, and numbers
                     </FormDescription>
                   </FormItem>
                 )}
@@ -251,7 +255,9 @@ export function PasswordForm() {
                           variant="ghost"
                           size="sm"
                           className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
                         >
                           {showConfirmPassword ? (
                             <EyeOff className="h-4 w-4" />
