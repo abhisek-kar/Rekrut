@@ -51,7 +51,7 @@ const envSchema = z.object({
   EMAIL_SECURE: z.string().optional(),
   EMAIL_USER: z.string().optional(),
   EMAIL_PASSWORD: z.string().optional(),
-  // EMAIL_FROM: z.string().email("EMAIL_FROM must be a valid email").optional(),
+  EMAIL_FROM: z.string().email("EMAIL_FROM must be a valid email").optional(),
 
   // AWS S3 settings (optional)
   AWS_ACCESS_KEY_ID: z.string().optional(),
@@ -178,5 +178,8 @@ export function getFeatureFlags() {
   };
 }
 
-// Export the schema for use in other files if needed
-export { envSchema };
+// Initialize env object once for export
+const env = getEnv();
+
+// Export the schema and env object for use in other files
+export { envSchema, env };

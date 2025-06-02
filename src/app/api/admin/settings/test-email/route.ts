@@ -80,7 +80,7 @@ export async function POST() {
     return NextResponse.json({
       success: true,
       message: "Test email sent successfully",
-      // messageId: info.messageId,
+      messageId: info.messageId,
     });
   } catch (error: unknown) {
     console.error("Error sending test email:", error);
