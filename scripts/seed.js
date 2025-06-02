@@ -6,43 +6,6 @@ const dotenv = require("dotenv");
 
 dotenv.config({ path: path.join(__dirname, "../.env.local") });
 
-// Validate environment variables
-function validateEnv() {
-  const requiredEnvVars = ["MONGODB_URI"];
-
-  const missingEnvVars = requiredEnvVars.filter(
-    (envVar) => !process.env[envVar]
-  );
-
-  if (missingEnvVars.length > 0) {
-    throw new Error(
-      `Missing required environment variables: ${missingEnvVars.join(", ")}`
-    );
-  }
-
-  // Warn about recommended variables
-  const recommendedEnvVars = [
-    "ADMIN_EMAIL",
-    "ADMIN_PASSWORD",
-    "ADMIN_FIRST_NAME",
-    "ADMIN_LAST_NAME",
-  ];
-
-  const missingRecommendedEnvVars = recommendedEnvVars.filter(
-    (envVar) => !process.env[envVar]
-  );
-
-  if (missingRecommendedEnvVars.length > 0) {
-    console.warn(
-      `Warning: Missing recommended environment variables: ${missingRecommendedEnvVars.join(
-        ", "
-      )}`
-    );
-  }
-
-  return true;
-}
-
 // Define MongoDB connection URL
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/rekrut";
@@ -124,8 +87,10 @@ async function seedAdmin() {
 // Main function to run seeders
 async function runSeeders() {
   try {
-    // Validate environment variables
-    validateEnv();
+    // Validate required environment variables
+    if (!process.env.MONGODB_URI) {
+      throw new Error("MONGODB_URI environment variable is required");
+    }
 
     console.log(`🔌 Connecting to MongoDB at ${MONGODB_URI}...`);
     await mongoose.connect(MONGODB_URI);

@@ -3,7 +3,14 @@ import "./globals.css";
 import { Poppins, Open_Sans } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/shadcn-ui/sonner";
-import { SessionProviderWrapper } from "@/lib/auth/session-provider"; 
+import { SessionProviderWrapper } from "@/lib/auth/session-provider";
+import { validateEnv } from "@/lib/env";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+
+// Validate environment variables at startup
+if (typeof window === "undefined") {
+  validateEnv();
+} 
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -31,12 +38,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.variable} ${openSans.variable}`}>
-        <SessionProviderWrapper>
-          <AuthProvider>
-            {children}
-            <Toaster />
-          </AuthProvider>
-        </SessionProviderWrapper>
+        <ErrorBoundary level="global">
+          <SessionProviderWrapper>
+            <AuthProvider>
+              {children}
+              <Toaster />
+            </AuthProvider>
+          </SessionProviderWrapper>
+        </ErrorBoundary>
       </body>
     </html>
   );

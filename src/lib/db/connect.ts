@@ -1,19 +1,10 @@
 import mongoose from "mongoose";
+import { getEnv } from "@/lib/env";
+import { log } from "@/lib/logger";
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-  throw new Error(
-    "Please define the MONGODB_URI environment variable inside .env.local"
-  );
-}
-
-// Validate MongoDB URI format
-if (!MONGODB_URI.startsWith("mongodb://") && !MONGODB_URI.startsWith("mongodb+srv://")) {
-  throw new Error(
-    "Invalid MONGODB_URI format. Must start with 'mongodb://' or 'mongodb+srv://'"
-  );
-}
+// Get validated environment variables
+const env = getEnv();
+const MONGODB_URI = env.MONGODB_URI;
 
 /**
  * Global is used here to maintain a cached connection across hot reloads
@@ -39,12 +30,12 @@ if (process.env.NODE_ENV !== "production") global.mongoose = cached;
 // Enhanced connection options for better performance and reliability
 const connectionOptions = {
   bufferCommands: false, // Disable mongoose buffering
-  maxPoolSize: parseInt(process.env.DB_MAX_POOL_SIZE || "10"), // Maintain up to N socket connections
-  serverSelectionTimeoutMS: parseInt(process.env.DB_CONNECTION_TIMEOUT || "5000"), // Keep trying to send operations for N seconds
-  socketTimeoutMS: parseInt(process.env.DB_SOCKET_TIMEOUT || "45000"), // Close sockets after N seconds of inactivity
+  maxPoolSize: parseInt(env.DB_MAX_POOL_SIZE || "10"), // Maintain up to N socket connections
+  serverSelectionTimeoutMS: parseInt(env.DB_CONNECTION_TIMEOUT || "5000"), // Keep trying to send operations for N seconds
+  socketTimeoutMS: parseInt(env.DB_SOCKET_TIMEOUT || "45000"), // Close sockets after N seconds of inactivity
   family: 4, // Use IPv4, skip trying IPv6
   retryWrites: true, // Enable retryable writes
-  ...(process.env.NODE_ENV === "production" && {
+  ...(env.NODE_ENV === "production" && {
     maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity in production
     minPoolSize: 2, // Maintain at least 2 connections in production
   }),
@@ -53,33 +44,36 @@ const connectionOptions = {
 async function dbConnect() {
   // Return cached connection if available
   if (cached.conn) {
-    console.log("🔄 Using existing MongoDB connection");
+    log.debug("Using existing MongoDB connection");
     return cached.conn;
   }
 
   // Create new connection if none exists
   if (!cached.promise) {
-    console.log("🔌 Creating new MongoDB connection");
+    log.info("Creating new MongoDB connection", { uri: MONGODB_URI.replace(/\/\/([^:]+):([^@]+)@/, '//***:***@') });
+    
+    const startTime = Date.now();
     cached.promise = mongoose.connect(MONGODB_URI, connectionOptions).then((mongoose) => {
-      console.log("✅ MongoDB connected successfully");
+      const duration = Date.now() - startTime;
+      log.info("MongoDB connected successfully", { duration });
       
       // Set up connection event listeners for better monitoring
       mongoose.connection.on("error", (error) => {
-        console.error("❌ MongoDB connection error:", error);
+        log.error("MongoDB connection error", error);
       });
       
       mongoose.connection.on("disconnected", () => {
-        console.warn("⚠️ MongoDB disconnected");
+        log.warn("MongoDB disconnected");
       });
       
       mongoose.connection.on("reconnected", () => {
-        console.log("🔄 MongoDB reconnected");
+        log.info("MongoDB reconnected");
       });
       
       return mongoose;
     });
   } else {
-    console.log("⏳ Waiting for existing MongoDB connection promise");
+    log.debug("Waiting for existing MongoDB connection promise");
   }
 
   try {
@@ -87,7 +81,7 @@ async function dbConnect() {
   } catch (error) {
     // Reset promise on failure to allow retry
     cached.promise = null;
-    console.error("❌ MongoDB connection failed:", error);
+    log.error("MongoDB connection failed", error as Error);
     throw error;
   }
 
@@ -103,11 +97,15 @@ export async function checkDbHealth(): Promise<boolean> {
       return false;
     }
     
+    const startTime = Date.now();
     // Ping the database to check if it's responsive
     await cached.conn.connection.db?.admin().ping();
+    const duration = Date.now() - startTime;
+    
+    log.debug("Database health check passed", { duration });
     return true;
   } catch (error) {
-    console.error("Database health check failed:", error);
+    log.error("Database health check failed", error as Error);
     return false;
   }
 }
@@ -150,10 +148,10 @@ export async function disconnectDb(): Promise<void> {
       await cached.conn.disconnect();
       cached.conn = null;
       cached.promise = null;
-      console.log("🔌 MongoDB connection closed gracefully");
+      log.info("MongoDB connection closed gracefully");
     }
   } catch (error) {
-    console.error("Error closing MongoDB connection:", error);
+    log.error("Error closing MongoDB connection", error as Error);
     throw error;
   }
 }
@@ -162,7 +160,7 @@ export async function disconnectDb(): Promise<void> {
  * Force reconnection to the database
  */
 export async function reconnectDb(): Promise<typeof mongoose> {
-  console.log("🔄 Forcing database reconnection");
+  log.info("Forcing database reconnection");
   
   // Clear cached connection
   cached.conn = null;

@@ -1,71 +1,58 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkDbHealth, getDbConnectionInfo } from "@/lib/db/connect";
+import { withSecurity } from "@/lib/security";
+import { log } from "@/lib/logger";
+import { createApiSuccess, handleApiError } from "@/lib/api";
+import { HealthCheckResponse } from "@/types/api";
 
 /**
  * Health check endpoint for monitoring database connectivity
  * GET /api/health
  */
-export async function GET(request: NextRequest) {
-  try {
-    const startTime = Date.now();
-    
-    // Check database health
-    const isDbHealthy = await checkDbHealth();
-    const dbInfo = getDbConnectionInfo();
-    
-    const responseTime = Date.now() - startTime;
-    
-    const healthData = {
-      status: isDbHealthy ? "healthy" : "unhealthy",
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      database: {
-        status: dbInfo.status,
-        host: dbInfo.host,
-        name: dbInfo.name,
-        healthy: isDbHealthy,
-      },
-      performance: {
-        responseTime: `${responseTime}ms`,
-      },
-      environment: {
-        nodeEnv: process.env.NODE_ENV,
-        nodeVersion: process.version,
-      },
-    };
-
-    // Return appropriate HTTP status based on health
-    const statusCode = isDbHealthy ? 200 : 503;
-    
-    return NextResponse.json(healthData, { 
-      status: statusCode,
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      }
-    });
-  } catch (error) {
-    console.error("Health check failed:", error);
-    
-    return NextResponse.json(
-      {
-        status: "error",
+export const GET = withSecurity(
+  async (request: NextRequest) => {
+    try {
+      const startTime = Date.now();
+      
+      // Check database health
+      const isDbHealthy = await checkDbHealth();
+      const dbInfo = getDbConnectionInfo();
+      
+      const responseTime = Date.now() - startTime;
+      
+      const healthData: HealthCheckResponse = {
+        status: isDbHealthy ? "healthy" : "unhealthy",
         timestamp: new Date().toISOString(),
-        error: "Health check failed",
+        uptime: process.uptime(),
         database: {
-          status: "error",
-          healthy: false,
+          status: dbInfo.status,
+          host: dbInfo.host,
+          name: dbInfo.name,
+          healthy: isDbHealthy,
         },
-      },
-      { 
-        status: 503,
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-        }
-      }
-    );
+        performance: {
+          responseTime: `${responseTime}ms`,
+        },
+        environment: {
+          nodeEnv: process.env.NODE_ENV || 'development',
+          nodeVersion: process.version,
+        },
+      };
+
+      // Return appropriate HTTP status based on health
+      const statusCode = isDbHealthy ? 200 : 503;
+      
+      return createApiSuccess(
+        healthData,
+        isDbHealthy ? "System is healthy" : "System is unhealthy",
+        statusCode
+      );
+    } catch (error) {
+      return handleApiError(error, "health-check");
+    }
+  },
+  {
+    rateLimit: { limit: 60, windowMs: 60 * 1000 }, // 60 requests per minute
+    allowCORS: true,
   }
-}
+);

@@ -72,6 +72,7 @@ export const API_ROUTES = {
   },
   SYSTEM: {
     HEALTH: "/api/health",
+    STATUS: "/api/status",
   },
 } as const;
 
@@ -110,6 +111,7 @@ export function isPublicRoute(pathname: string): boolean {
     PUBLIC_ROUTES.HOME,
     PUBLIC_ROUTES.JOBS,
     API_ROUTES.SYSTEM.HEALTH, // Health check endpoint
+    API_ROUTES.SYSTEM.STATUS, // Status endpoint
     "/api/auth",
     "/api/public",
   ];
