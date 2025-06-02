@@ -17,7 +17,7 @@ import {
   Shield,
 } from "lucide-react";
 import { useAuthForm } from "@/hooks/useAuthForm";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 import { AUTH_ROUTES, getDashboardRoute } from "@/lib/routes";
 
 import { Button } from "@/components/shadcn-ui/button";
@@ -58,8 +58,8 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect") || "";
   const [showPassword, setShowPassword] = useState(false);
-  const { isAuthenticated } = useAuth();
-  const { isLoading, error, handleLogin } = useAuthForm();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const { isLoading: authFormLoading, error, handleLogin } = useAuthForm();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -73,11 +73,35 @@ export default function LoginPage() {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      const defaultRedirect = redirectUrl || getDashboardRoute("admin"); // Default to admin dashboard
+    if (!isLoading && isAuthenticated && user) {
+      const defaultRedirect = redirectUrl || getDashboardRoute(user.role);
       router.push(defaultRedirect);
     }
-  }, [isAuthenticated, redirectUrl, router]);
+  }, [isAuthenticated, isLoading, user, redirectUrl, router]);
+
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If authenticated, show redirect message
+  if (isAuthenticated && user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Redirecting to your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   const onSubmit = async (data: LoginFormValues) => {
     await handleLogin(data);
@@ -248,9 +272,9 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   className="w-full h-12 text-base font-medium rounded-lg transition-all duration-200 hover:shadow-md hover:translate-y-[-1px]"
-                  disabled={isLoading}
+                  disabled={authFormLoading}
                 >
-                  {isLoading ? (
+                  {authFormLoading ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       <span>Logging in...</span>
