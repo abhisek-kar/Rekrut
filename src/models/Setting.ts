@@ -1,25 +1,32 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ISetting extends Document {
   category: string; // 'general', 'email', 'compliance', etc.
-  settings: Record<string, any>;
+  settings: Record<string, unknown>;
   updatedBy: mongoose.Types.ObjectId;
   updatedAt: Date;
 }
 
 const SettingSchema = new Schema<ISetting>(
   {
-    category: { 
-      type: String, 
-      required: true, 
-      enum: ['general', 'email', 'compliance', 'integration', 'appearance', 'notification'] 
-    },
-    settings: { 
-      type: Schema.Types.Mixed, 
+    category: {
+      type: String,
       required: true,
-      default: {}
+      enum: [
+        "general",
+        "email",
+        "compliance",
+        "integration",
+        "appearance",
+        "notification",
+      ],
     },
-    updatedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    settings: {
+      type: Schema.Types.Mixed,
+      required: true,
+      default: {},
+    },
+    updatedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
   },
   { timestamps: true }
 );
@@ -28,5 +35,5 @@ const SettingSchema = new Schema<ISetting>(
 SettingSchema.index({ category: 1 }, { unique: true });
 
 // Use function to avoid issues with model compilation in Next.js hot reloading
-export default (mongoose.models.Setting as Model<ISetting>) || 
-  mongoose.model<ISetting>('Setting', SettingSchema);
+export default (mongoose.models.Setting as Model<ISetting>) ||
+  mongoose.model<ISetting>("Setting", SettingSchema);

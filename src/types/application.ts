@@ -4,11 +4,18 @@ export interface ApplicationType {
   _id: string;
   jobId?: string;
   candidateId?: string;
-  status: 'applied' | 'screening' | 'interview' | 'offer' | 'hired' | 'rejected' | 'withdrawn';
+  status:
+    | "applied"
+    | "screening"
+    | "interview"
+    | "offer"
+    | "hired"
+    | "rejected"
+    | "withdrawn";
   applicationDate: string;
   resumeId?: string;
   coverLetterId?: string;
-  customFieldResponses?: Record<string, any>;
+  customFieldResponses?: Record<string, unknown>;
   questionResponses?: Array<{
     question: string;
     answer: string;
@@ -18,7 +25,7 @@ export interface ApplicationType {
     skillsMatch?: number;
     experienceMatch?: number;
     educationMatch?: number;
-    breakdown?: Record<string, any>;
+    breakdown?: Record<string, unknown>;
   };
   statusHistory?: Array<{
     status: string;
@@ -29,11 +36,11 @@ export interface ApplicationType {
   interviews?: Array<{
     scheduledFor: string;
     duration: number;
-    type: 'phone' | 'video' | 'in-person';
+    type: "phone" | "video" | "in-person";
     location?: string;
     participants?: string[];
     notes?: string;
-    status: 'scheduled' | 'completed' | 'cancelled' | 'no-show';
+    status: "scheduled" | "completed" | "cancelled" | "no-show";
   }>;
   reviews?: Array<{
     reviewer: string;
@@ -53,7 +60,7 @@ export interface ApplicationType {
   token?: string;
   createdAt?: string;
   updatedAt?: string;
-  
+
   // Populated references
   job?: {
     _id: string;

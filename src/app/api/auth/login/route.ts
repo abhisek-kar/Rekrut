@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
-// This route is maintained for backward compatibilityort { NextRequest, NextResponse } from "next/server";
+// This route is maintained for backward compatibility
+// NextAuth now handles authentication via /api/auth/[...nextauth]
 
 // This route is maintained for backward compatibility
 // NextAuth now handles authentication via /api/auth/[...nextauth]

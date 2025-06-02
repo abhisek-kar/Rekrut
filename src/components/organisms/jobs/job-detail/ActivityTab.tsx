@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -8,20 +8,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/shadcn-ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn-ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/shadcn-ui/avatar";
 import { Button } from "@/components/shadcn-ui/button";
 import { Skeleton } from "@/components/shadcn-ui/skeleton";
-import { 
-  FileEdit, 
-  Clock, 
-  ChevronDown, 
-  UserCheck, 
+import {
+  FileEdit,
+  Clock,
+  ChevronDown,
+  UserCheck,
   FileText,
   ArrowUpRight,
-  MessageCircle
+  MessageCircle,
 } from "lucide-react";
-import { format, formatDistanceToNow } from 'date-fns';
-import { getInitials } from '@/lib/utils';
+import { format, formatDistanceToNow } from "date-fns";
+import { getInitials } from "@/lib/utils";
 
 // Activity type definition (to be moved to types)
 interface Activity {
@@ -29,7 +33,7 @@ interface Activity {
   action: string;
   entityType: string;
   entityId: string;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   userId: {
     _id: string;
     firstName: string;
@@ -49,32 +53,34 @@ export function ActivityTab({ jobId }: ActivityTabProps) {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  
+
   // Fetch job activities when component mounts
   useEffect(() => {
     fetchActivities();
   }, [jobId]);
-  
+
   // Fetch activities from API
   const fetchActivities = async (reset = false) => {
     try {
       const currentPage = reset ? 1 : page;
       setLoading(true);
-      
-      const response = await fetch(`/api/admin/activity?entityId=${jobId}&entityType=job&page=${currentPage}&limit=10`);
-      
+
+      const response = await fetch(
+        `/api/admin/activity?entityId=${jobId}&entityType=job&page=${currentPage}&limit=10`
+      );
+
       if (!response.ok) {
         throw new Error("Failed to fetch activities");
       }
-      
+
       const data = await response.json();
-      
+
       if (reset) {
         setActivities(data.activities);
       } else {
-        setActivities(prev => [...prev, ...data.activities]);
+        setActivities((prev) => [...prev, ...data.activities]);
       }
-      
+
       setHasMore(data.pagination.page < data.pagination.pages);
       setPage(reset ? 2 : page + 1);
     } catch (error) {
@@ -83,85 +89,91 @@ export function ActivityTab({ jobId }: ActivityTabProps) {
       setLoading(false);
     }
   };
-  
+
   // Load more activities
   const handleLoadMore = () => {
     if (!loading && hasMore) {
       fetchActivities();
     }
   };
-  
+
   // Get icon for activity action
   const getActionIcon = (action: string) => {
     switch (action) {
-      case 'create':
+      case "create":
         return <FileText className="h-4 w-4" />;
-      case 'update':
+      case "update":
         return <FileEdit className="h-4 w-4" />;
-      case 'job_assignment':
+      case "job_assignment":
         return <UserCheck className="h-4 w-4" />;
-      case 'status_change':
+      case "status_change":
         return <ArrowUpRight className="h-4 w-4" />;
-      case 'comment':
+      case "comment":
         return <MessageCircle className="h-4 w-4" />;
       default:
         return <Clock className="h-4 w-4" />;
     }
   };
-  
+
   // Get description for activity
   const getActivityDescription = (activity: Activity) => {
     switch (activity.action) {
-      case 'create':
+      case "create":
         return "created this job";
-      case 'update':
+      case "update":
         return "updated the job details";
-      case 'job_assignment':
-        return `assigned this job to ${activity.details.assigneeName || 'a recruiter'}`;
-      case 'status_change':
+      case "job_assignment":
+        return `assigned this job to ${
+          activity.details.assigneeName || "a recruiter"
+        }`;
+      case "status_change":
         return `changed job status to "${activity.details.status}"`;
-      case 'comment':
+      case "comment":
         return `commented: "${activity.details.comment}"`;
       default:
         return "performed an action";
     }
   };
-  
+
   // Format date in human-readable format
   const formatActivityDate = (date: string) => {
     try {
       const activityDate = new Date(date);
       return {
         relative: formatDistanceToNow(activityDate, { addSuffix: true }),
-        absolute: format(activityDate, "MMM d, yyyy 'at' h:mm a")
+        absolute: format(activityDate, "MMM d, yyyy 'at' h:mm a"),
       };
     } catch {
       return {
         relative: "Invalid date",
-        absolute: "Invalid date"
+        absolute: "Invalid date",
       };
     }
   };
-  
+
   // Render loading state
   const renderLoading = () => {
-    return Array(3).fill(0).map((_, index) => (
-      <div key={index} className="flex gap-3 items-start mb-6">
-        <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
-        <div className="flex-1">
-          <Skeleton className="h-4 w-1/3 mb-2" />
-          <Skeleton className="h-3 w-2/3 mb-2" />
-          <Skeleton className="h-3 w-1/4" />
+    return Array(3)
+      .fill(0)
+      .map((_, index) => (
+        <div key={index} className="flex gap-3 items-start mb-6">
+          <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
+          <div className="flex-1">
+            <Skeleton className="h-4 w-1/3 mb-2" />
+            <Skeleton className="h-3 w-2/3 mb-2" />
+            <Skeleton className="h-3 w-1/4" />
+          </div>
         </div>
-      </div>
-    ));
+      ));
   };
-  
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Activity Timeline</CardTitle>
-        <CardDescription>History of actions performed on this job</CardDescription>
+        <CardDescription>
+          History of actions performed on this job
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {loading && activities.length === 0 ? (
@@ -178,16 +190,18 @@ export function ActivityTab({ jobId }: ActivityTabProps) {
           <div className="space-y-6">
             {activities.map((activity) => {
               const dateFormatted = formatActivityDate(activity.createdAt);
-              
+
               return (
                 <div key={activity._id} className="flex gap-3 items-start">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage 
-                      src={activity.userId.profilePhoto} 
-                      alt={`${activity.userId.firstName} ${activity.userId.lastName}`} 
+                    <AvatarImage
+                      src={activity.userId.profilePhoto}
+                      alt={`${activity.userId.firstName} ${activity.userId.lastName}`}
                     />
                     <AvatarFallback>
-                      {getInitials(`${activity.userId.firstName} ${activity.userId.lastName}`)}
+                      {getInitials(
+                        `${activity.userId.firstName} ${activity.userId.lastName}`
+                      )}
                     </AvatarFallback>
                   </Avatar>
                   <div>
@@ -205,18 +219,20 @@ export function ActivityTab({ jobId }: ActivityTabProps) {
                         {dateFormatted.relative}
                       </span>
                     </div>
-                    
+
                     {/* Optional details based on action type */}
-                    {activity.action === 'status_change' && activity.details.reason && (
-                      <div className="mt-2 p-2 bg-muted rounded-md text-sm">
-                        <span className="font-medium">Reason:</span> {activity.details.reason}
-                      </div>
-                    )}
+                    {activity.action === "status_change" &&
+                      activity.details.reason && (
+                        <div className="mt-2 p-2 bg-muted rounded-md text-sm">
+                          <span className="font-medium">Reason:</span>{" "}
+                          {activity.details.reason}
+                        </div>
+                      )}
                   </div>
                 </div>
               );
             })}
-            
+
             {/* Load more button */}
             {hasMore && (
               <div className="flex justify-center mt-4">

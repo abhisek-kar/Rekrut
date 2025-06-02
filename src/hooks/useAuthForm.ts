@@ -2,6 +2,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { getDefaultLoginRedirect } from "@/lib/routes";
 
 type AuthFormValues = {
   email: string;
@@ -38,8 +39,8 @@ export function useAuthForm() {
 
       toast.success("Login successful!");
       
-      // Redirect based on role
-      const redirectPath = values.role === "admin" ? "/admin/dashboard" : "/subadmin/dashboard";
+      // Redirect based on role using centralized route configuration
+      const redirectPath = getDefaultLoginRedirect(values.role);
       router.push(redirectPath);
       
       return result;

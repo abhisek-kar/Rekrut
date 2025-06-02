@@ -2,7 +2,6 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { useSidebar } from "@/components/shadcn-ui/sidebar";
 
 // Import the SVG logo
 import LogoSVG from "@/assets/logo.svg";
@@ -22,16 +21,9 @@ export function Logo({
   asLink = true,
   hideTextInSidebar = false,
 }: LogoProps) {
-  // Call hook at top level, but handle the error case
-  let sidebarState = null;
-  let sidebarError = false;
-
-  try {
-    const sidebar = useSidebar();
-    sidebarState = sidebar.state;
-  } catch {
-    sidebarError = true;
-  }
+  // For now, we'll skip the sidebar integration to avoid context issues
+  // This can be re-added later when the component is specifically used within a sidebar
+  const shouldHideText = false; // Always show text for now
 
   // Define size classes
   const sizeClasses = {
@@ -48,10 +40,6 @@ export function Logo({
     lg: { width: 42, height: 45 },
     xl: { width: 52, height: 56 },
   };
-
-  // In a collapsed sidebar, only show the icon
-  const isCollapsedSidebar =
-    !sidebarError && sidebarState === "collapsed" && hideTextInSidebar;
 
   // Logo content component
   const LogoContent = () => (
@@ -72,8 +60,8 @@ export function Logo({
       />
 
       {/* Text Logo - hide when sidebar is collapsed */}
-      {!isCollapsedSidebar && (
-        <h1 className="text-primary whitespace-nowrap transition-opacity duration-200 group-data-[collapsible=icon]:opacity-0">
+      {!shouldHideText && (
+        <h1 className="text-primary whitespace-nowrap transition-opacity duration-200">
           Rekrut<span className="text-gray-800"> ATS</span>
         </h1>
       )}

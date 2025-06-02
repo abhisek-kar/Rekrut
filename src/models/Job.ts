@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IJob extends Document {
   title: string;
@@ -31,7 +31,7 @@ export interface IJob extends Document {
   expectedStartDate?: Date;
   applicationInstructions?: string;
   requiredDocuments?: string[];
-  customFields?: Record<string, any>;
+  customFields?: Record<string, unknown>;
   visibility: string; // 'public', 'private'
   featured: boolean;
   status: string; // 'draft', 'active', 'closed', 'archived'
@@ -49,7 +49,11 @@ const JobSchema = new Schema<IJob>(
     company: { type: String, required: true },
     department: { type: String },
     location: {
-      type: { type: String, required: true, enum: ['remote', 'onsite', 'hybrid'] },
+      type: {
+        type: String,
+        required: true,
+        enum: ["remote", "onsite", "hybrid"],
+      },
       address: { type: String },
       city: { type: String },
       state: { type: String },
@@ -60,22 +64,22 @@ const JobSchema = new Schema<IJob>(
     responsibilities: { type: String },
     requirements: { type: String },
     skills: [{ type: String }],
-    experienceLevel: { 
-      type: String, 
+    experienceLevel: {
+      type: String,
       required: true,
-      enum: ['entry', 'mid', 'senior']
+      enum: ["entry", "mid", "senior"],
     },
     educationRequirements: [{ type: String }],
-    employmentType: { 
-      type: String, 
+    employmentType: {
+      type: String,
       required: true,
-      enum: ['full-time', 'part-time', 'contract', 'internship']
+      enum: ["full-time", "part-time", "contract", "internship"],
     },
     salary: {
       min: { type: Number },
       max: { type: Number },
-      currency: { type: String, default: 'USD' },
-      visible: { type: Boolean, default: false }
+      currency: { type: String, default: "USD" },
+      visible: { type: Boolean, default: false },
     },
     benefits: [{ type: String }],
     perks: [{ type: String }],
@@ -84,23 +88,23 @@ const JobSchema = new Schema<IJob>(
     applicationInstructions: { type: String },
     requiredDocuments: [{ type: String }],
     customFields: { type: Schema.Types.Mixed },
-    visibility: { 
-      type: String, 
-      required: true, 
-      default: 'public',
-      enum: ['public', 'private']
+    visibility: {
+      type: String,
+      required: true,
+      default: "public",
+      enum: ["public", "private"],
     },
     featured: { type: Boolean, default: false },
-    status: { 
-      type: String, 
-      required: true, 
-      default: 'draft',
-      enum: ['draft', 'active', 'closed', 'archived']
+    status: {
+      type: String,
+      required: true,
+      default: "draft",
+      enum: ["draft", "active", "closed", "archived"],
     },
     isTemplate: { type: Boolean, default: false },
-    templateId: { type: Schema.Types.ObjectId, ref: 'Job' },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    assignedTo: { type: Schema.Types.ObjectId, ref: 'User' },
+    templateId: { type: Schema.Types.ObjectId, ref: "Job" },
+    createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    assignedTo: { type: Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );
@@ -116,5 +120,5 @@ JobSchema.index({ isTemplate: 1 });
 JobSchema.index({ templateId: 1 });
 
 // Use function to avoid issues with model compilation in Next.js hot reloading
-export default (mongoose.models.Job as Model<IJob>) || 
-  mongoose.model<IJob>('Job', JobSchema);
+export default (mongoose.models.Job as Model<IJob>) ||
+  mongoose.model<IJob>("Job", JobSchema);

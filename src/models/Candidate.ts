@@ -92,7 +92,7 @@ export interface ICandidate extends Document {
   // System Fields
   user?: mongoose.Types.ObjectId; // if they create an account
   status: string; // 'active', 'inactive', 'blacklisted'
-  customFields?: Record<string, any>;
+  customFields?: Record<string, unknown>;
   notes?: Array<{
     content: string;
     createdBy: mongoose.Types.ObjectId;

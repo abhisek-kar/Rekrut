@@ -45,7 +45,7 @@ export interface JobType {
   expectedStartDate?: Date;
   applicationInstructions?: string;
   requiredDocuments?: string[];
-  customFields?: Record<string, any>;
+  customFields?: Record<string, unknown>;
   visibility: JobVisibility;
   seoTitle?: string;
   seoDescription?: string;

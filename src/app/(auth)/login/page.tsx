@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useAuthForm } from "@/hooks/useAuthForm";
 import { useAuth } from "@/hooks/useAuth";
+import { AUTH_ROUTES, getDashboardRoute } from "@/lib/routes";
 
 import { Button } from "@/components/shadcn-ui/button";
 import {
@@ -73,13 +74,12 @@ export default function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push(redirectUrl || "/admin/dashboard");
+      const defaultRedirect = redirectUrl || getDashboardRoute("admin"); // Default to admin dashboard
+      router.push(defaultRedirect);
     }
   }, [isAuthenticated, redirectUrl, router]);
 
   const onSubmit = async (data: LoginFormValues) => {
-    // Prevent default form submission to avoid adding credentials to URL
-    event?.preventDefault();
     await handleLogin(data);
   };
 
@@ -182,7 +182,7 @@ export default function LoginPage() {
                           Password
                         </FormLabel>
                         <Link
-                          href="/auth/forgot-password"
+                          href={AUTH_ROUTES.FORGOT_PASSWORD}
                           className="text-xs font-medium text-primary hover:underline"
                         >
                           Forgot password?

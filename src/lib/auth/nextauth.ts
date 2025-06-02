@@ -71,8 +71,8 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/(auth)/login", // Update to match the actual route
-    error: "/(auth)/error",
+    signIn: "/login",
+    error: "/error",
   },
   callbacks: {
     async jwt({ token, user }) {

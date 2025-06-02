@@ -1,29 +1,11 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { isPublicRoute, isAdminRoute, isSubadminRoute, AUTH_ROUTES } from "@/lib/routes";
 
-// Define protected routes patterns
-const adminRoutes = [/^\/admin(\/.*)?$/];
-const subadminRoutes = [/^\/subadmin(\/.*)?$/];
-const apiRoutes = [/^\/api\/(admin|subadmin|users|jobs|candidates|applications)(\/.*)?$/];
-const authRoutes = [/^\/api\/auth\/(session|logout)(\/.*)?$/];
-const publicRoutes = [
-  /^\/$/,
-  /^\/\(auth\)\/login(\/.*)?$/,
-  /^\/(auth)\/login(\/.*)?$/,
-  /^\/login(\/.*)?$/,
-  /^\/\(auth\)\/forgot-password(\/.*)?$/,
-  /^\/(auth)\/forgot-password(\/.*)?$/,
-  /^\/forgot-password(\/.*)?$/,
-  /^\/\(auth\)\/reset-password(\/.*)?$/,
-  /^\/(auth)\/reset-password(\/.*)?$/,
-  /^\/reset-password(\/.*)?$/,
-  /^\/\(auth\)\/account-setup(\/.*)?$/,
-  /^\/(auth)\/account-setup(\/.*)?$/,
-  /^\/account-setup(\/.*)?$/,
-  /^\/api\/auth(\/.*)?$/,
-  /^\/api\/public(\/.*)?$/,
-];
+// Define API routes patterns that still need regex matching
+const apiRoutes = [/^\/api\/(admin|subadmin|users|jobs|candidates|applications)(\/.*)?$/]; // Protected API routes
+const authRoutes = [/^\/api\/auth\/(session|logout)(\/.*)?$/]; // Auth API routes that need token validation
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -31,29 +13,43 @@ export async function middleware(request: NextRequest) {
   console.log("Middleware checking path:", pathname);
 
   // Check if the path is a public route (no auth required)
-  const isPublicRoute = publicRoutes.some((pattern) => pattern.test(pathname));
-  if (isPublicRoute) {
+  if (isPublicRoute(pathname)) {
     console.log("Public route, allowing access");
     return NextResponse.next();
   }
 
   // Check if this is a protected route
-  const isAdminRoute = adminRoutes.some((pattern) => pattern.test(pathname));
-  const isSubadminRoute = subadminRoutes.some((pattern) => pattern.test(pathname));
+  const needsAdminRole = isAdminRoute(pathname);
+  const needsSubadminRole = isSubadminRoute(pathname);
   const isProtectedApiRoute = apiRoutes.some((pattern) => pattern.test(pathname));
   const isAuthApiRoute = authRoutes.some((pattern) => pattern.test(pathname));
 
   // If not a route we need to check, continue
-  if (!isAdminRoute && !isSubadminRoute && !isProtectedApiRoute && !isAuthApiRoute) {
+  if (!needsAdminRole && !needsSubadminRole && !isProtectedApiRoute && !isAuthApiRoute) {
     console.log("Not a protected route, allowing access");
     return NextResponse.next();
   }
 
-  // Get token from NextAuth
-  const token = await getToken({ 
-    req: request, 
-    secret: process.env.NEXTAUTH_SECRET 
-  });
+  // Get token from NextAuth with error handling
+  let token;
+  try {
+    token = await getToken({ 
+      req: request, 
+      secret: process.env.NEXTAUTH_SECRET 
+    });
+  } catch (error) {
+    console.error("Token verification failed:", error);
+    // If API route, return 401 unauthorized
+    if (isProtectedApiRoute || isAuthApiRoute) {
+      return NextResponse.json(
+        { message: "Authentication error" },
+        { status: 401 }
+      );
+    }
+    // Otherwise redirect to login
+    const loginUrl = new URL(AUTH_ROUTES.LOGIN, request.url);
+    return NextResponse.redirect(loginUrl);
+  }
 
   if (!token) {
     console.log("No token found, redirecting to login");
@@ -65,8 +61,11 @@ export async function middleware(request: NextRequest) {
       );
     }
     
-    // Otherwise redirect to login
-    const loginUrl = new URL("/login", request.url);
+    // Otherwise redirect to login (prevent infinite redirects)
+    if (pathname === AUTH_ROUTES.LOGIN) {
+      return NextResponse.next();
+    }
+    const loginUrl = new URL(AUTH_ROUTES.LOGIN, request.url);
     loginUrl.searchParams.set("redirect", encodeURI(request.nextUrl.pathname));
     return NextResponse.redirect(loginUrl);
   }
@@ -74,14 +73,22 @@ export async function middleware(request: NextRequest) {
   try {
     console.log("Token found, user role:", token.role);
     // Check if user has the required role
-    if (isAdminRoute && token.role !== "admin") {
+    if (needsAdminRole && token.role !== "admin") {
       console.log("User is not admin, redirecting");
-      return NextResponse.redirect(new URL("/login", request.url));
+      // Prevent infinite redirects
+      if (pathname === AUTH_ROUTES.LOGIN) {
+        return NextResponse.next();
+      }
+      return NextResponse.redirect(new URL(AUTH_ROUTES.LOGIN, request.url));
     }
     
-    if (isSubadminRoute && token.role !== "subadmin" && token.role !== "admin") {
+    if (needsSubadminRole && token.role !== "subadmin" && token.role !== "admin") {
       console.log("User is not subadmin or admin, redirecting");
-      return NextResponse.redirect(new URL("/login", request.url));
+      // Prevent infinite redirects
+      if (pathname === AUTH_ROUTES.LOGIN) {
+        return NextResponse.next();
+      }
+      return NextResponse.redirect(new URL(AUTH_ROUTES.LOGIN, request.url));
     }
 
     // Add user info to request headers for backend routes
@@ -111,7 +118,7 @@ export async function middleware(request: NextRequest) {
     }
     
     // Otherwise redirect to login
-    const loginUrl = new URL("/login", request.url);
+    const loginUrl = new URL(AUTH_ROUTES.LOGIN, request.url);
     return NextResponse.redirect(loginUrl);
   }
 }
