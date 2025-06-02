@@ -88,7 +88,7 @@ export function JobDetailsForm({
     });
 
     return () => subscription.unsubscribe();
-  }, [form, onValidityChange, onChange]);
+  }, [form, onValidityChange, onChange, onSubmit]);
 
   // Add a new skill
   const handleAddSkill = () => {

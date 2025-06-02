@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Breadcrumb,
@@ -70,16 +70,6 @@ export default function JobsPage() {
 
   const itemsPerPage = 10;
 
-  // Fetch jobs when page loads
-  useEffect(() => {
-    fetchJobs();
-  }, [currentPage, sortBy, sortOrder, activeTab]);
-
-  // Apply search and filters
-  useEffect(() => {
-    applyFilters();
-  }, [jobs, searchTerm, filters]);
-
   // Check if user is a subadmin and get assigned jobs only
   useEffect(() => {
     // Read the 'assigned' query parameter from the URL
@@ -93,7 +83,7 @@ export default function JobsPage() {
   }, [user?.role]);
 
   // Fetch jobs from API
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -131,10 +121,10 @@ export default function JobsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, sortBy, sortOrder, activeTab, user, filters.assignedToMe]);
 
   // Apply search and filters to jobs
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...jobs];
 
     // Apply search term
@@ -198,26 +188,34 @@ export default function JobsPage() {
     }
 
     setFilteredJobs(filtered);
-  };
+  }, [jobs, searchTerm, filters]);
 
   // Handle search input change
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
-  // Handle pagination
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+  // Handle filter change
+  const handleFilterChange = (
+    name: keyof FilterOptions,
+    value: string
+  ) => {
+    setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle sorting
+  // Handle sort change
   const handleSort = (field: string) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       setSortBy(field);
-      setSortOrder("asc");
+      setSortOrder("desc");
     }
+  };
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   // Reset all filters
@@ -234,14 +232,6 @@ export default function JobsPage() {
       assignedToMe, // Maintain this value if it was set for subadmin
     });
     setSearchTerm("");
-  };
-
-  // Handle filter changes
-  const handleFilterChange = (name: keyof FilterOptions, value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
   };
 
   // Toggle job selection for bulk actions
@@ -403,6 +393,19 @@ export default function JobsPage() {
 
   // Get confirmation dialog content
   const confirmationContent = getConfirmationContent();
+
+  // Add useEffect calls after all function definitions
+  useEffect(() => {
+    if (fetchJobs) {
+      fetchJobs();
+    }
+  }, [fetchJobs]);
+
+  useEffect(() => {
+    if (applyFilters) {
+      applyFilters();
+    }
+  }, [applyFilters]);
 
   return (
     <SidebarProvider>

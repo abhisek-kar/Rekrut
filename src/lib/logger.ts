@@ -216,20 +216,20 @@ export const log = {
 
 // Client-side logger (simplified)
 export const clientLogger = {
-  debug: (message: string, context?: any) => {
+  debug: (message: string, context?: Record<string, unknown>) => {
     if (process.env.NODE_ENV === 'development') {
       console.log('🐛 [DEBUG]', message, context);
     }
   },
-  info: (message: string, context?: any) => {
+  info: (message: string, context?: Record<string, unknown>) => {
     if (process.env.NODE_ENV === 'development') {
       console.log('ℹ️ [INFO]', message, context);
     }
   },
-  warn: (message: string, context?: any) => {
+  warn: (message: string, context?: Record<string, unknown>) => {
     console.warn('⚠️ [WARN]', message, context);
   },
-  error: (message: string, error?: Error, context?: any) => {
+  error: (message: string, error?: Error, context?: Record<string, unknown>) => {
     console.error('❌ [ERROR]', message, error, context);
     
     // In production, you might want to send errors to a logging service

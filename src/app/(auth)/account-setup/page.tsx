@@ -120,7 +120,7 @@ export default function AccountSetupPage() {
       }
     });
     return () => subscription.unsubscribe();
-  }, [form.watch]);
+  }, [form, form.watch]);
 
   // Get password strength label and color
   const getStrengthDetails = () => {

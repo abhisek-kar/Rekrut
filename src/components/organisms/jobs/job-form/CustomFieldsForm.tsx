@@ -117,7 +117,7 @@ export function CustomFieldsForm({
     });
 
     return () => subscription.unsubscribe();
-  }, [form, onChange]);
+  }, [form, onChange, onSubmit]);
 
   // Render a custom field based on its type
   const renderCustomField = (field: CustomFieldDefinition) => {

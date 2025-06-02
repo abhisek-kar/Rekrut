@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Breadcrumb,
@@ -73,18 +73,8 @@ export default function ApplicationsPage() {
     }
   }, [searchParams, user?.role]);
 
-  // Fetch applications
-  useEffect(() => {
-    fetchApplications();
-  }, [currentPage, sortBy, sortOrder, activeTab, filters.assignedToMe]);
-
-  // Apply search and filters
-  useEffect(() => {
-    applyFilters();
-  }, [applications, searchTerm, filters]);
-
   // Fetch applications from API
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -122,10 +112,10 @@ export default function ApplicationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, sortBy, sortOrder, activeTab, filters.assignedToMe, user]);
 
   // Apply search and filters
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...applications];
 
     // Apply search term
@@ -186,15 +176,16 @@ export default function ApplicationsPage() {
         const maxScore = parseInt(scoreRange[1]);
 
         filtered = filtered.filter(
-          (application) =>
-            application.matchingScore?.overall >= minScore &&
-            application.matchingScore?.overall <= maxScore
+          (application) => {
+            const score = application.matchingScore?.overall;
+            return score !== undefined && score >= minScore && score <= maxScore;
+          }
         );
       }
     }
 
     setFilteredApplications(filtered);
-  };
+  }, [applications, searchTerm, filters]);
 
   // Handle search input change
   const handleSearch = (value: string) => {

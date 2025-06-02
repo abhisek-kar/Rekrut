@@ -114,7 +114,7 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
     });
     
     return () => subscription.unsubscribe();
-  }, [form, onValidityChange, onChange]);
+  }, [form, onValidityChange, onChange, onSubmit]);
 
   // Add a new required document
   const handleAddDocument = (documentText?: string) => {

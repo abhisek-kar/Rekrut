@@ -41,20 +41,20 @@ class PerformanceMonitor {
     if (!this.isEnabled) return null;
 
     const endTime = performance.now();
-    const startTime = this.timers.get(name);
+    const startTimeValue = this.timers.get(name);
 
-    if (!startTime) {
+    if (!startTimeValue || typeof startTimeValue !== 'number') {
       console.warn(`Performance timer '${name}' was not started`);
       return null;
     }
 
-    const duration = endTime - startTime;
-    const metadata = this.timers.get(`${name}_metadata`) as Record<string, any>;
+    const duration = endTime - startTimeValue;
+    const metadata = this.timers.get(`${name}_metadata`) as Record<string, unknown>;
 
     const metric: PerformanceMetrics = {
       name,
       duration,
-      startTime,
+      startTime: startTimeValue,
       endTime,
       metadata,
     };
@@ -79,7 +79,7 @@ class PerformanceMonitor {
   async measure<T>(
     name: string,
     fn: () => T | Promise<T>,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<T> {
     this.start(name, metadata);
     try {
@@ -173,7 +173,7 @@ export const performanceMonitor = new PerformanceMonitor();
  * React hook for performance monitoring
  */
 export function usePerformanceMonitor() {
-  const start = (name: string, metadata?: Record<string, any>) => {
+  const start = (name: string, metadata?: Record<string, unknown>) => {
     performanceMonitor.start(name, metadata);
   };
 
@@ -184,7 +184,7 @@ export function usePerformanceMonitor() {
   const measure = async <T>(
     name: string,
     fn: () => T | Promise<T>,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ) => {
     return performanceMonitor.measure(name, fn, metadata);
   };
@@ -196,11 +196,15 @@ export function usePerformanceMonitor() {
  * Performance decorator for class methods
  */
 export function measurePerformance(name?: string) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: Record<string, unknown>,
+    propertyKey: string,
+    descriptor: PropertyDescriptor
+  ) {
     const originalMethod = descriptor.value;
     const measureName = name || `${target.constructor.name}.${propertyKey}`;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       return performanceMonitor.measure(measureName, () => originalMethod.apply(this, args));
     };
 
@@ -217,7 +221,9 @@ export function initWebVitals() {
   // Cumulative Layout Shift (CLS)
   new PerformanceObserver((list) => {
     for (const entry of list.getEntries()) {
-      if (!entry.hadRecentInput) {
+      // For Layout Shift entries that have hadRecentInput property
+      const layoutShiftEntry = entry as unknown as { hadRecentInput?: boolean };
+      if (!layoutShiftEntry.hadRecentInput) {
         performanceMonitor.start('CLS');
         performanceMonitor.end('CLS');
       }
@@ -234,19 +240,24 @@ export function initWebVitals() {
       duration: lastEntry.startTime,
       startTime: 0,
       endTime: lastEntry.startTime,
-      metadata: { size: (lastEntry as any).size },
+      metadata: { size: (lastEntry as unknown as { size: number }).size },
     });
   }).observe({ type: 'largest-contentful-paint', buffered: true });
 
   // First Input Delay (FID)
   new PerformanceObserver((list) => {
     for (const entry of list.getEntries()) {
-      const fid = entry.processingStart - entry.startTime;
+      // For First Input entries that have processingStart property
+      const fidEntry = entry as unknown as { 
+        processingStart: number;
+        startTime: number;
+      };
+      const fid = fidEntry.processingStart - fidEntry.startTime;
       performanceMonitor.metrics.push({
         name: 'FID',
         duration: fid,
-        startTime: entry.startTime,
-        endTime: entry.processingStart,
+        startTime: fidEntry.startTime,
+        endTime: fidEntry.processingStart,
       });
     }
   }).observe({ type: 'first-input', buffered: true });
@@ -255,11 +266,11 @@ export function initWebVitals() {
 /**
  * API performance monitoring middleware
  */
-export function withPerformanceMonitoring<T extends (...args: any[]) => any>(
+export function withPerformanceMonitoring<T extends (...args: unknown[]) => unknown>(
   fn: T,
   name?: string
 ): T {
-  return (async (...args: any[]) => {
+  return (async (...args: unknown[]) => {
     const operationName = name || fn.name || 'anonymous';
     return performanceMonitor.measure(operationName, () => fn(...args));
   }) as T;

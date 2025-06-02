@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -77,13 +77,8 @@ export function DocumentsTab({ jobId }: DocumentsTabProps) {
   const [documentToDelete, setDocumentToDelete] = useState<JobDocument | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Fetch documents when component mounts
-  useEffect(() => {
-    fetchDocuments();
-  }, [jobId]);
-  
   // Fetch documents from API
-  const fetchDocuments = async () => {
+  const fetchDocuments = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -101,7 +96,12 @@ export function DocumentsTab({ jobId }: DocumentsTabProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [jobId]);
+  
+  // Fetch documents when component mounts
+  useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
   
   // Handle file upload
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,13 +132,13 @@ export function DocumentsTab({ jobId }: DocumentsTabProps) {
       });
       
       // Upload file
-      const uploadPromise = new Promise<Document>((resolve, reject) => {
+      const uploadPromise = new Promise<JobDocument>((resolve, reject) => {
         xhr.open('POST', `/api/jobs/${jobId}/documents`);
         
         xhr.onload = () => {
           if (xhr.status >= 200 && xhr.status < 300) {
             const response = JSON.parse(xhr.responseText);
-            resolve(response.document);
+            resolve(response.document as JobDocument);
           } else {
             reject(new Error(`Upload failed with status ${xhr.status}`));
           }

@@ -107,7 +107,7 @@ export function PasswordForm() {
       }
     });
     return () => subscription.unsubscribe();
-  }, [form.watch]);
+  }, [form, form.watch]);
 
   // Handle form submission
   const onSubmit = async (data: PasswordFormValues) => {

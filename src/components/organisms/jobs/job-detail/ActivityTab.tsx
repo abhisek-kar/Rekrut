@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -33,7 +33,7 @@ interface Activity {
   action: string;
   entityType: string;
   entityId: string;
-  details: Record<string, unknown>;
+  details: Record<string, any>;
   userId: {
     _id: string;
     firstName: string;
@@ -54,13 +54,8 @@ export function ActivityTab({ jobId }: ActivityTabProps) {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  // Fetch job activities when component mounts
-  useEffect(() => {
-    fetchActivities();
-  }, [jobId]);
-
   // Fetch activities from API
-  const fetchActivities = async (reset = false) => {
+  const fetchActivities = useCallback(async (reset = false) => {
     try {
       const currentPage = reset ? 1 : page;
       setLoading(true);
@@ -76,19 +71,24 @@ export function ActivityTab({ jobId }: ActivityTabProps) {
       const data = await response.json();
 
       if (reset) {
-        setActivities(data.activities);
+        setActivities(data.data);
       } else {
-        setActivities((prev) => [...prev, ...data.activities]);
+        setActivities((prev) => [...prev, ...data.data]);
       }
 
-      setHasMore(data.pagination.page < data.pagination.pages);
-      setPage(reset ? 2 : page + 1);
+      setHasMore(data.data.length === 10);
+      setPage(currentPage + 1);
     } catch (error) {
       console.error("Error fetching activities:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [jobId, page]);
+  
+  // Fetch job activities when component mounts
+  useEffect(() => {
+    fetchActivities();
+  }, [fetchActivities]);
 
   // Load more activities
   const handleLoadMore = () => {

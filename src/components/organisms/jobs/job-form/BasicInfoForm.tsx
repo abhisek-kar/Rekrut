@@ -99,7 +99,7 @@ export function BasicInfoForm({ data, onChange, onValidityChange }: BasicInfoFor
     });
     
     return () => subscription.unsubscribe();
-  }, [form, onValidityChange, onChange]);
+  }, [form, onValidityChange, onChange, onSubmit]);
 
   // Handle location type change
   const handleLocationTypeChange = (value: string) => {

@@ -129,7 +129,7 @@ export function CompensationForm({
     });
 
     return () => subscription.unsubscribe();
-  }, [form, onValidityChange, onChange]);
+  }, [form, onValidityChange, onChange, onSubmit]);
 
   // Add a new benefit
   const handleAddBenefit = (benefitText?: string) => {
