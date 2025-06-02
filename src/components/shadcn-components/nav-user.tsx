@@ -134,7 +134,7 @@ export function NavUser({
       <LogoutConfirmationModal
         isOpen={isLogoutModalOpen}
         onClose={() => setIsLogoutModalOpen(false)}
-        redirectTo="/auth/login"
+        redirectTo="/login"
       />
     </>
   );

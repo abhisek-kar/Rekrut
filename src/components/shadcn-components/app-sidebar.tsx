@@ -20,7 +20,7 @@ import {
 } from "@/components/shadcn-ui/sidebar";
 import { Logo } from "@/components/atoms/logo";
 import { Badge } from "@/components/shadcn-ui/badge";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 
 type NavItem = {
   title: string;
@@ -44,7 +44,7 @@ export function AppSidebar({
   const defaultUserData = {
     name: user?.firstName ? `${user.firstName} ${user.lastName}` : "User",
     email: user?.email || "user@example.com",
-    avatar: user?.profilePhoto || "https://docs.material-tailwind.com/img/face-2.jpg",
+    avatar: user?.profilePhoto || "/avatars/default.png",
   };
 
   const userProfile = userData || defaultUserData;
