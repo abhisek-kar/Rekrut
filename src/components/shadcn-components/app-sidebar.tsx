@@ -78,21 +78,14 @@ export function AppSidebar({
                     asChild
                     isActive={isActive}
                     tooltip={item.title}
-                    className="w-full transition-colors"
+                    className="w-full transition-colors "
                   >
                     <Link href={item.href ?? "#"} className="flex items-center w-full justify-between">
-                      <div className="flex items-center">
+                      <div className="flex items-center  hover:translate-x-1 hover:scale-105 transition-transform ease-all duration-300">
                         {item.icon && <item.icon className="h-5 w-5 mr-3" />}
-                        <span>{item.title}</span>
+                        <span >{item.title}</span>
                       </div>
-                      {item.label && (
-                        <Badge
-                          variant={isActive ? "default" : "secondary"}
-                          className="ml-auto text-xs h-5"
-                        >
-                          {item.label}
-                        </Badge>
-                      )}
+                  
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

@@ -4,8 +4,8 @@ import React from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { 
   Briefcase, LayoutDashboard, FileText, 
-  UserCircle, CheckSquare, FileBarChart2, CalendarCheck,
-  Bell
+  UserCircle, CheckSquare, FileBarChart2, CalendarCheck,LayoutGrid,
+  Bell, ContactRound
 } from "lucide-react";
 import { PageLoader } from "@/components/atoms/loader";
 
@@ -42,24 +42,22 @@ export default function SubAdminLayout({
     {
       title: "Dashboard",
       href: "/subadmin/dashboard",
-      icon: LayoutDashboard
+      icon: LayoutGrid
     },
     {
       title: "Jobs",
       href: "/subadmin/jobs",
       icon: Briefcase,
-      label: "12" // This would be dynamic in a real implementation
     },
     {
       title: "Applications",
       href: "/subadmin/applications",
       icon: FileText,
-      label: "24" // This would be dynamic in a real implementation
     },
     {
       title: "Candidates",
       href: "/subadmin/candidates",
-      icon: UserCircle
+      icon: ContactRound
     },
     {
       title: "Interviews",
@@ -70,19 +68,13 @@ export default function SubAdminLayout({
       title: "Tasks",
       href: "/subadmin/tasks",
       icon: CheckSquare,
-      label: "5" // This would be dynamic in a real implementation
     },
     {
       title: "Reports",
       href: "/subadmin/reports",
       icon: FileBarChart2
     },
-    {
-      title: "Notifications",
-      href: "/subadmin/notifications",
-      icon: Bell,
-      label: "3" // This would be dynamic in a real implementation
-    }
+   
   ];
 
   const userData = {
