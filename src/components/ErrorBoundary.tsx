@@ -48,7 +48,7 @@ export class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log error details
     console.error("Error Boundary caught an error:", error, errorInfo);
-
+    
     // Update state with error info
     this.setState({
       error,
@@ -109,18 +109,14 @@ export class ErrorBoundary extends Component<Props, State> {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button
-                    onClick={this.handleReset}
-                    className="flex-1"
-                    size="sm"
-                  >
+                  <Button onClick={this.handleReset} className="flex-1" size="sm">
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Try Again
                   </Button>
-                  <Button
-                    onClick={this.handleGoHome}
-                    variant="outline"
-                    className="flex-1"
+                  <Button 
+                    onClick={this.handleGoHome} 
+                    variant="outline" 
+                    className="flex-1" 
                     size="sm"
                   >
                     <Home className="w-4 h-4 mr-2" />
@@ -165,11 +161,7 @@ export class ErrorBoundary extends Component<Props, State> {
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Retry
                   </Button>
-                  <Button
-                    onClick={this.handleGoHome}
-                    variant="outline"
-                    size="sm"
-                  >
+                  <Button onClick={this.handleGoHome} variant="outline" size="sm">
                     <Home className="w-4 h-4 mr-2" />
                     Home
                   </Button>
@@ -222,11 +214,9 @@ export function withErrorBoundary<P extends object>(
       <Component {...props} />
     </ErrorBoundary>
   );
-
-  WrappedComponent.displayName = `withErrorBoundary(${
-    Component.displayName || Component.name
-  })`;
-
+  
+  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
+  
   return WrappedComponent;
 }
 
@@ -234,15 +224,12 @@ export function withErrorBoundary<P extends object>(
  * Hook for manual error reporting in functional components
  */
 export function useErrorHandler() {
-  return React.useCallback(
-    (error: Error, errorInfo?: Record<string, unknown>) => {
-      console.error("Manual error report:", error, errorInfo);
-
-      // In production, report to error service
-      if (process.env.NODE_ENV === "production") {
-        // reportError(error, errorInfo);
-      }
-    },
-    []
-  );
+  return React.useCallback((error: Error, errorInfo?: Record<string, unknown>) => {
+    console.error("Manual error report:", error, errorInfo);
+    
+    // In production, report to error service
+    if (process.env.NODE_ENV === "production") {
+      // reportError(error, errorInfo);
+    }
+  }, []);
 }

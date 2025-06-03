@@ -17,7 +17,7 @@ import {
   Shield,
 } from "lucide-react";
 import { useAuthForm } from "@/hooks/useAuthForm";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { AUTH_ROUTES, getDashboardRoute } from "@/lib/routes";
 
 import { Button } from "@/components/shadcn-ui/button";
@@ -39,7 +39,6 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/shadcn-ui/card";
-import { PageLoader } from "@/components/atoms/loader";
 import { AppFooter } from "@/components/atoms/footer";
 
 // Form validation schema
@@ -59,8 +58,8 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get("redirect") || "";
   const [showPassword, setShowPassword] = useState(false);
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const { isLoading: authFormLoading, error, handleLogin } = useAuthForm();
+  const { isAuthenticated } = useAuth();
+  const { isLoading, error, handleLogin } = useAuthForm();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -74,21 +73,11 @@ export default function LoginPage() {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (!isLoading && isAuthenticated && user) {
-      const defaultRedirect = redirectUrl || getDashboardRoute(user.role);
+    if (isAuthenticated) {
+      const defaultRedirect = redirectUrl || getDashboardRoute("admin"); // Default to admin dashboard
       router.push(defaultRedirect);
     }
-  }, [isAuthenticated, isLoading, user, redirectUrl, router]);
-
-  // Show loading while checking authentication
-  if (isLoading) {
-    return <PageLoader message="Checking authentication..." />;
-  }
-
-  // If authenticated, show redirect message
-  if (isAuthenticated && user) {
-    return <PageLoader message="Redirecting to your dashboard..." />;
-  }
+  }, [isAuthenticated, redirectUrl, router]);
 
   const onSubmit = async (data: LoginFormValues) => {
     await handleLogin(data);
@@ -259,9 +248,9 @@ export default function LoginPage() {
                 <Button
                   type="submit"
                   className="w-full h-12 text-base font-medium rounded-lg transition-all duration-200 hover:shadow-md hover:translate-y-[-1px]"
-                  disabled={authFormLoading}
+                  disabled={isLoading}
                 >
-                  {authFormLoading ? (
+                  {isLoading ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       <span>Logging in...</span>

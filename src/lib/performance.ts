@@ -16,7 +16,7 @@ class PerformanceMonitor {
   private isEnabled: boolean;
 
   constructor() {
-    this.isEnabled = typeof window !== "undefined" && "performance" in window;
+    this.isEnabled = typeof window !== 'undefined' && 'performance' in window;
   }
 
   /**
@@ -43,16 +43,13 @@ class PerformanceMonitor {
     const endTime = performance.now();
     const startTimeValue = this.timers.get(name);
 
-    if (!startTimeValue || typeof startTimeValue !== "number") {
+    if (!startTimeValue || typeof startTimeValue !== 'number') {
       console.warn(`Performance timer '${name}' was not started`);
       return null;
     }
 
     const duration = endTime - startTimeValue;
-    const metadata = this.timers.get(`${name}_metadata`) as Record<
-      string,
-      unknown
-    >;
+    const metadata = this.timers.get(`${name}_metadata`) as Record<string, unknown>;
 
     const metric: PerformanceMetrics = {
       name,
@@ -69,10 +66,8 @@ class PerformanceMonitor {
     this.timers.delete(`${name}_metadata`);
 
     // Log slow operations in development
-    if (process.env.NODE_ENV === "development" && duration > 1000) {
-      console.warn(
-        `⚠️ Slow operation detected: ${name} took ${duration.toFixed(2)}ms`
-      );
+    if (process.env.NODE_ENV === 'development' && duration > 1000) {
+      console.warn(`⚠️ Slow operation detected: ${name} took ${duration.toFixed(2)}ms`);
     }
 
     return metric;
@@ -108,8 +103,8 @@ class PerformanceMonitor {
    * Get metrics by name pattern
    */
   getMetricsByName(pattern: string | RegExp): PerformanceMetrics[] {
-    const regex = typeof pattern === "string" ? new RegExp(pattern) : pattern;
-    return this.metrics.filter((metric) => regex.test(metric.name));
+    const regex = typeof pattern === 'string' ? new RegExp(pattern) : pattern;
+    return this.metrics.filter(metric => regex.test(metric.name));
   }
 
   /**
@@ -130,7 +125,7 @@ class PerformanceMonitor {
       };
     }
 
-    const durations = this.metrics.map((m) => m.duration);
+    const durations = this.metrics.map(m => m.duration);
     const totalDuration = durations.reduce((sum, d) => sum + d, 0);
     const averageDuration = totalDuration / this.metrics.length;
 
@@ -162,17 +157,12 @@ class PerformanceMonitor {
    * Export metrics for analysis
    */
   export(): string {
-    return JSON.stringify(
-      {
-        timestamp: new Date().toISOString(),
-        userAgent:
-          typeof navigator !== "undefined" ? navigator.userAgent : "server",
-        metrics: this.metrics,
-        summary: this.getSummary(),
-      },
-      null,
-      2
-    );
+    return JSON.stringify({
+      timestamp: new Date().toISOString(),
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'server',
+      metrics: this.metrics,
+      summary: this.getSummary(),
+    }, null, 2);
   }
 }
 
@@ -215,9 +205,7 @@ export function measurePerformance(name?: string) {
     const measureName = name || `${target.constructor.name}.${propertyKey}`;
 
     descriptor.value = async function (...args: unknown[]) {
-      return performanceMonitor.measure(measureName, () =>
-        originalMethod.apply(this, args)
-      );
+      return performanceMonitor.measure(measureName, () => originalMethod.apply(this, args));
     };
 
     return descriptor;
@@ -228,7 +216,7 @@ export function measurePerformance(name?: string) {
  * Web Vitals monitoring
  */
 export function initWebVitals() {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
 
   // Cumulative Layout Shift (CLS)
   new PerformanceObserver((list) => {
@@ -236,53 +224,54 @@ export function initWebVitals() {
       // For Layout Shift entries that have hadRecentInput property
       const layoutShiftEntry = entry as unknown as { hadRecentInput?: boolean };
       if (!layoutShiftEntry.hadRecentInput) {
-        performanceMonitor.start("CLS");
-        performanceMonitor.end("CLS");
+        performanceMonitor.start('CLS');
+        performanceMonitor.end('CLS');
       }
     }
-  }).observe({ type: "layout-shift", buffered: true });
+  }).observe({ type: 'layout-shift', buffered: true });
 
   // Largest Contentful Paint (LCP)
   new PerformanceObserver((list) => {
     const entries = list.getEntries();
     const lastEntry = entries[entries.length - 1];
-
+    
     performanceMonitor.metrics.push({
-      name: "LCP",
+      name: 'LCP',
       duration: lastEntry.startTime,
       startTime: 0,
       endTime: lastEntry.startTime,
       metadata: { size: (lastEntry as unknown as { size: number }).size },
     });
-  }).observe({ type: "largest-contentful-paint", buffered: true });
+  }).observe({ type: 'largest-contentful-paint', buffered: true });
 
   // First Input Delay (FID)
   new PerformanceObserver((list) => {
     for (const entry of list.getEntries()) {
       // For First Input entries that have processingStart property
-      const fidEntry = entry as unknown as {
+      const fidEntry = entry as unknown as { 
         processingStart: number;
         startTime: number;
       };
       const fid = fidEntry.processingStart - fidEntry.startTime;
       performanceMonitor.metrics.push({
-        name: "FID",
+        name: 'FID',
         duration: fid,
         startTime: fidEntry.startTime,
         endTime: fidEntry.processingStart,
       });
     }
-  }).observe({ type: "first-input", buffered: true });
+  }).observe({ type: 'first-input', buffered: true });
 }
 
 /**
  * API performance monitoring middleware
  */
-export function withPerformanceMonitoring<
-  T extends (...args: unknown[]) => unknown
->(fn: T, name?: string): T {
+export function withPerformanceMonitoring<T extends (...args: unknown[]) => unknown>(
+  fn: T,
+  name?: string
+): T {
   return (async (...args: unknown[]) => {
-    const operationName = name || fn.name || "anonymous";
+    const operationName = name || fn.name || 'anonymous';
     return performanceMonitor.measure(operationName, () => fn(...args));
   }) as T;
 }

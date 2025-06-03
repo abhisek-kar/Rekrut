@@ -12,9 +12,14 @@ interface LogoProps {
   size?: LogoSize;
   className?: string;
   asLink?: boolean;
+  hideTextInSidebar?: boolean;
 }
 
-export function Logo({ size = "md", className, asLink = true }: LogoProps) {
+export function Logo({
+  size = "md",
+  className,
+  asLink = true,
+}: LogoProps) {
   // For now, we'll skip the sidebar integration to avoid context issues
   // This can be re-added later when the component is specifically used within a sidebar
   const shouldHideText = false; // Always show text for now
