@@ -3,8 +3,7 @@
 import React from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { 
-  Users, LayoutDashboard, Briefcase, 
-  UserCircle, FileText, Bell
+  Users, LayoutGrid, Briefcase, FileText, ContactRound, Box
 } from "lucide-react";
 import { PageLoader } from "@/components/atoms/loader";
 
@@ -41,7 +40,7 @@ export default function AdminLayout({
     {
       title: "Dashboard",
       href: "/admin/dashboard",
-      icon: LayoutDashboard
+      icon: LayoutGrid
     },
     {
       title: "Users",
@@ -56,7 +55,7 @@ export default function AdminLayout({
     {
       title: "Candidates",
       href: "/admin/candidates",
-      icon: UserCircle
+      icon: ContactRound
     },
     {
       title: "Applications",
