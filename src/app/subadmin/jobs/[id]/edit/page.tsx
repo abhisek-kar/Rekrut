@@ -354,6 +354,12 @@ export default function SubAdminEditJobPage() {
       onSubmit={handleUpdateJob}
       cancelUrl={`/subadmin/jobs/${jobId}`}
       backToText="Back to Job"
+      breadcrumbContext={{
+        'subadmin': 'SubAdmin',
+        'jobs': 'My Jobs',
+        [jobId]: jobData.title || 'Job Details',
+        'edit': 'Edit Job'
+      }}
     >
       {renderStepForm()}
     </JobFormLayout>

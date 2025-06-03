@@ -11,16 +11,9 @@ import {
   CardTitle,
 } from "@/components/shadcn-ui/card";
 import { Button } from "@/components/shadcn-ui/button";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/shadcn-ui/breadcrumb";
-import { Separator } from "@/components/shadcn-ui/separator";
 import { ArrowLeft, ArrowRight, Save, Check } from "lucide-react";
-import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { BreadcrumbItem } from "@/lib/breadcrumbs";
 
 interface Step {
   title: string;
@@ -40,6 +33,8 @@ interface JobFormLayoutProps {
   isEdit?: boolean;
   cancelUrl?: string;
   backToText?: string;
+  customBreadcrumbs?: BreadcrumbItem[];
+  breadcrumbContext?: Record<string, string>;
   onNext: () => void;
   onPrevious: () => void;
   onCancel?: () => void;
@@ -60,6 +55,8 @@ export function JobFormLayout({
   isEdit = false,
   cancelUrl = "/jobs",
   backToText = "Back to Jobs",
+  customBreadcrumbs,
+  breadcrumbContext,
   onNext,
   onPrevious,
   onCancel,
@@ -71,46 +68,22 @@ export function JobFormLayout({
   const isFirstStep = currentStep === 1;
   const isLastStep = currentStep === totalSteps;
 
+  // Generate step progress description
+  const stepProgress = `Step ${currentStep} of ${totalSteps}: ${steps[currentStep - 1]?.title}`;
+
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header with Breadcrumb and Sidebar Trigger */}
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mx-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/jobs">Jobs</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink
-                  href={isEdit ? `/jobs/${isEdit}` : "/jobs/create"}
-                >
-                  {isEdit ? "Edit Job" : "Create Job"}
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      {/* Use PageHeader instead of manual header */}
+      <PageHeader
+        title={title}
+        description={subtitle || stepProgress}
+        customBreadcrumbs={customBreadcrumbs}
+        breadcrumbContext={breadcrumbContext}
+      />
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-6">
         <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-          {/* Page Header */}
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-            <p className="text-muted-foreground mt-2">
-              {subtitle || `Complete the form below to ${isEdit ? "update" : "create"} a job posting`}
-            </p>
-          </div>
-
           {/* Form Steps */}
           <div className="flex flex-wrap gap-2 mb-4">
             {steps.map((step, index) => {

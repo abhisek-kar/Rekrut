@@ -305,6 +305,11 @@ export default function SubAdminCreateJobPage() {
       onSubmit={handlePublishJob}
       cancelUrl="/subadmin/jobs"
       backToText="Back to My Jobs"
+      breadcrumbContext={{
+        'subadmin': 'SubAdmin',
+        'jobs': 'My Jobs',
+        'create': 'Create New Job'
+      }}
     >
       {renderStepForm()}
     </JobFormLayout>

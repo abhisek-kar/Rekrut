@@ -1,73 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/shadcn-ui/card";
-import { Button } from "@/components/shadcn-ui/button";
-import { ArrowLeft, ArrowRight, Save, Check } from "lucide-react";
+import { JobType } from "@/types/job";
 import { useAuth } from "@/context/AuthContext";
-import { PageHeader } from "@/components/shared/PageHeader";
 
-// Import job creation components
+// Import all form components including the shared layout
 import {
+  JobFormLayout,
   BasicInfoForm,
   JobDetailsForm,
   CompensationForm,
   ApplicationSettingsForm,
+  VisibilityForm,
   CustomFieldsForm,
   PreviewForm,
 } from "@/components/organisms/jobs/job-form";
 
-// Job type interface - simplified for admin use
-interface AdminJobData {
-  title: string;
-  company: string;
-  department?: string;
-  location: {
-    type: "remote" | "onsite" | "hybrid";
-    address?: string;
-    city?: string;
-    state?: string;
-    country?: string;
-    postalCode?: string;
-  };
-  description: string;
-  responsibilities?: string;
-  requirements?: string;
-  skills: string[];
-  experienceLevel: "entry" | "mid" | "senior";
-  educationRequirements?: string[];
-  employmentType: "full-time" | "part-time" | "contract" | "internship";
-  salary?: {
-    min?: number;
-    max?: number;
-    currency?: string;
-    visible: boolean;
-  };
-  benefits?: string[];
-  perks?: string[];
-  applicationDeadline?: Date;
-  expectedStartDate?: Date;
-  applicationInstructions?: string;
-  requiredDocuments?: string[];
-  customFields?: Record<string, unknown>;
-  visibility: "public" | "private";
-  featured: boolean;
-  status: "draft" | "active" | "closed" | "archived";
-  assignedTo?: string; // SubAdmin ID
-  createdBy?: string; // Admin ID
-}
-
-// Define the steps for admin job creation
+// Define the steps for admin job creation (includes assignment step)
 const adminFormSteps = [
   {
     title: "Basic Information",
@@ -100,7 +51,7 @@ const adminFormSteps = [
 ];
 
 // Initial job data for admin creation
-const initialAdminJobData: Partial<AdminJobData> = {
+const initialAdminJobData: Partial<JobType> = {
   title: "",
   company: "",
   department: "",
@@ -126,26 +77,53 @@ const initialAdminJobData: Partial<AdminJobData> = {
   status: "draft",
 };
 
+// SubAdmin interface for assignment
+interface SubAdmin {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 export default function AdminCreateJobPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
-  const [jobData, setJobData] =
-    useState<Partial<AdminJobData>>(initialAdminJobData);
+  const [jobData, setJobData] = useState<Partial<JobType>>(initialAdminJobData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formValidity, setFormValidity] = useState({
     step1: false,
     step2: false,
     step3: true, // Compensation is optional
     step4: true, // Application settings are optional
-    step5: true, // Assignment is optional initially
+    step5: true, // Assignment is optional
     step6: true, // Custom fields are optional
     step7: true, // Preview step is always valid
   });
   const [formDirty, setFormDirty] = useState(false);
+  const [subAdmins, setSubAdmins] = useState<SubAdmin[]>([]);
+  const [loadingSubAdmins, setLoadingSubAdmins] = useState(false);
 
-  const isFirstStep = currentStep === 1;
-  const isLastStep = currentStep === adminFormSteps.length;
+  // Fetch SubAdmins for assignment
+  useEffect(() => {
+    const fetchSubAdmins = async () => {
+      try {
+        setLoadingSubAdmins(true);
+        const response = await fetch("/api/users/subadmins");
+        if (response.ok) {
+          const data = await response.json();
+          setSubAdmins(data.users || []);
+        }
+      } catch (error) {
+        console.error("Error fetching SubAdmins:", error);
+        toast.error("Failed to load SubAdmins for assignment");
+      } finally {
+        setLoadingSubAdmins(false);
+      }
+    };
+
+    fetchSubAdmins();
+  }, []);
 
   // Handle next step
   const handleNextStep = () => {
@@ -215,8 +193,8 @@ export default function AdminCreateJobPage() {
       toast.success("Job saved as draft successfully");
       setFormDirty(false);
 
-      // Navigate back to admin jobs page
-      router.push("/admin/jobs");
+      // Navigate to admin job detail page or jobs list
+      router.push(`/admin/jobs`);
     } catch (error) {
       console.error("Error saving job:", error);
       toast.error(
@@ -235,7 +213,7 @@ export default function AdminCreateJobPage() {
       // Add admin-specific data
       const jobToPublish = {
         ...jobData,
-        status: "active",
+        status: "published", // Use "published" to match schema
         createdBy: user?.id,
       };
 
@@ -255,9 +233,9 @@ export default function AdminCreateJobPage() {
 
       const result = await response.json();
 
-      toast.success("Job published successfully!");
+      toast.success("Job published successfully! It's now live and accepting applications.");
 
-      // Navigate back to admin jobs page
+      // Navigate to admin jobs list
       router.push("/admin/jobs");
     } catch (error) {
       console.error("Error publishing job:", error);
@@ -269,38 +247,21 @@ export default function AdminCreateJobPage() {
     }
   };
 
-  // Admin-specific Assignment & Visibility Form
+  // Handle cancel/back navigation
+  const handleCancel = () => {
+    if (formDirty) {
+      const confirmLeave = window.confirm(
+        "You have unsaved changes. Are you sure you want to leave? Your changes will be lost."
+      );
+      if (!confirmLeave) {
+        return;
+      }
+    }
+    router.push("/admin/jobs");
+  };
+
+  // Admin-specific Assignment & Visibility Form (Step 5)
   const AdminAssignmentForm = () => {
-    const [subAdmins, setSubAdmins] = useState<
-      Array<{ id: string; name: string }>
-    >([]);
-    const [loading, setLoading] = useState(false);
-
-    // Fetch SubAdmins for assignment
-    React.useEffect(() => {
-      const fetchSubAdmins = async () => {
-        try {
-          setLoading(true);
-          const response = await fetch("/api/admin/users?role=subadmin");
-          if (response.ok) {
-            const data = await response.json();
-            setSubAdmins(
-              data.users?.map((user: any) => ({
-                id: user._id,
-                name: `${user.firstName} ${user.lastName}`,
-              })) || []
-            );
-          }
-        } catch (error) {
-          console.error("Error fetching SubAdmins:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchSubAdmins();
-    }, []);
-
     return (
       <div className="space-y-6">
         <div>
@@ -308,8 +269,7 @@ export default function AdminCreateJobPage() {
             Job Assignment & Visibility
           </h3>
           <p className="text-muted-foreground mb-6">
-            Configure who will manage this job and how it will be visible to
-            candidates.
+            Configure who will manage this job and how it will be visible to candidates.
           </p>
         </div>
 
@@ -320,26 +280,28 @@ export default function AdminCreateJobPage() {
             <label className="text-sm font-medium">
               Select SubAdmin (Optional)
             </label>
-            <select
-              className="w-full p-2 border rounded-md"
-              value={jobData.assignedTo || ""}
-              onChange={(e) =>
-                handleChange("assignment", {
-                  assignedTo: e.target.value || undefined,
-                })
-              }
-              disabled={loading}
-            >
-              <option value="">Unassigned</option>
-              {subAdmins.map((subAdmin) => (
-                <option key={subAdmin.id} value={subAdmin.id}>
-                  {subAdmin.name}
-                </option>
-              ))}
-            </select>
+            {loadingSubAdmins ? (
+              <div className="text-sm text-muted-foreground">Loading SubAdmins...</div>
+            ) : (
+              <select
+                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
+                value={jobData.assignedTo || ""}
+                onChange={(e) =>
+                  handleChange("assignment", {
+                    assignedTo: e.target.value || undefined,
+                  })
+                }
+              >
+                <option value="">Unassigned</option>
+                {subAdmins.map((subAdmin) => (
+                  <option key={subAdmin._id} value={subAdmin._id}>
+                    {subAdmin.firstName} {subAdmin.lastName} ({subAdmin.email})
+                  </option>
+                ))}
+              </select>
+            )}
             <p className="text-sm text-muted-foreground">
-              Assign this job to a specific recruiter or leave unassigned for
-              manual assignment later.
+              Assign this job to a specific recruiter or leave unassigned for manual assignment later.
             </p>
           </div>
         </div>
@@ -358,6 +320,7 @@ export default function AdminCreateJobPage() {
                 onChange={(e) =>
                   handleChange("visibility", { visibility: e.target.value })
                 }
+                className="focus:ring-primary"
               />
               <label
                 htmlFor="public"
@@ -376,6 +339,7 @@ export default function AdminCreateJobPage() {
                 onChange={(e) =>
                   handleChange("visibility", { visibility: e.target.value })
                 }
+                className="focus:ring-primary"
               />
               <label
                 htmlFor="private"
@@ -386,7 +350,7 @@ export default function AdminCreateJobPage() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 mt-4">
+          <div className="flex items-center space-x-3 mt-4 pt-3 border-t">
             <input
               type="checkbox"
               id="featured"
@@ -394,6 +358,7 @@ export default function AdminCreateJobPage() {
               onChange={(e) =>
                 handleChange("visibility", { featured: e.target.checked })
               }
+              className="focus:ring-primary"
             />
             <label
               htmlFor="featured"
@@ -466,146 +431,29 @@ export default function AdminCreateJobPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <PageHeader
-        title="Create New Job"
-        description="Complete the form below to create a new job posting"
-      />
-
-      {/* Main Content */}
-      <main className="flex-1 p-4 md:p-6">
-        <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-          {/* Form Steps */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {adminFormSteps.map((step, index) => {
-              const stepNumber = index + 1;
-              const isActive = stepNumber === currentStep;
-              const isCompleted = stepNumber < currentStep;
-
-              return (
-                <div
-                  key={stepNumber}
-                  className={`flex items-center ${index > 0 ? "ml-2" : ""}`}
-                >
-                  {index > 0 && <div className="h-0.5 w-4 bg-gray-200 mr-2" />}
-                  <div
-                    className={`
-                      flex items-center justify-center rounded-full w-8 h-8 text-sm font-medium
-                      ${
-                        isActive
-                          ? "bg-primary text-primary-foreground"
-                          : isCompleted
-                          ? "bg-primary/20 text-primary"
-                          : "bg-gray-100 text-gray-500"
-                      }
-                    `}
-                  >
-                    {isCompleted ? <Check className="h-4 w-4" /> : stepNumber}
-                  </div>
-                  <span
-                    className={`ml-2 text-sm font-medium hidden sm:inline-block
-                      ${
-                        isActive
-                          ? "text-foreground"
-                          : isCompleted
-                          ? "text-primary"
-                          : "text-muted-foreground"
-                      }
-                    `}
-                  >
-                    {step.title}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Step Content */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{adminFormSteps[currentStep - 1]?.title}</CardTitle>
-              <CardDescription>
-                {adminFormSteps[currentStep - 1]?.description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>{renderStepForm()}</CardContent>
-            <CardFooter className="flex justify-between pt-6 border-t">
-              <div>
-                <Button
-                  variant="outline"
-                  onClick={() => router.push("/admin/jobs")}
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </Button>
-              </div>
-              <div className="flex gap-2">
-                {!isFirstStep && (
-                  <Button
-                    variant="outline"
-                    onClick={handlePreviousStep}
-                    disabled={isSubmitting}
-                  >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Previous
-                  </Button>
-                )}
-
-                {!isLastStep && (
-                  <Button
-                    onClick={handleNextStep}
-                    disabled={isSubmitting || !isCurrentStepValid}
-                  >
-                    Next
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                )}
-
-                {formDirty && (
-                  <Button
-                    variant="outline"
-                    onClick={handleSaveAsDraft}
-                    disabled={isSubmitting || !isCurrentStepValid}
-                  >
-                    <Save className="mr-2 h-4 w-4" />
-                    Save as Draft
-                  </Button>
-                )}
-
-                {isLastStep && (
-                  <Button
-                    onClick={handlePublishJob}
-                    disabled={isSubmitting || !isCurrentStepValid}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    <Check className="mr-2 h-4 w-4" />
-                    Publish Job
-                  </Button>
-                )}
-              </div>
-            </CardFooter>
-          </Card>
-
-          {/* Form Progress */}
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>
-              Step {currentStep} of {adminFormSteps.length}
-            </span>
-            <div className="w-full max-w-xs bg-gray-200 rounded-full h-2 mx-4">
-              <div
-                className="bg-primary h-2 rounded-full"
-                style={{
-                  width: `${(currentStep / adminFormSteps.length) * 100}%`,
-                }}
-              ></div>
-            </div>
-            <span>
-              {Math.round((currentStep / adminFormSteps.length) * 100)}%
-              Complete
-            </span>
-          </div>
-        </div>
-      </main>
-    </div>
+    <JobFormLayout
+      title="Create New Job"
+      subtitle="As an Admin, you can assign this job to a SubAdmin or manage it yourself"
+      currentStep={currentStep}
+      totalSteps={adminFormSteps.length}
+      steps={adminFormSteps}
+      isSubmitting={isSubmitting}
+      isValid={isCurrentStepValid}
+      isDirty={formDirty}
+      onNext={handleNextStep}
+      onPrevious={handlePreviousStep}
+      onCancel={handleCancel}
+      onSave={handleSaveAsDraft}
+      onSubmit={handlePublishJob}
+      cancelUrl="/admin/jobs"
+      backToText="Back to Jobs"
+      breadcrumbContext={{
+        'admin': 'Admin',
+        'jobs': 'Jobs',
+        'create': 'Create New Job'
+      }}
+    >
+      {renderStepForm()}
+    </JobFormLayout>
   );
 }
