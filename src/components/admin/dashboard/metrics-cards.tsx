@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Skeleton } from '@/components/shadcn-ui/skeleton';
 
 interface MetricCardProps {
   title: string;
@@ -22,7 +23,10 @@ export function MetricCard({ title, value, description, change, loading = false 
       </CardHeader>
       <CardContent>
         {loading ? (
-          <div className="h-8 w-24 bg-muted rounded animate-pulse" />
+          <div className="space-y-3">
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-4 w-32" />
+          </div>
         ) : (
           <>
             <div className="text-2xl font-bold">{value}</div>

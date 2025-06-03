@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal, Plus } from "lucide-react";
+import { SectionLoader } from "@/components/atoms/loader";
 
 import { Button } from "@/components/shadcn-ui/button";
 import {
@@ -240,8 +241,14 @@ export function SubAdminTable({ data, isLoading = false }: SubAdminTableProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">SubAdmins</h2>
+          <Button onClick={() => router.push("/admin/users/create")}>
+            <Plus className="mr-2 h-4 w-4" /> Add SubAdmin
+          </Button>
+        </div>
+        <SectionLoader message="Loading users..." height="400px" />
       </div>
     );
   }

@@ -10,7 +10,6 @@ import {
 } from "@/components/shadcn-ui/card";
 import { Button } from "@/components/shadcn-ui/button";
 import { Checkbox } from "@/components/shadcn-ui/checkbox";
-import { Skeleton } from "@/components/shadcn-ui/skeleton";
 import {
   BriefcaseIcon,
   UserIcon,
@@ -24,6 +23,9 @@ import { Badge } from "@/components/shadcn-ui/badge";
 import { formatDistanceToNow, format } from "date-fns";
 import Link from "next/link";
 import { toast } from "sonner";
+import { SectionLoader } from "@/components/atoms/loader";
+import { ButtonLoader } from "@/components/atoms/loader";
+import { Skeleton } from "@/components/shadcn-ui/skeleton";
 
 interface Task {
   _id: string;
@@ -104,17 +106,7 @@ export function TasksPanel() {
       </CardHeader>
       <CardContent>
         {loading ? (
-          <div className="space-y-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex items-center gap-3">
-                <Skeleton className="h-4 w-4 rounded-full" />
-                <div className="flex-1">
-                  <Skeleton className="h-5 w-4/5 mb-1" />
-                  <Skeleton className="h-4 w-2/3" />
-                </div>
-              </div>
-            ))}
-          </div>
+          <SectionLoader message="Loading tasks..." height="300px" />
         ) : error ? (
           <div className="p-4 text-sm text-red-800 rounded-lg bg-red-50">
             {error}
@@ -173,8 +165,8 @@ function TaskItem({ task, onTaskComplete }: { task: Task; onTaskComplete: () => 
   };
 
   const handleTaskComplete = async () => {
+    setIsCompleting(true);
     try {
-      setIsCompleting(true);
       const response = await fetch(`/api/subadmin/tasks/${task._id}`, {
         method: 'PUT',
         headers: {

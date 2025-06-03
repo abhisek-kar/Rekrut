@@ -11,8 +11,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn-ui/avatar";
 import { Badge } from "@/components/shadcn-ui/badge";
 import { Button } from "@/components/shadcn-ui/button";
-import { Skeleton } from "@/components/shadcn-ui/skeleton";
 import { RefreshCwIcon, ChevronRightIcon } from "lucide-react";
+import { SectionLoader } from "@/components/atoms/loader";
+import { Skeleton } from "@/components/shadcn-ui/skeleton";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 
@@ -100,17 +101,7 @@ export function RecentApplicationsPanel() {
       </CardHeader>
       <CardContent>
         {loading ? (
-          <div className="space-y-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex items-center gap-4">
-                <Skeleton className="w-10 h-10 rounded-full" />
-                <div className="flex-1">
-                  <Skeleton className="h-5 w-3/4 mb-1" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
+          <SectionLoader message="Loading recent applications..." height="300px" />
         ) : error ? (
           <div className="p-4 text-sm text-red-800 rounded-lg bg-red-50">
             {error}

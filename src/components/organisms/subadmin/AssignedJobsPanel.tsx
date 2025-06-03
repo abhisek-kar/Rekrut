@@ -17,6 +17,7 @@ import {
   RefreshCwIcon,
   UsersIcon,
 } from "lucide-react";
+import { SectionLoader } from "@/components/atoms/loader";
 import { Skeleton } from "@/components/shadcn-ui/skeleton";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
@@ -131,19 +132,7 @@ export function AssignedJobsPanel() {
           </TabsList>
           <TabsContent value={activeTab} className="pt-4">
             {loading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <Card key={i} className="overflow-hidden">
-                    <CardContent className="p-0">
-                      <div className="p-4">
-                        <Skeleton className="h-6 w-2/3 mb-2" />
-                        <Skeleton className="h-4 w-1/2 mb-1" />
-                        <Skeleton className="h-4 w-1/4" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              <SectionLoader message="Loading assigned jobs..." height="300px" />
             ) : error ? (
               <div className="p-4 text-sm text-red-800 rounded-lg bg-red-50">
                 {error}

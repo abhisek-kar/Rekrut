@@ -8,8 +8,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/shadcn-ui/card";
-import { Skeleton } from "@/components/shadcn-ui/skeleton";
 import { BriefcaseIcon, UsersIcon, CalendarIcon, UserPlusIcon } from "lucide-react";
+import { SectionLoader } from "@/components/atoms/loader";
+import { Skeleton } from "@/components/shadcn-ui/skeleton";
 
 interface DashboardMetrics {
   activeJobsCount: number;
@@ -53,6 +54,10 @@ export function DashboardMetricsPanel() {
         {error}
       </div>
     );
+  }
+
+  if (loading) {
+    return <SectionLoader message="Loading dashboard metrics..." height="200px" />;
   }
 
   return (

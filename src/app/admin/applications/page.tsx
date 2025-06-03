@@ -24,6 +24,7 @@ import { Skeleton } from "@/components/shadcn-ui/skeleton";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { FileText, Users, Eye, Calendar } from "lucide-react";
+import { SectionLoader } from "@/components/atoms/loader";
 
 // Simple application interface for admin use
 interface SimpleApplication {
@@ -122,26 +123,7 @@ export default function AdminApplicationsPage() {
 
   // Render loading state
   const renderLoading = () => {
-    return (
-      <div className="space-y-4">
-        {Array(5)
-          .fill(0)
-          .map((_, index) => (
-            <Card key={index}>
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <Skeleton className="h-5 w-1/3" />
-                    <Skeleton className="h-5 w-20" />
-                  </div>
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-4 w-full" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-      </div>
-    );
+    return <SectionLoader message="Loading applications..." height="400px" />;
   };
 
   // Render application card

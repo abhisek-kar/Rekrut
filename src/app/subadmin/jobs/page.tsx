@@ -8,7 +8,7 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/shadcn-ui/card";
-import { Skeleton } from "@/components/shadcn-ui/skeleton";
+import { SectionLoader } from "@/components/atoms/loader";
 
 export default function SubAdminJobsPage() {
   const router = useRouter();
@@ -29,14 +29,7 @@ export default function SubAdminJobsPage() {
           <CardTitle>My Assigned Jobs</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col space-y-3">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <div className="text-center text-sm text-muted-foreground mt-2">
-              Redirecting to Assigned Jobs...
-            </div>
-          </div>
+          <SectionLoader message="Redirecting to Assigned Jobs..." height="200px" />
         </CardContent>
       </Card>
     </div>

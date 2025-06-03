@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/shadcn-ui/button";
+import { ButtonLoader, SectionLoader } from "@/components/atoms/loader";
 import {
   Form,
   FormControl,
@@ -61,6 +62,8 @@ export function GeneralSettings({
   onSave,
   isLoading,
 }: GeneralSettingsProps) {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  
   const form = useForm<GeneralSettingsFormValues>({
     resolver: zodResolver(generalSettingsSchema),
     defaultValues: {
@@ -80,12 +83,31 @@ export function GeneralSettings({
   });
 
   const onSubmit = async (data: GeneralSettingsFormValues) => {
+    setIsSubmitting(true);
     try {
       await onSave(data);
     } catch (error) {
       console.error("Error saving settings:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>General Settings</CardTitle>
+          <CardDescription>
+            Configure your company information and system defaults
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SectionLoader message="Loading settings..." height="400px" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -368,8 +390,15 @@ export function GeneralSettings({
               </div>
             </div>
 
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Save Settings"}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <ButtonLoader size="sm" />
+                  Saving...
+                </>
+              ) : (
+                "Save Settings"
+              )}
             </Button>
           </form>
         </Form>

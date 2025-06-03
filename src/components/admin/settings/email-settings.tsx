@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/shadcn-ui/button";
+import { ButtonLoader, SectionLoader } from "@/components/atoms/loader";
 import {
   Form,
   FormControl,
@@ -56,6 +57,9 @@ export function EmailSettings({
   onTestEmail,
   isLoading,
 }: EmailSettingsProps) {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isSendingTest, setIsSendingTest] = React.useState(false);
+  
   const form = useForm<EmailSettingsFormValues>({
     resolver: zodResolver(emailSettingsSchema),
     defaultValues: {
@@ -92,20 +96,42 @@ export function EmailSettings({
   });
 
   const onSubmit = async (data: EmailSettingsFormValues) => {
+    setIsSubmitting(true);
     try {
       await onSave(data);
     } catch (error) {
       console.error("Error saving email settings:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleTestEmail = async () => {
+    setIsSendingTest(true);
     try {
       await onTestEmail();
     } catch (error) {
       console.error("Error sending test email:", error);
+    } finally {
+      setIsSendingTest(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Email Configuration</CardTitle>
+          <CardDescription>
+            Configure your email server settings and notification preferences
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SectionLoader message="Loading email settings..." height="400px" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -374,16 +400,30 @@ export function EmailSettings({
             </div>
 
             <div className="flex items-center justify-between">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save Settings"}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <ButtonLoader size="sm" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Settings"
+                )}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleTestEmail}
-                disabled={isLoading}
+                disabled={isSendingTest}
               >
-                Send Test Email
+                {isSendingTest ? (
+                  <>
+                    <ButtonLoader size="sm" />
+                    Sending...
+                  </>
+                ) : (
+                  "Send Test Email"
+                )}
               </Button>
             </div>
           </form>

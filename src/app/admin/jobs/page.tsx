@@ -23,6 +23,7 @@ import {
 import { PlusCircle, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
+import { SectionLoader } from "@/components/atoms/loader";
 
 // Simple job type for this page
 interface SimpleJob {
@@ -95,24 +96,7 @@ export default function AdminJobsPage() {
 
   // Render loading state
   const renderLoading = () => {
-    return (
-      <div className="space-y-4">
-        {Array(5)
-          .fill(0)
-          .map((_, index) => (
-            <Card key={index}>
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  <Skeleton className="h-5 w-1/3" />
-                  <Skeleton className="h-4 w-1/4" />
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-full" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-      </div>
-    );
+    return <SectionLoader message="Loading jobs..." height="400px" />;
   };
 
   // Render job card

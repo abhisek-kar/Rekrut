@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { ButtonLoader } from "@/components/atoms/loader";
 
 import { Button } from "@/components/shadcn-ui/button";
 import {
@@ -273,7 +274,7 @@ export function PasswordForm() {
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <ButtonLoader size="sm" />
                 Updating Password...
               </>
             ) : (

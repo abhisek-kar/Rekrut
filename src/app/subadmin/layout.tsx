@@ -7,6 +7,7 @@ import {
   UserCircle, CheckSquare, FileBarChart2, CalendarCheck,
   Bell
 } from "lucide-react";
+import { PageLoader } from "@/components/atoms/loader";
 
 import { AppSidebar } from "@/components/shadcn-components/app-sidebar";
 import {
@@ -31,13 +32,9 @@ export default function SubAdminLayout({
     }
   }, [isAuthenticated, isLoading, router, user]);
 
-  // If still loading or not authenticated, show nothing
+  // If still loading or not authenticated, show loading screen
   if (isLoading || !isAuthenticated || (user && user.role !== "subadmin")) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-16 w-16 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-      </div>
-    );
+    return <PageLoader message="Loading SubAdmin dashboard..." />;
   }
 
   // Single unified navigation for subadmin (Settings moved to profile section)
