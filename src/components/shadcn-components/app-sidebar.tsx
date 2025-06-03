@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Bell, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
@@ -22,6 +21,8 @@ import {
 import { Logo } from "@/components/atoms/logo";
 import { Badge } from "@/components/shadcn-ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { useSidebar } from "@/components/shadcn-ui/sidebar";
+
 
 export function AppSidebar({
   navItems = [],
@@ -39,6 +40,8 @@ export function AppSidebar({
   userData?: { name: string; email: string; avatar: string } | null;
 }) {
   const { user } = useAuth();
+  const {open } = useSidebar()
+
   const pathname = usePathname();
 
   // Get user's role to determine which menu items to show
@@ -56,8 +59,8 @@ export function AppSidebar({
   return (
     <Sidebar className="border-r border-border" collapsible="icon" {...props}>
       <SidebarHeader className="flex flex-col items-center py-6">
-        <div className="w-full flex justify-center">
-          <Logo size="lg" hideTextInSidebar={true} />
+        <div className="w-full flex  justify-center">
+          <Logo size={open ? "lg" :"sm"}  showText={open}/>
         </div>
       </SidebarHeader>
 

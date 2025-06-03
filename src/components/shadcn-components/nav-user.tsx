@@ -71,9 +71,9 @@ export function NavUser({
                 size="lg"
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
-                <Avatar className="h-8 w-8 rounded-lg">
+                <Avatar className="h-8 w-8 rounded-full">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">
+                  <AvatarFallback className="rounded-full">
                     {getInitials(user.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -92,9 +92,9 @@ export function NavUser({
             >
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar className="h-8 w-8 rounded-lg">
+                  <Avatar className="h-8 w-8 rounded-full">
                     <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="rounded-lg">
+                    <AvatarFallback className="rounded-full">
                       {getInitials(user.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -107,23 +107,23 @@ export function NavUser({
 
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild className="cursor-pointer">
                   <Link href={profileLink}>
-                    <User className="mr-2 h-4 w-4" />
+                    <User className="mr-2 h-6 w-6" />
                     <span>Profile</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={settingsLink}>
-                    <Settings className="mr-2 h-4 w-4" />
+                  <Link href={settingsLink} className="cursor-pointer">
+                    <Settings className="mr-2 h-6 w-6" />
                     <span>Settings</span>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
 
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleOpenLogoutModal}>
-                <LogOut className="mr-2 h-4 w-4" />
+              <DropdownMenuItem onClick={handleOpenLogoutModal} className="cursor-pointer">
+                <LogOut className="mr-2 h-6 w-6" />
                 <span>Log out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -134,7 +134,7 @@ export function NavUser({
       <LogoutConfirmationModal
         isOpen={isLogoutModalOpen}
         onClose={() => setIsLogoutModalOpen(false)}
-        redirectTo="/auth/login"
+        redirectTo="/login"
       />
     </>
   );

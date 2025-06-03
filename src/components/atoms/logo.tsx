@@ -12,17 +12,15 @@ interface LogoProps {
   size?: LogoSize;
   className?: string;
   asLink?: boolean;
-  hideTextInSidebar?: boolean;
+  showText?: boolean;
 }
 
 export function Logo({
   size = "md",
   className,
   asLink = true,
+  showText
 }: LogoProps) {
-  // For now, we'll skip the sidebar integration to avoid context issues
-  // This can be re-added later when the component is specifically used within a sidebar
-  const shouldHideText = false; // Always show text for now
 
   // Define size classes
   const sizeClasses = {
@@ -59,7 +57,7 @@ export function Logo({
       />
 
       {/* Text Logo - hide when sidebar is collapsed */}
-      {!shouldHideText && (
+      {showText && (
         <h1 className="text-primary whitespace-nowrap transition-opacity duration-200">
           Rekrut<span className="text-gray-800"> ATS</span>
         </h1>
