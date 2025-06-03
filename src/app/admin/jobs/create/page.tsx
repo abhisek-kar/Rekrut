@@ -3,15 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/shadcn-ui/breadcrumb";
-import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
-import { Separator } from "@/components/shadcn-ui/separator";
+
 import {
   Card,
   CardContent,
@@ -23,6 +15,7 @@ import {
 import { Button } from "@/components/shadcn-ui/button";
 import { ArrowLeft, ArrowRight, Save, Check } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { PageHeader } from "@/components/shared/PageHeader";
 
 // Import job creation components
 import {
@@ -137,7 +130,8 @@ export default function AdminCreateJobPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
-  const [jobData, setJobData] = useState<Partial<AdminJobData>>(initialAdminJobData);
+  const [jobData, setJobData] =
+    useState<Partial<AdminJobData>>(initialAdminJobData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formValidity, setFormValidity] = useState({
     step1: false,
@@ -225,7 +219,9 @@ export default function AdminCreateJobPage() {
       router.push("/admin/jobs");
     } catch (error) {
       console.error("Error saving job:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to save job as draft");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save job as draft"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -265,7 +261,9 @@ export default function AdminCreateJobPage() {
       router.push("/admin/jobs");
     } catch (error) {
       console.error("Error publishing job:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to publish job");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to publish job"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -273,7 +271,9 @@ export default function AdminCreateJobPage() {
 
   // Admin-specific Assignment & Visibility Form
   const AdminAssignmentForm = () => {
-    const [subAdmins, setSubAdmins] = useState<Array<{id: string, name: string}>>([]);
+    const [subAdmins, setSubAdmins] = useState<
+      Array<{ id: string; name: string }>
+    >([]);
     const [loading, setLoading] = useState(false);
 
     // Fetch SubAdmins for assignment
@@ -284,10 +284,12 @@ export default function AdminCreateJobPage() {
           const response = await fetch("/api/admin/users?role=subadmin");
           if (response.ok) {
             const data = await response.json();
-            setSubAdmins(data.users?.map((user: any) => ({
-              id: user._id,
-              name: `${user.firstName} ${user.lastName}`,
-            })) || []);
+            setSubAdmins(
+              data.users?.map((user: any) => ({
+                id: user._id,
+                name: `${user.firstName} ${user.lastName}`,
+              })) || []
+            );
           }
         } catch (error) {
           console.error("Error fetching SubAdmins:", error);
@@ -302,9 +304,12 @@ export default function AdminCreateJobPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h3 className="text-lg font-medium mb-4">Job Assignment & Visibility</h3>
+          <h3 className="text-lg font-medium mb-4">
+            Job Assignment & Visibility
+          </h3>
           <p className="text-muted-foreground mb-6">
-            Configure who will manage this job and how it will be visible to candidates.
+            Configure who will manage this job and how it will be visible to
+            candidates.
           </p>
         </div>
 
@@ -312,11 +317,17 @@ export default function AdminCreateJobPage() {
         <div className="space-y-4 border p-4 rounded-lg">
           <h4 className="font-medium">Assign to SubAdmin</h4>
           <div className="space-y-3">
-            <label className="text-sm font-medium">Select SubAdmin (Optional)</label>
+            <label className="text-sm font-medium">
+              Select SubAdmin (Optional)
+            </label>
             <select
               className="w-full p-2 border rounded-md"
               value={jobData.assignedTo || ""}
-              onChange={(e) => handleChange("assignment", { assignedTo: e.target.value || undefined })}
+              onChange={(e) =>
+                handleChange("assignment", {
+                  assignedTo: e.target.value || undefined,
+                })
+              }
               disabled={loading}
             >
               <option value="">Unassigned</option>
@@ -327,7 +338,8 @@ export default function AdminCreateJobPage() {
               ))}
             </select>
             <p className="text-sm text-muted-foreground">
-              Assign this job to a specific recruiter or leave unassigned for manual assignment later.
+              Assign this job to a specific recruiter or leave unassigned for
+              manual assignment later.
             </p>
           </div>
         </div>
@@ -343,9 +355,14 @@ export default function AdminCreateJobPage() {
                 name="visibility"
                 value="public"
                 checked={jobData.visibility === "public"}
-                onChange={(e) => handleChange("visibility", { visibility: e.target.value })}
+                onChange={(e) =>
+                  handleChange("visibility", { visibility: e.target.value })
+                }
               />
-              <label htmlFor="public" className="text-sm font-medium cursor-pointer">
+              <label
+                htmlFor="public"
+                className="text-sm font-medium cursor-pointer"
+              >
                 Public - Visible on job board
               </label>
             </div>
@@ -356,9 +373,14 @@ export default function AdminCreateJobPage() {
                 name="visibility"
                 value="private"
                 checked={jobData.visibility === "private"}
-                onChange={(e) => handleChange("visibility", { visibility: e.target.value })}
+                onChange={(e) =>
+                  handleChange("visibility", { visibility: e.target.value })
+                }
               />
-              <label htmlFor="private" className="text-sm font-medium cursor-pointer">
+              <label
+                htmlFor="private"
+                className="text-sm font-medium cursor-pointer"
+              >
                 Private - Internal use only
               </label>
             </div>
@@ -369,9 +391,14 @@ export default function AdminCreateJobPage() {
               type="checkbox"
               id="featured"
               checked={jobData.featured || false}
-              onChange={(e) => handleChange("visibility", { featured: e.target.checked })}
+              onChange={(e) =>
+                handleChange("visibility", { featured: e.target.checked })
+              }
             />
-            <label htmlFor="featured" className="text-sm font-medium cursor-pointer">
+            <label
+              htmlFor="featured"
+              className="text-sm font-medium cursor-pointer"
+            >
               Featured Job - Highlight in job listings
             </label>
           </div>
@@ -440,40 +467,14 @@ export default function AdminCreateJobPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header with Breadcrumb */}
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mx-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin">Admin</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin/jobs">Jobs</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin/jobs/create">Create</BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <PageHeader
+        title="Create New Job"
+        description="Complete the form below to create a new job posting"
+      />
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-6">
         <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-          {/* Page Header */}
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Create New Job</h1>
-            <p className="text-muted-foreground mt-2">
-              Complete the form below to create a new job posting
-            </p>
-          </div>
-
           {/* Form Steps */}
           <div className="flex flex-wrap gap-2 mb-4">
             {adminFormSteps.map((step, index) => {
@@ -551,7 +552,10 @@ export default function AdminCreateJobPage() {
                 )}
 
                 {!isLastStep && (
-                  <Button onClick={handleNextStep} disabled={isSubmitting || !isCurrentStepValid}>
+                  <Button
+                    onClick={handleNextStep}
+                    disabled={isSubmitting || !isCurrentStepValid}
+                  >
                     Next
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -590,11 +594,14 @@ export default function AdminCreateJobPage() {
             <div className="w-full max-w-xs bg-gray-200 rounded-full h-2 mx-4">
               <div
                 className="bg-primary h-2 rounded-full"
-                style={{ width: `${(currentStep / adminFormSteps.length) * 100}%` }}
+                style={{
+                  width: `${(currentStep / adminFormSteps.length) * 100}%`,
+                }}
               ></div>
             </div>
             <span>
-              {Math.round((currentStep / adminFormSteps.length) * 100)}% Complete
+              {Math.round((currentStep / adminFormSteps.length) * 100)}%
+              Complete
             </span>
           </div>
         </div>

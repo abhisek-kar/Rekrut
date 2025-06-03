@@ -1,45 +1,17 @@
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/shadcn-ui/breadcrumb";
-import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
-import { Separator } from "@/components/shadcn-ui/separator";
 import { Badge } from "@/components/shadcn-ui/badge";
 import { Bell, Settings, User, FileText } from "lucide-react";
+import { PageHeader } from "@/components/shared/PageHeader";
 
 export default function AdminNotificationsPage() {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mx-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin">Admin</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin/notifications">Notifications</BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <PageHeader
+        title="Notifications"
+        description="Stay updated with system activities and important events"
+      />
 
       <main className="flex-1 p-4 md:p-6">
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
-            <p className="text-muted-foreground">
-              Stay updated with system activities and important events
-            </p>
-          </div>
-
           {/* Sample notifications */}
           <div className="space-y-4">
             <div className="border rounded-lg p-4 flex items-start gap-3">
@@ -82,7 +54,8 @@ export default function AdminNotificationsPage() {
                   <Badge variant="secondary">1 day ago</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Application has been updated to version 2.1.0 with new features.
+                  Application has been updated to version 2.1.0 with new
+                  features.
                 </p>
               </div>
             </div>
@@ -107,7 +80,8 @@ export default function AdminNotificationsPage() {
           <div className="border rounded-lg p-6 text-center">
             <h3 className="text-lg font-medium mb-2">Notification Center</h3>
             <p className="text-muted-foreground mb-4">
-              This is a preview of the notification system. Future features will include:
+              This is a preview of the notification system. Future features will
+              include:
             </p>
             <div className="grid gap-4 md:grid-cols-2 mt-6">
               <div className="border rounded-lg p-4">

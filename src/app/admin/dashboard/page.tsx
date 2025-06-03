@@ -1,18 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/shadcn-ui/breadcrumb";
-import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
-import { Separator } from "@/components/shadcn-ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn-ui/tabs";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { 
   MetricsGrid, 
   ActivityFeed, 
@@ -241,35 +233,13 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mx-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin">Admin</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin/dashboard">Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <PageHeader
+        title={`Welcome, ${user?.firstName || 'Admin'}`}
+        description="Here's an overview of your recruitment process"
+      />
 
       <main className="flex-1 p-4 md:p-6">
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold tracking-tight">
-              Welcome, {user?.firstName || 'Admin'}
-            </h1>
-            <p className="text-muted-foreground">
-              Here&apos;s an overview of your recruitment process
-            </p>
-          </div>
-
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -280,7 +250,7 @@ export default function AdminDashboardPage() {
             <TabsContent value="overview" className="space-y-6">
               {/* Metrics Cards */}
               <MetricsGrid 
-                metrics={dashboardData?.metrics} 
+                metrics={dashboardData ? dashboardData.metrics : null} 
                 loading={isLoading} 
               />
 

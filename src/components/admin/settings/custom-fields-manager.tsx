@@ -471,7 +471,7 @@ export function CustomFieldsManager({
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
-                <FormField
+                <FormField<CustomFieldFormValues>
                   control={form.control}
                   name="entity"
                   render={({ field }) => (

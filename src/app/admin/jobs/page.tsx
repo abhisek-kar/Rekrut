@@ -2,17 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/shadcn-ui/breadcrumb";
-import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
-import { Separator } from "@/components/shadcn-ui/separator";
 import { Button } from "@/components/shadcn-ui/button";
-import { Skeleton } from "@/components/shadcn-ui/skeleton";
 import { Card, CardContent } from "@/components/shadcn-ui/card";
 import {
   Tabs,
@@ -24,6 +14,7 @@ import { PlusCircle, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { SectionLoader } from "@/components/atoms/loader";
+import { PageHeader } from "@/components/shared/PageHeader";
 
 // Simple job type for this page
 interface SimpleJob {
@@ -124,9 +115,9 @@ export default function AdminJobsPage() {
                   {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
                 </span>
               </div>
-              
+
               <p className="text-muted-foreground mb-2">{job.company}</p>
-              
+
               <div className="flex flex-wrap gap-2 text-sm text-muted-foreground mb-3">
                 <span className="bg-secondary px-2 py-1 rounded">
                   {job.location.type}
@@ -145,21 +136,22 @@ export default function AdminJobsPage() {
                   Created: {new Date(job.createdAt).toLocaleDateString()}
                   {job.assignedTo && (
                     <span className="ml-4">
-                      Assigned to: {job.assignedTo.firstName} {job.assignedTo.lastName}
+                      Assigned to: {job.assignedTo.firstName}{" "}
+                      {job.assignedTo.lastName}
                     </span>
                   )}
                 </div>
-                
+
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => router.push(`/jobs/${job._id}`)}
                   >
                     View
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => router.push(`/jobs/${job._id}/edit`)}
                   >
@@ -186,10 +178,9 @@ export default function AdminJobsPage() {
           <Briefcase className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium mb-2">No jobs found</h3>
           <p className="text-muted-foreground mb-4">
-            {activeTab === "all" 
+            {activeTab === "all"
               ? "Get started by creating your first job posting"
-              : `No ${activeTab} jobs found`
-            }
+              : `No ${activeTab} jobs found`}
           </p>
           {activeTab === "all" && (
             <Button onClick={() => router.push("/admin/jobs/create")}>
@@ -201,56 +192,28 @@ export default function AdminJobsPage() {
       );
     }
 
-    return (
-      <div className="space-y-4">
-        {jobs.map(renderJobCard)}
-      </div>
-    );
+    return <div className="space-y-4">{jobs.map(renderJobCard)}</div>;
   };
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header with Breadcrumb and Sidebar Trigger */}
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mx-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin">Admin</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin/jobs">Jobs</BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <PageHeader
+        title="Jobs Management"
+        description="Manage all job postings across the platform"
+        actions={
+          <Button
+            onClick={() => router.push("/admin/jobs/create")}
+            className="gap-1"
+          >
+            <PlusCircle className="h-4 w-4" />
+            Create New Job
+          </Button>
+        }
+      />
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-6">
         <div className="flex flex-col gap-6">
-          {/* Page Header */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                Jobs Management
-              </h1>
-              <p className="text-muted-foreground">
-                Manage all job postings across the platform
-              </p>
-            </div>
-            <Button
-              onClick={() => router.push("/admin/jobs/create")}
-              className="gap-1"
-            >
-              <PlusCircle className="h-4 w-4" />
-              Create New Job
-            </Button>
-          </div>
-
           {/* Job Tabs and Listing */}
           <Tabs
             value={activeTab}

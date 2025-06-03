@@ -1,20 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shadcn-ui/tabs';
+import React, { useState, useEffect } from "react";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from '@/components/shadcn-ui/breadcrumb';
-import { SidebarTrigger } from '@/components/shadcn-ui/sidebar';
-import { Separator } from '@/components/shadcn-ui/separator';
-import { toast } from 'sonner';
-import { GeneralSettings } from '@/components/admin/settings/general-settings';
-import { EmailSettings } from '@/components/admin/settings/email-settings';
-import { CustomFieldsManager, CustomField } from '@/components/admin/settings/custom-fields-manager';
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/shadcn-ui/tabs";
+
+import { toast } from "sonner";
+import { GeneralSettings } from "@/components/admin/settings/general-settings";
+import { EmailSettings } from "@/components/admin/settings/email-settings";
+import {
+  CustomFieldsManager,
+  CustomField,
+} from "@/components/admin/settings/custom-fields-manager";
+import { PageHeader } from "@/components/shared/PageHeader";
 
 // Types
 interface GeneralSettings {
@@ -50,79 +51,83 @@ interface EmailSettings {
 
 // Sample data for testing when API fails
 const sampleGeneralSettings = {
-  companyName: 'Rekrut ATS',
-  companyEmail: 'contact@rekrut.com',
-  companyPhone: '+1 (555) 123-4567',
-  companyWebsite: 'https://rekrut.example.com',
-  companyAddress: '123 Recruitment Street, HR City, 12345',
-  jobBoardTitle: 'Careers at Rekrut',
-  jobBoardDescription: 'Find your dream job through our specialized recruitment platform',
-  defaultLanguage: 'en',
-  defaultCurrency: 'USD',
-  timezone: 'America/New_York',
-  dateFormat: 'MM/DD/YYYY',
-  timeFormat: '12h'
+  companyName: "Rekrut ATS",
+  companyEmail: "contact@rekrut.com",
+  companyPhone: "+1 (555) 123-4567",
+  companyWebsite: "https://rekrut.example.com",
+  companyAddress: "123 Recruitment Street, HR City, 12345",
+  jobBoardTitle: "Careers at Rekrut",
+  jobBoardDescription:
+    "Find your dream job through our specialized recruitment platform",
+  defaultLanguage: "en",
+  defaultCurrency: "USD",
+  timezone: "America/New_York",
+  dateFormat: "MM/DD/YYYY",
+  timeFormat: "12h",
 };
 
 const sampleEmailSettings = {
-  senderName: 'Rekrut Recruitment',
-  senderEmail: 'recruitment@rekrut.com',
-  smtpHost: 'smtp.example.com',
+  senderName: "Rekrut Recruitment",
+  senderEmail: "recruitment@rekrut.com",
+  smtpHost: "smtp.example.com",
   smtpPort: 587,
-  smtpUser: 'rekrut_mail',
-  smtpPassword: '********',
+  smtpUser: "rekrut_mail",
+  smtpPassword: "********",
   smtpSecure: true,
-  emailSignature: 'Best regards,\nThe Rekrut Team\nwww.rekrut.example.com',
+  emailSignature: "Best regards,\nThe Rekrut Team\nwww.rekrut.example.com",
   applicationConfirmationEnabled: true,
   statusChangeNotificationEnabled: true,
   interviewScheduleEnabled: true,
   rejectionEnabled: true,
-  offerEnabled: true
+  offerEnabled: true,
 };
 
 const sampleCustomFields: CustomField[] = [
   {
-    _id: '1',
-    name: 'experience_years',
-    label: 'Years of Experience',
-    type: 'text',
-    entity: 'candidate',
-    placeholder: 'Enter years of experience',
-    helpText: 'Total number of years in this profession',
+    _id: "1",
+    name: "experience_years",
+    label: "Years of Experience",
+    type: "text",
+    entity: "candidate",
+    placeholder: "Enter years of experience",
+    helpText: "Total number of years in this profession",
     validation: { required: true },
     isVisible: true,
-    visibleTo: ['admin', 'subadmin'],
+    visibleTo: ["admin", "subadmin"],
     order: 0,
-    createdBy: 'admin',
+    createdBy: "admin",
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   },
   {
-    _id: '2',
-    name: 'remote_preference',
-    label: 'Remote Work Preference',
-    type: 'select',
-    entity: 'job',
+    _id: "2",
+    name: "remote_preference",
+    label: "Remote Work Preference",
+    type: "select",
+    entity: "job",
     options: [
-      { value: 'remote', label: 'Fully Remote' },
-      { value: 'hybrid', label: 'Hybrid' },
-      { value: 'onsite', label: 'On-site' }
+      { value: "remote", label: "Fully Remote" },
+      { value: "hybrid", label: "Hybrid" },
+      { value: "onsite", label: "On-site" },
     ],
     validation: { required: false },
     isVisible: true,
-    visibleTo: ['admin', 'subadmin', 'candidate'],
+    visibleTo: ["admin", "subadmin", "candidate"],
     order: 1,
-    createdBy: 'admin',
+    createdBy: "admin",
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
+    updatedAt: new Date().toISOString(),
+  },
 ];
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('general');
+  const [activeTab, setActiveTab] = useState("general");
   const [isLoading, setIsLoading] = useState(true);
-  const [generalSettings, setGeneralSettings] = useState<GeneralSettings | null>(null);
-  const [emailSettings, setEmailSettings] = useState<EmailSettings | null>(null);
+  const [generalSettings, setGeneralSettings] =
+    useState<GeneralSettings | null>(null);
+  const [emailSettings, setEmailSettings] = useState<EmailSettings | null>(
+    null
+  );
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
 
   // Fetch general settings
@@ -130,8 +135,8 @@ export default function SettingsPage() {
     const fetchGeneralSettings = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/admin/settings?category=general');
-        
+        const response = await fetch("/api/admin/settings?category=general");
+
         if (!response.ok) {
           if (response.status === 401) {
             toast.error("Authentication error. Please log in again.");
@@ -139,9 +144,9 @@ export default function SettingsPage() {
             setGeneralSettings(sampleGeneralSettings);
             return;
           }
-          throw new Error('Failed to fetch general settings');
+          throw new Error("Failed to fetch general settings");
         }
-        
+
         const data = await response.json();
         setGeneralSettings(data.settings?.general || {});
       } catch (error) {
@@ -154,7 +159,7 @@ export default function SettingsPage() {
       }
     };
 
-    if (activeTab === 'general') {
+    if (activeTab === "general") {
       fetchGeneralSettings();
     }
   }, [activeTab]);
@@ -164,8 +169,8 @@ export default function SettingsPage() {
     const fetchEmailSettings = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/admin/settings?category=email');
-        
+        const response = await fetch("/api/admin/settings?category=email");
+
         if (!response.ok) {
           if (response.status === 401) {
             toast.error("Authentication error. Please log in again.");
@@ -173,9 +178,9 @@ export default function SettingsPage() {
             setEmailSettings(sampleEmailSettings);
             return;
           }
-          throw new Error('Failed to fetch email settings');
+          throw new Error("Failed to fetch email settings");
         }
-        
+
         const data = await response.json();
         setEmailSettings(data.settings?.email || {});
       } catch (error) {
@@ -188,7 +193,7 @@ export default function SettingsPage() {
       }
     };
 
-    if (activeTab === 'email') {
+    if (activeTab === "email") {
       fetchEmailSettings();
     }
   }, [activeTab]);
@@ -198,8 +203,8 @@ export default function SettingsPage() {
     const fetchCustomFields = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/admin/custom-fields');
-        
+        const response = await fetch("/api/admin/custom-fields");
+
         if (!response.ok) {
           if (response.status === 401) {
             toast.error("Authentication error. Please log in again.");
@@ -207,9 +212,9 @@ export default function SettingsPage() {
             setCustomFields(sampleCustomFields);
             return;
           }
-          throw new Error('Failed to fetch custom fields');
+          throw new Error("Failed to fetch custom fields");
         }
-        
+
         const data = await response.json();
         setCustomFields(data.fields || []);
       } catch (error) {
@@ -222,7 +227,7 @@ export default function SettingsPage() {
       }
     };
 
-    if (activeTab === 'custom-fields') {
+    if (activeTab === "custom-fields") {
       fetchCustomFields();
     }
   }, [activeTab]);
@@ -231,19 +236,19 @@ export default function SettingsPage() {
   const handleSaveGeneralSettings = async (data: GeneralSettings) => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/admin/settings', {
-        method: 'PUT',
+      const response = await fetch("/api/admin/settings", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          category: 'general',
+          category: "general",
           settings: data,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save general settings');
+        throw new Error("Failed to save general settings");
       }
 
       setGeneralSettings(data);
@@ -260,19 +265,19 @@ export default function SettingsPage() {
   const handleSaveEmailSettings = async (data: EmailSettings) => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/admin/settings', {
-        method: 'PUT',
+      const response = await fetch("/api/admin/settings", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          category: 'email',
+          category: "email",
           settings: data,
         }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save email settings');
+        throw new Error("Failed to save email settings");
       }
 
       setEmailSettings(data);
@@ -289,16 +294,16 @@ export default function SettingsPage() {
   const handleSendTestEmail = async () => {
     try {
       toast.info("Sending test email...");
-      const response = await fetch('/api/admin/settings/test-email', {
-        method: 'POST',
+      const response = await fetch("/api/admin/settings/test-email", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({}),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send test email');
+        throw new Error("Failed to send test email");
       }
 
       toast.success("Test email sent successfully");
@@ -309,19 +314,19 @@ export default function SettingsPage() {
   };
 
   // Add custom field
-  const handleAddCustomField = async (field: Omit<CustomField, '_id'>) => {
+  const handleAddCustomField = async (field: Omit<CustomField, "_id">) => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/admin/custom-fields', {
-        method: 'POST',
+      const response = await fetch("/api/admin/custom-fields", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(field),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add custom field');
+        throw new Error("Failed to add custom field");
       }
 
       const data = await response.json();
@@ -336,23 +341,26 @@ export default function SettingsPage() {
   };
 
   // Edit custom field
-  const handleEditCustomField = async (id: string, field: Partial<CustomField>) => {
+  const handleEditCustomField = async (
+    id: string,
+    field: Partial<CustomField>
+  ) => {
     try {
       setIsLoading(true);
       const response = await fetch(`/api/admin/custom-fields/${id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(field),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update custom field');
+        throw new Error("Failed to update custom field");
       }
 
       const data = await response.json();
-      setCustomFields(customFields.map(f => f._id === id ? data.field : f));
+      setCustomFields(customFields.map((f) => (f._id === id ? data.field : f)));
       toast.success("Custom field updated successfully");
     } catch (error) {
       console.error("Error updating custom field:", error);
@@ -367,14 +375,14 @@ export default function SettingsPage() {
     try {
       setIsLoading(true);
       const response = await fetch(`/api/admin/custom-fields/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete custom field');
+        throw new Error("Failed to delete custom field");
       }
 
-      setCustomFields(customFields.filter(f => f._id !== id));
+      setCustomFields(customFields.filter((f) => f._id !== id));
       toast.success("Custom field deleted successfully");
     } catch (error) {
       console.error("Error deleting custom field:", error);
@@ -385,36 +393,39 @@ export default function SettingsPage() {
   };
 
   // Reorder custom field
-  const handleReorderCustomField = async (id: string, direction: 'up' | 'down') => {
+  const handleReorderCustomField = async (
+    id: string,
+    direction: "up" | "down"
+  ) => {
     try {
       // Find the current field and its index
-      const fieldIndex = customFields.findIndex(f => f._id === id);
+      const fieldIndex = customFields.findIndex((f) => f._id === id);
       if (fieldIndex === -1) return;
-      
+
       const field = customFields[fieldIndex];
-      
+
       // Find the field to swap with
-      const swapIndex = direction === 'up' ? fieldIndex - 1 : fieldIndex + 1;
+      const swapIndex = direction === "up" ? fieldIndex - 1 : fieldIndex + 1;
       if (swapIndex < 0 || swapIndex >= customFields.length) return;
-      
+
       const swapField = customFields[swapIndex];
-      
+
       // Update orders
       const newOrder = swapField.order;
       const swapOrder = field.order;
-      
+
       // Update both fields
       await Promise.all([
         handleEditCustomField(id, { order: newOrder }),
-        handleEditCustomField(swapField._id, { order: swapOrder })
+        handleEditCustomField(swapField._id, { order: swapOrder }),
       ]);
-      
+
       // Update local state to show reordering immediately
       const updatedFields = [...customFields];
       updatedFields[fieldIndex].order = newOrder;
       updatedFields[swapIndex].order = swapOrder;
       updatedFields.sort((a, b) => a.order - b.order);
-      
+
       setCustomFields(updatedFields);
       toast.success("Field order updated");
     } catch (error) {
@@ -425,59 +436,43 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mx-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin">Admin</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin/settings">Settings</BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <PageHeader
+        title="System Settings"
+        description="Configure your application's global settings and preferences"
+      />
 
       <main className="flex-1 p-4 md:p-6">
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold tracking-tight">System Settings</h1>
-            <p className="text-muted-foreground">
-              Configure your application&apos;s global settings and preferences
-            </p>
-          </div>
-
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="space-y-6"
+          >
             <TabsList className="grid w-full md:w-auto md:inline-grid grid-cols-1 md:grid-cols-3 h-auto">
               <TabsTrigger value="general">General</TabsTrigger>
               <TabsTrigger value="email">Email</TabsTrigger>
               <TabsTrigger value="custom-fields">Custom Fields</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="general" className="space-y-6">
-              <GeneralSettings 
-                initialData={generalSettings} 
+              <GeneralSettings
+                initialData={generalSettings}
                 onSave={handleSaveGeneralSettings}
                 isLoading={isLoading}
               />
             </TabsContent>
-            
+
             <TabsContent value="email" className="space-y-6">
-              <EmailSettings 
-                initialData={emailSettings} 
+              <EmailSettings
+                initialData={emailSettings ?? {}}
                 onSave={handleSaveEmailSettings}
                 onTestEmail={handleSendTestEmail}
                 isLoading={isLoading}
               />
             </TabsContent>
-            
+
             <TabsContent value="custom-fields" className="space-y-6">
-              <CustomFieldsManager 
+              <CustomFieldsManager
                 fields={customFields}
                 loading={isLoading}
                 onAddField={handleAddCustomField}

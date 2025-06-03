@@ -1,19 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/shadcn-ui/breadcrumb";
-import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
-import { Separator } from "@/components/shadcn-ui/separator";
 import { SubAdminTable, SubAdmin } from "@/components/admin/subadmin-table";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { Button } from "@/components/shadcn-ui/button";
+import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function SubAdminsPage() {
+  const router = useRouter();
   const [subadmins, setSubadmins] = useState<SubAdmin[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -43,35 +39,18 @@ export default function SubAdminsPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mx-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin">Admin</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin/users">Users</BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <PageHeader
+        title="User Management"
+        description="Manage your recruitment team members"
+        actions={
+          <Button onClick={() => router.push("/admin/users/create")}>
+            <Plus className="mr-2 h-4 w-4" /> Add SubAdmin
+          </Button>
+        }
+      />
 
       <main className="flex-1 p-6">
-        <div className="flex flex-col gap-6">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
-            <p className="text-muted-foreground">
-              Manage your recruitment team members
-            </p>
-          </div>
-
-          <SubAdminTable data={subadmins} isLoading={isLoading} />
-        </div>
+        <SubAdminTable data={subadmins} isLoading={isLoading} />
       </main>
     </div>
   );

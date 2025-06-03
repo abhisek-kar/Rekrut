@@ -3,15 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/shadcn-ui/breadcrumb";
-import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
-import { Separator } from "@/components/shadcn-ui/separator";
-import {
   Tabs,
   TabsContent,
   TabsList,
@@ -20,11 +11,11 @@ import {
 import { Card, CardContent } from "@/components/shadcn-ui/card";
 import { Button } from "@/components/shadcn-ui/button";
 import { Badge } from "@/components/shadcn-ui/badge";
-import { Skeleton } from "@/components/shadcn-ui/skeleton";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { FileText, Users, Eye, Calendar } from "lucide-react";
 import { SectionLoader } from "@/components/atoms/loader";
+import { PageHeader } from "@/components/shared/PageHeader";
 
 // Simple application interface for admin use
 interface SimpleApplication {
@@ -241,45 +232,20 @@ export default function AdminApplicationsPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header with Breadcrumb */}
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 md:px-6">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mx-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin">Admin</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/admin/applications">Applications</BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+      <PageHeader
+        title="Applications Management"
+        description="Manage all job applications across the platform"
+        actions={
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <FileText className="w-4 h-4" />
+            <span>Total: {statusCounts.all} applications</span>
+          </div>
+        }
+      />
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-6">
         <div className="flex flex-col gap-6">
-          {/* Page Header */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                Applications Management
-              </h1>
-              <p className="text-muted-foreground">
-                Manage all job applications across the platform
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <FileText className="w-4 h-4" />
-              <span>Total: {statusCounts.all} applications</span>
-            </div>
-          </div>
-
           {/* Status Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="mb-6">

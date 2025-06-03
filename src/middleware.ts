@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
   log.debug("Middleware processing request", { 
     pathname, 
     method: request.method,
-    userAgent: request.headers.get('user-agent')
+    userAgent: request.headers.get('user-agent') ?? undefined
   });
 
   // Check if the path is a public route (no auth required)
