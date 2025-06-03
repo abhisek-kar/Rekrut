@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useCallback, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,9 +11,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/shadcn-ui/alert-dialog";
-import { LogOut } from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { toast } from "sonner";
+import clsx from "clsx";
 
 interface LogoutConfirmationModalProps {
   isOpen: boolean;
@@ -24,42 +25,64 @@ interface LogoutConfirmationModalProps {
 export function LogoutConfirmationModal({
   isOpen,
   onClose,
-  redirectTo = "/auth/login",
+  redirectTo = "/",
 }: LogoutConfirmationModalProps) {
-  const handleLogout = async () => {
+  const [loading, setLoading] = useState(false);
+
+  const handleLogout = useCallback(async () => {
+    setLoading(true);
     try {
-      await signOut({ 
-        redirect: false,
-        callbackUrl: redirectTo
-      });
-      
-      toast.success("You have been logged out successfully");
-      
-      // Manually redirect to maintain consistent behavior
+      await signOut({ redirect: false, callbackUrl: redirectTo });
+      toast.success("You’ve been logged out successfully.");
       window.location.href = redirectTo;
     } catch (error) {
       console.error("Logout error:", error);
-      toast.error("Failed to log out. Please try again.");
+      toast.error("Logout failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [redirectTo]);
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent>
+      <AlertDialogContent className="space-y-4">
         <AlertDialogHeader>
-          <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to log out of your account?
+          <AlertDialogTitle className="text-xl font-semibold">
+            Confirm Logout
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-muted-foreground">
+            Logging out will end your current session. Are you sure you want to
+            continue?
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction 
-            onClick={handleLogout}
-            className="bg-destructive hover:bg-destructive/90"
+
+        <AlertDialogFooter className="flex justify-end gap-3 pt-4">
+          <AlertDialogCancel
+            disabled={loading}
+            className="rounded-md px-4 py-2 text-sm"
           >
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
+            Cancel
+          </AlertDialogCancel>
+
+          <AlertDialogAction
+            onClick={handleLogout}
+            disabled={loading}
+            className={clsx(
+              "bg-destructive text-white hover:bg-destructive/90 rounded-md px-4 py-2 text-sm flex items-center justify-center gap-2",
+              loading && "opacity-75 cursor-not-allowed"
+            )}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="animate-spin h-4 w-4" />
+                Logging out...
+              </>
+            ) : (
+              <>
+                <LogOut className="h-4 w-4" />
+                Logout
+              </>
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
