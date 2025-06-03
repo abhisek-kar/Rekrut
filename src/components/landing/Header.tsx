@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/shadcn-ui/button";
 import Link from "next/link";
 import { Briefcase, Menu, X } from "lucide-react";
+import { Logo } from "../atoms/logo";
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -20,17 +21,12 @@ const Header = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center">
-            <div className="flex-shrink-0 flex items-center">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Briefcase className="w-5 h-5 text-white" />
-              </div>
-              <span className="ml-2 text-xl font-bold text-gray-900">Rekrut ATS</span>
-            </div>
-          </div>
+         
+          <Logo asLink={true} showText={true}/>
+
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-8">
             {navigationItems.map((item) => (
               <a
                 key={item.href}
