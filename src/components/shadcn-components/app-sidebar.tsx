@@ -80,7 +80,7 @@ export function AppSidebar({
                     tooltip={item.title}
                     className="w-full transition-colors "
                   >
-                    <Link href={item.href ?? "#"} className="flex items-center w-full justify-between">
+                    <Link href={item.href ?? "#"} className="flex items-center w-full justify-between ">
                       <div className="flex items-center  hover:translate-x-1 hover:scale-105 transition-transform ease-all duration-300">
                         {item.icon && <item.icon className="h-5 w-5 mr-3" />}
                         <span >{item.title}</span>

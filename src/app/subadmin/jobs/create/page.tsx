@@ -79,7 +79,7 @@ const initialJobData: Partial<JobType> = {
 export default function SubAdminCreateJobPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(3);
   const [jobData, setJobData] = useState(initialJobData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formValidity, setFormValidity] = useState({
