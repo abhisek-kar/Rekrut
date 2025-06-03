@@ -4,6 +4,8 @@ import { Badge } from "@/components/shadcn-ui/badge";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "../shadcn-ui/card";
 import { Star } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "../shadcn-ui/avatar";
+
 
 function TestimonialsSection() {
     const testimonials = [
@@ -12,18 +14,22 @@ function TestimonialsSection() {
           role: "HR Director",
           company: "TechCorp Inc.",
           content: "Rekrut ATS transformed our hiring process. We've reduced our time-to-hire by 50% and improved candidate satisfaction significantly."
+          ,
+          image:"https://randomuser.me/api/portraits/women/44.jpg"
         },
         {
           name: "Michael Chen",
           role: "Recruitment Manager", 
           company: "Growth Ventures",
-          content: "The AI-powered matching feature is incredible. It saves us hours of manual screening and helps us find the perfect candidates faster."
+          content: "The AI-powered matching feature is incredible. It saves us hours of manual screening and helps us find the perfect candidates faster.",
+          image:"https://randomuser.me/api/portraits/men/45.jpg"
         },
         {
           name: "Emily Davis",
           role: "Talent Acquisition Lead",
           company: "Innovation Labs",
-          content: "User-friendly interface, powerful features, and excellent support. Rekrut ATS is everything we needed in one platform."
+          content: "User-friendly interface, powerful features, and excellent support. Rekrut ATS is everything we needed in one platform.",
+          image:"https://randomuser.me/api/portraits/women/46.jpg"
         }
       ];
   return (
@@ -65,9 +71,10 @@ function TestimonialsSection() {
                   "{testimonial.content}"
                 </blockquote>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 flex items-center justify-center text-white font-semibold">
-                    {testimonial.name.charAt(0)}
-                  </div>
+                <Avatar>
+  <AvatarImage src={testimonial?.image} />
+  <AvatarFallback>{testimonial?.name}</AvatarFallback>
+</Avatar>
                   <div className="ml-3">
                     <div className="font-semibold text-gray-900">{testimonial.name}</div>
                     <div className="text-sm text-gray-600">{testimonial.role}, {testimonial.company}</div>

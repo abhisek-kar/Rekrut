@@ -53,6 +53,7 @@
     "nodemailer": "^6.9.13",
     "pino": "^9.7.0",
     "react": "^18",
+    "react-countup": "^6.5.3",
     "react-dom": "^18",
     "react-hook-form": "^7.55.0",
     "sonner": "^2.0.3",

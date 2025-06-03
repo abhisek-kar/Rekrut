@@ -5,6 +5,7 @@ import { Badge } from "@/components/shadcn-ui/badge";
 import Link from "next/link";
 import { ArrowRight, Star, Play, CheckCircle, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
+import { Avatar, AvatarFallback, AvatarImage } from "../shadcn-ui/avatar";
 
 const HeroSection = () => {
   const stats = [
@@ -13,6 +14,24 @@ const HeroSection = () => {
     { number: "95%", label: "Customer Satisfaction" },
     { number: "60%", label: "Faster Hiring Process" }
   ];
+
+  const candidates = [
+    {
+        name: "Elon Jena",
+        position: "Senior Developer",
+        image: "https://randomuser.me/api/portraits/men/75.jpg"
+    },
+    {
+        name: "Renuka Gawde",
+        position: "Product Manager",
+        image: "https://randomuser.me/api/portraits/women/75.jpg"
+    },
+    {
+        name: "Jamuna Siri",
+        position: "UX Designer",
+        image: "https://randomuser.me/api/portraits/women/76.jpg"
+    }
+  ]
 
   return (
     <section className="pt-16 pb-24 bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -58,9 +77,19 @@ const HeroSection = () => {
             <div className="flex items-center space-x-8 pt-4">
               <div className="flex items-center space-x-2">
                 <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-purple-400 border-2 border-white"></div>
-                  ))}
+                    {[
+                        { name: "Satya Nadella", image: "https://randomuser.me/api/portraits/men/32.jpg" },
+                        { name: "Sundar Pichai", image: "https://randomuser.me/api/portraits/men/45.jpg" },
+                        { name: "Tim Cook", image: "https://randomuser.me/api/portraits/men/67.jpg" },
+                        { name: "Jensen Huang", image: "https://randomuser.me/api/portraits/men/26.jpg" }
+                    ].map((ceo, i) => (
+                        <Avatar key={i} className="w-8 h-8 border-2 border-white">
+                            <AvatarImage src={ceo.image} alt={ceo.name} />
+                            <AvatarFallback className="text-xs bg-gradient-to-r from-blue-400 to-purple-400 text-white">
+                                {ceo.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                        </Avatar>
+                    ))}
                 </div>
                 <span className="text-sm text-gray-600">500+ companies trust us</span>
               </div>
@@ -107,12 +136,16 @@ const HeroSection = () => {
                     <span className="text-gray-600">Recent Applications</span>
                     <span className="text-blue-600">View all</span>
                   </div>
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-purple-400"></div>
+                  {candidates?.map((candidate, index) => (
+                    <div key={index} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
+                  <Avatar>
+  <AvatarImage src={candidate?.image} />
+  <AvatarFallback>{candidate?.name}</AvatarFallback>
+</Avatar>
+
                       <div className="flex-1">
-                        <div className="text-sm font-medium">Candidate {i}</div>
-                        <div className="text-xs text-gray-500">Senior Developer</div>
+                        <div className="text-sm font-medium">{candidate?.name}</div>
+                        <div className="text-xs text-gray-500">{candidate?.position}</div>
                       </div>
                       <Badge variant="outline" className="text-xs">New</Badge>
                     </div>
