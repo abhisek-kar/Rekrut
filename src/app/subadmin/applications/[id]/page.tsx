@@ -314,8 +314,13 @@ export default function SubAdminApplicationDetailPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <PageHeader
-        title={
-          <div className="flex items-center gap-3">
+        title={`Application - ${application.candidate.firstName} ${application.candidate.lastName}`}
+        description={`Job: ${application.job.title} | Status: ${statusInfo.label}`}
+      />
+
+      <main className="flex-1 p-4 md:p-6">
+        <div>
+        <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="sm"
@@ -340,8 +345,6 @@ export default function SubAdminApplicationDetailPage() {
               <p className="text-muted-foreground">{application.job.title}</p>
             </div>
           </div>
-        }
-        actions={
           <div className="flex items-center gap-2">
             <Badge className={statusInfo.color}>
               <StatusIcon className="w-3 h-3 mr-1" />
@@ -398,10 +401,7 @@ export default function SubAdminApplicationDetailPage() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        }
-      />
-
-      <main className="flex-1 p-4 md:p-6">
+        </div>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList>
             <TabsTrigger value="overview">Overview</TabsTrigger>
