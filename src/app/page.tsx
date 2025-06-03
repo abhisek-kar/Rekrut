@@ -11,22 +11,17 @@ import { Logo } from "@/components/atoms/logo";
 
 export default function Home() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   // Redirect authenticated users to their dashboard
   useEffect(() => {
-    if (!isLoading && isAuthenticated && user) {
+    if (isAuthenticated && user) {
       const dashboardRoute = getDashboardRoute(user.role);
       router.push(dashboardRoute);
     }
-  }, [isAuthenticated, isLoading, user, router]);
+  }, [isAuthenticated, user, router]);
 
-  // Show loading while checking authentication
-  if (isLoading) {
-    return <PageLoader message="Checking authentication..." />;
-  }
-
-  // If authenticated, this will redirect, but show loading state briefly
+  // If authenticated, show redirecting state
   if (isAuthenticated && user) {
     return <PageLoader message="Redirecting to your dashboard..." />;
   }

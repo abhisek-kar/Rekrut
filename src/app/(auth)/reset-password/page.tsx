@@ -8,7 +8,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { ButtonLoader } from "@/components/atoms/loader";
 
 import { Button } from "@/components/shadcn-ui/button";
 import {
@@ -274,7 +275,7 @@ export default function ResetPasswordPage() {
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                        <ButtonLoader size="sm" />
                         Resetting...
                       </>
                     ) : (

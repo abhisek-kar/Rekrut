@@ -10,12 +10,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
-  Loader2,
   Mail,
   AlertCircle,
   CheckCircle,
   InfoIcon,
 } from "lucide-react";
+import { ButtonLoader } from "@/components/atoms/loader";
 
 import { Button } from "@/components/shadcn-ui/button";
 import {
@@ -181,7 +181,7 @@ export default function ForgotPasswordPage() {
                   >
                     {isLoading ? (
                       <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />{" "}
+                        <ButtonLoader size="sm" />
                         Sending Email...
                       </>
                     ) : (

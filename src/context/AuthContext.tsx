@@ -6,6 +6,7 @@ import {
   ReactNode,
 } from "react";
 import { useAuth as useNextAuth } from "@/hooks/useAuth";
+import { PageLoader } from "@/components/atoms/loader";
 
 // Create context type for TypeScript
 type AuthContextType = ReturnType<typeof useNextAuth>;
@@ -28,6 +29,11 @@ type AuthProviderProps = {
 // Auth provider component
 export function AuthProvider({ children }: AuthProviderProps) {
   const auth = useNextAuth();
+
+  // Show loading screen while authentication is being checked
+  if (auth.isLoading) {
+    return <PageLoader message="Checking authentication..." />;
+  }
 
   return (
     <AuthContext.Provider value={auth}>

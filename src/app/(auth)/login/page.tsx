@@ -9,13 +9,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Eye,
   EyeOff,
-  Loader2,
   Mail,
   Lock,
   UserCheck,
   User,
   Shield,
 } from "lucide-react";
+import { ButtonLoader } from "@/components/atoms/loader";
 import { useAuthForm } from "@/hooks/useAuthForm";
 import { useAuth } from "@/hooks/useAuth";
 import { AUTH_ROUTES, getDashboardRoute } from "@/lib/routes";
@@ -252,7 +252,7 @@ export default function LoginPage() {
                 >
                   {isLoading ? (
                     <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      <ButtonLoader size="sm" />
                       <span>Logging in...</span>
                     </>
                   ) : (
