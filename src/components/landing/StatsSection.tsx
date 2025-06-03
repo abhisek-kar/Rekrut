@@ -12,7 +12,7 @@ const stats = [
 
 const StatsSection = () => {
   return (
-    <section className="py-16 bg-gray-900 text-white">
+    <section className="py-20 bg-gray-900 text-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
           {stats.map((stat, index) => (
@@ -27,7 +27,7 @@ const StatsSection = () => {
               <div className="text-3xl sm:text-4xl font-bold text-white mb-2">
                 <CountUp
                   end={stat.number}
-                  duration={1.5}
+                  duration={1.2}
                   separator=","
                   decimals={stat.suffix === "%" ? 1 : 0}
                 />
