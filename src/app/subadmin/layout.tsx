@@ -99,7 +99,7 @@ export default function SubAdminLayout({
   const userData = {
     name: user ? `${user.firstName} ${user.lastName}` : "SubAdmin User",
     email: user?.email || "",
-    avatar: user?.profilePhoto || "/avatars/default.png",
+    avatar: user?.profilePhoto || "https://docs.material-tailwind.com/img/face-2.jpg",
   };
 
   return (

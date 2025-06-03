@@ -13,6 +13,7 @@ type AuthUser = {
   lastName: string;
   role: "admin" | "subadmin";
   profilePhoto?: string;
+  phone?: string;
 };
 
 // Type for the hook return value
@@ -20,7 +21,11 @@ type UseAuthReturn = {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string, role: "admin" | "subadmin") => Promise<boolean>;
+  login: (
+    email: string,
+    password: string,
+    role: "admin" | "subadmin"
+  ) => Promise<boolean>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<boolean>;
 };
@@ -45,31 +50,12 @@ export function useAuth(): UseAuthReturn {
       }
     : null;
 
-  // Validate user data integrity
-  if (user && (!user.role || !user.id)) {
-    console.error("Invalid user session data:", {
-      hasRole: !!user.role,
-      hasId: !!user.id,
-      email: user.email
-    });
-    // Force logout if session is corrupted
-    signOut({ redirect: false });
-    return {
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      login,
-      logout,
-      refreshSession,
-    };
-  }
-
   // Login function with improved error handling
   const login = async (
     email: string,
     password: string,
     role: "admin" | "subadmin"
-  ) => {
+  ): Promise<boolean> => {
     if (!email || !password || !role) {
       throw new Error("Email, password, and role are required");
     }
@@ -94,9 +80,10 @@ export function useAuth(): UseAuthReturn {
 
       if (result.url) {
         router.push(result.url);
+        return true;
       }
 
-      return result;
+      return false;
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -128,6 +115,25 @@ export function useAuth(): UseAuthReturn {
       return false;
     }
   };
+
+  // Validate user data integrity
+  if (user && (!user.role || !user.id)) {
+    console.error("Invalid user session data:", {
+      hasRole: !!user.role,
+      hasId: !!user.id,
+      email: user.email,
+    });
+    // Force logout if session is corrupted
+    signOut({ redirect: false });
+    return {
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      login,
+      logout,
+      refreshSession,
+    };
+  }
 
   return {
     user,

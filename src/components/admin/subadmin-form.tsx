@@ -65,13 +65,15 @@ const subadminFormSchema = z.object({
     .min(6, { message: "Password must be at least 6 characters" })
     .optional(),
   status: z.enum(["active", "inactive"]),
-  sendSetupEmail: z.boolean().default(true),
+  sendSetupEmail: z.boolean().default(true).optional(),
   permissions: z.array(z.string()),
   profilePhoto: z.any().optional(), // File upload handling
 });
 
 // Types for the form values
-export type SubadminFormValues = z.infer<typeof subadminFormSchema>;
+export type SubadminFormValues = z.infer<typeof subadminFormSchema> & {
+  id?: string;
+};
 
 // Function to generate a strong password
 function generateStrongPassword(length = 12) {
@@ -103,7 +105,7 @@ function generateStrongPassword(length = 12) {
 
 // SubAdmin form props
 interface SubadminFormProps {
-  initialData?: Partial<SubadminFormValues>;
+  initialData?: Partial<SubadminFormValues> & { id?: string };
   isEditing?: boolean;
   onSuccess?: (data: SubadminFormValues) => void;
 }
