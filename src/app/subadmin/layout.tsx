@@ -44,55 +44,47 @@ export default function SubAdminLayout({
   const navItems = [
     {
       title: "Dashboard",
-      url: "/subadmin/dashboard",
-      icon: LayoutDashboard,
-      isActive: pathname === "/subadmin/dashboard"
+      href: "/subadmin/dashboard",
+      icon: LayoutDashboard
     },
     {
       title: "Jobs",
-      url: "/subadmin/jobs",
+      href: "/subadmin/jobs",
       icon: Briefcase,
-      isActive: pathname.startsWith("/subadmin/jobs"),
-      badge: "12" // This would be dynamic in a real implementation
+      label: "12" // This would be dynamic in a real implementation
     },
     {
       title: "Applications",
-      url: "/subadmin/applications",
+      href: "/subadmin/applications",
       icon: FileText,
-      isActive: pathname.startsWith("/subadmin/applications"),
-      badge: "24" // This would be dynamic in a real implementation
+      label: "24" // This would be dynamic in a real implementation
     },
     {
       title: "Candidates",
-      url: "/subadmin/candidates",
-      icon: UserCircle,
-      isActive: pathname.startsWith("/subadmin/candidates")
+      href: "/subadmin/candidates",
+      icon: UserCircle
     },
     {
       title: "Interviews",
-      url: "/subadmin/interviews",
-      icon: CalendarCheck,
-      isActive: pathname.startsWith("/subadmin/interviews")
+      href: "/subadmin/interviews",
+      icon: CalendarCheck
     },
     {
       title: "Tasks",
-      url: "/subadmin/tasks",
+      href: "/subadmin/tasks",
       icon: CheckSquare,
-      isActive: pathname.startsWith("/subadmin/tasks"),
-      badge: "5" // This would be dynamic in a real implementation
+      label: "5" // This would be dynamic in a real implementation
     },
     {
       title: "Reports",
-      url: "/subadmin/reports",
-      icon: FileBarChart2,
-      isActive: pathname.startsWith("/subadmin/reports")
+      href: "/subadmin/reports",
+      icon: FileBarChart2
     },
     {
       title: "Notifications",
-      url: "/subadmin/notifications",
+      href: "/subadmin/notifications",
       icon: Bell,
-      isActive: pathname.startsWith("/subadmin/notifications"),
-      badge: "3" // This would be dynamic in a real implementation
+      label: "3" // This would be dynamic in a real implementation
     }
   ];
 

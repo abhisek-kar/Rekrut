@@ -68,38 +68,36 @@ export function AppSidebar({
           <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
           <SidebarMenu>
             {navItems.map((item, index) => {
-              const isActive = item.href ? pathname === item.href : false;
+              const isActive = item.href ? pathname.startsWith(item.href) : false;
               return (
                 <SidebarMenuItem key={index}>
-                  <Link href={item.href ?? "#"} className="w-full">
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive}
-                      tooltip={item.title}
-                      className="w-full transition-colors"
-                    >
-                      <div className="flex items-center w-full justify-between">
-                        <div className="flex items-center">
-                          {item.icon && <item.icon className="h-5 w-5 mr-3" />}
-                          <span>{item.title}</span>
-                        </div>
-                        {item.label && (
-                          <Badge
-                            variant={isActive ? "default" : "secondary"}
-                            className="ml-auto text-xs h-5"
-                          >
-                            {item.label}
-                          </Badge>
-                        )}
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive}
+                    tooltip={item.title}
+                    className="w-full transition-colors"
+                  >
+                    <Link href={item.href ?? "#"} className="flex items-center w-full justify-between">
+                      <div className="flex items-center">
+                        {item.icon && <item.icon className="h-5 w-5 mr-3" />}
+                        <span>{item.title}</span>
                       </div>
-                    </SidebarMenuButton>
-                  </Link>
+                      {item.label && (
+                        <Badge
+                          variant={isActive ? "default" : "secondary"}
+                          className="ml-auto text-xs h-5"
+                        >
+                          {item.label}
+                        </Badge>
+                      )}
+                    </Link>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
               );
             })}
           </SidebarMenu>
         </SidebarGroup>
-
+{/* 
         {isAdmin && (
           <SidebarGroup>
             <SidebarGroupLabel>System</SidebarGroupLabel>
@@ -144,7 +142,7 @@ export function AppSidebar({
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
-        )}
+        )} */}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border/50 mt-auto">

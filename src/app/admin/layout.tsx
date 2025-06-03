@@ -43,40 +43,34 @@ export default function AdminLayout({
   const navItems = [
     {
       title: "Dashboard",
-      url: "/admin/dashboard",
-      icon: LayoutDashboard,
-      isActive: pathname === "/admin/dashboard"
+      href: "/admin/dashboard",
+      icon: LayoutDashboard
     },
     {
       title: "Users",
-      url: "/admin/users",
-      icon: Users,
-      isActive: pathname.startsWith("/admin/users")
+      href: "/admin/users",
+      icon: Users
     },
     {
       title: "Jobs",
-      url: "/admin/jobs",
-      icon: Briefcase,
-      isActive: pathname.startsWith("/admin/jobs")
+      href: "/admin/jobs",
+      icon: Briefcase
     },
     {
       title: "Candidates",
-      url: "/admin/candidates",
-      icon: UserCircle,
-      isActive: pathname.startsWith("/admin/candidates")
+      href: "/admin/candidates",
+      icon: UserCircle
     },
     {
       title: "Applications",
-      url: "/admin/applications",
-      icon: FileText,
-      isActive: pathname.startsWith("/admin/applications")
+      href: "/admin/applications",
+      icon: FileText
     },
     {
       title: "Notifications",
-      url: "/admin/notifications",
+      href: "/admin/notifications",
       icon: Bell,
-      isActive: pathname.startsWith("/admin/notifications"),
-      badge: "4"
+      label: "4"
     }
   ];
 
