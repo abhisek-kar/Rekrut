@@ -29,6 +29,7 @@ interface Step {
 
 interface JobFormLayoutProps {
   title: string;
+  subtitle?: string;
   currentStep: number;
   totalSteps: number;
   steps: Step[];
@@ -37,14 +38,18 @@ interface JobFormLayoutProps {
   isValid: boolean;
   isDirty: boolean;
   isEdit?: boolean;
+  cancelUrl?: string;
+  backToText?: string;
   onNext: () => void;
   onPrevious: () => void;
+  onCancel?: () => void;
   onSave: () => void;
   onSubmit: () => void;
 }
 
 export function JobFormLayout({
   title,
+  subtitle,
   currentStep,
   totalSteps,
   steps,
@@ -53,8 +58,11 @@ export function JobFormLayout({
   isValid,
   isDirty,
   isEdit = false,
+  cancelUrl = "/jobs",
+  backToText = "Back to Jobs",
   onNext,
   onPrevious,
+  onCancel,
   onSave,
   onSubmit,
 }: JobFormLayoutProps) {
@@ -99,8 +107,7 @@ export function JobFormLayout({
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
             <p className="text-muted-foreground mt-2">
-              Complete the form below to {isEdit ? "update" : "create"} a job
-              posting
+              {subtitle || `Complete the form below to ${isEdit ? "update" : "create"} a job posting`}
             </p>
           </div>
 
@@ -162,10 +169,10 @@ export function JobFormLayout({
               <div>
                 <Button
                   variant="outline"
-                  onClick={() => router.push("/jobs")}
+                  onClick={onCancel || (() => router.push(cancelUrl))}
                   disabled={isSubmitting}
                 >
-                  Cancel
+                  {backToText}
                 </Button>
               </div>
               <div className="flex gap-2">
