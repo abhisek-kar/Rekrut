@@ -205,8 +205,8 @@ export default function AdminJobsPage() {
             onClick={() => router.push("/admin/jobs/create")}
             className="gap-1"
           >
-            <PlusCircle className="h-4 w-4" />
-            Create New Job
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Create New Job
           </Button>
         }
       />

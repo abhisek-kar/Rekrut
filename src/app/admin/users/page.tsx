@@ -5,7 +5,7 @@ import { SubAdminTable, SubAdmin } from "@/components/admin/subadmin-table";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/shadcn-ui/button";
-import { Plus } from "lucide-react";
+import { Plus , PlusCircle} from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function SubAdminsPage() {
@@ -44,7 +44,9 @@ export default function SubAdminsPage() {
         description="Manage your recruitment team members"
         actions={
           <Button onClick={() => router.push("/admin/users/create")}>
-            <Plus className="mr-2 h-4 w-4" /> Add SubAdmin
+              <PlusCircle className="h-4 w-4 mr-2" />
+            
+             Add SubAdmin
           </Button>
         }
       />

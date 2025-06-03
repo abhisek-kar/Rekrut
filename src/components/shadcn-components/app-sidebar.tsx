@@ -65,7 +65,7 @@ export function AppSidebar({
 
       <SidebarContent className="px-2 py-2">
         <SidebarGroup>
-          <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
+          {/* <SidebarGroupLabel>Main Navigation</SidebarGroupLabel> */}
           <SidebarMenu>
             {navItems.map((item, index) => {
               const isActive = item.href ? pathname.startsWith(item.href) : false;
@@ -97,52 +97,7 @@ export function AppSidebar({
             })}
           </SidebarMenu>
         </SidebarGroup>
-{/* 
-        {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel>System</SidebarGroupLabel>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <Link href="/admin/notifications" className="w-full">
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname?.startsWith("/admin/notifications")}
-                    tooltip="Notifications"
-                    className="w-full transition-colors"
-                  >
-                    <div className="flex items-center w-full justify-between">
-                      <div className="flex items-center">
-                        <Bell className="h-5 w-5 mr-3" />
-                        <span>Notifications</span>
-                      </div>
-                      <Badge
-                        variant="destructive"
-                        className="ml-auto text-xs h-5"
-                      >
-                        4
-                      </Badge>
-                    </div>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <Link href="/admin/settings" className="w-full">
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname?.startsWith("/admin/settings")}
-                    tooltip="Settings"
-                    className="w-full transition-colors"
-                  >
-                    <div className="flex items-center">
-                      <Settings className="h-5 w-5 mr-3" />
-                      <span>Settings</span>
-                    </div>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroup>
-        )} */}
+
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border/50 mt-auto">

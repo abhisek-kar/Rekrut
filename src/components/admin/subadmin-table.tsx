@@ -244,9 +244,7 @@ export function SubAdminTable({ data, isLoading = false }: SubAdminTableProps) {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">SubAdmins</h2>
-          {/* <Button onClick={() => router.push("/admin/users/create")}>
-            <Plus className="mr-2 h-4 w-4" /> Add SubAdmin
-          </Button> */}
+        
         </div>
         <SectionLoader message="Loading users..." height="400px" />
       </div>
@@ -257,9 +255,7 @@ export function SubAdminTable({ data, isLoading = false }: SubAdminTableProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">SubAdmins</h2>
-        {/* <Button onClick={() => router.push("/admin/users/create")}>
-          <Plus className="mr-2 h-4 w-4" /> Add SubAdmin
-        </Button> */}
+        
       </div>
 
       <DataTable

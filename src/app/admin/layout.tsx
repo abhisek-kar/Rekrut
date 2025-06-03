@@ -63,12 +63,7 @@ export default function AdminLayout({
       href: "/admin/applications",
       icon: FileText
     },
-    {
-      title: "Notifications",
-      href: "/admin/notifications",
-      icon: Bell,
-      label: "4"
-    }
+  
   ];
 
   const userData = {
