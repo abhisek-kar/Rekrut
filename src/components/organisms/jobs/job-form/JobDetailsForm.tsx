@@ -10,7 +10,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/shadcn-ui/form";
-import { Card, CardContent } from "@/components/shadcn-ui/card";
 import { Button } from "@/components/shadcn-ui/button";
 import { Textarea } from "@/components/shadcn-ui/textarea";
 import { Badge } from "@/components/shadcn-ui/badge";
@@ -310,8 +309,8 @@ export function JobDetailsForm({
                   ) : (
                     <div className="flex flex-wrap gap-2">
                       {form
-                        .getValues()
-                        .educationRequirements.map((education, index) => (
+                        ?.getValues()
+                        ?.educationRequirements?.map((education, index) => (
                           <Badge
                             key={index}
                             variant="outline"
@@ -340,30 +339,6 @@ export function JobDetailsForm({
             </FormItem>
           )}
         />
-
-        {/* Helper Tips */}
-        <Card className="bg-muted/50">
-          <CardContent className="p-4">
-            <div className="flex gap-2">
-              <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium">
-                  Tips for writing effective job details:
-                </h4>
-                <ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1">
-                  <li>Be specific about day-to-day responsibilities</li>
-                  <li>
-                    Distinguish between &quot;required&quot; and
-                    &quot;preferred&quot; qualifications
-                  </li>
-                  <li>Include both technical and soft skills</li>
-                  <li>Avoid jargon or internal terminology</li>
-                  <li>Highlight opportunities for growth and development</li>
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </form>
     </Form>
   );
