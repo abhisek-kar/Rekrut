@@ -14,7 +14,12 @@ import { Button } from "@/components/shadcn-ui/button";
 import { Textarea } from "@/components/shadcn-ui/textarea";
 import { Badge } from "@/components/shadcn-ui/badge";
 import { Input } from "@/components/shadcn-ui/input";
-import { X, Plus, Info } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/shadcn-ui/popover";
+import { X, Plus, Info, Sparkles } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -113,6 +118,16 @@ export function JobDetailsForm({
 }: JobDetailsFormProps) {
   const [newSkill, setNewSkill] = useState("");
   const [newEducation, setNewEducation] = useState("");
+  const [aiPopoverOpen, setAiPopoverOpen] = useState<string | null>(null);
+
+  // AI Generation placeholder function (to be implemented)
+  const handleAIGeneration = (fieldType: 'description' | 'responsibilities' | 'requirements') => {
+    setAiPopoverOpen(fieldType);
+    // Auto-close popover after 2 seconds
+    setTimeout(() => {
+      setAiPopoverOpen(null);
+    }, 2000);
+  };
 
   // Initialize the form with existing data
   const form = useForm<JobDetailsFormValues>({
@@ -206,9 +221,34 @@ export function JobDetailsForm({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Job Description <span className="text-destructive">*</span>
-              </FormLabel>
+              <div className="flex items-center justify-between">
+                <FormLabel>
+                  Job Description <span className="text-destructive">*</span>
+                </FormLabel>
+                <Popover open={aiPopoverOpen === 'description'} onOpenChange={(open) => !open && setAiPopoverOpen(null)}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleAIGeneration('description')}
+                      className="text-xs h-auto p-1 text-primary hover:text-primary/80 hover:bg-transparent"
+                    >
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Generate with AI
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-3">
+                    <div className="text-center">
+                      <Sparkles className="h-6 w-6 mx-auto mb-2 text-primary" />
+                      <p className="text-sm font-medium">Coming Soon!</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        AI-powered content generation will be available soon.
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
               <FormControl>
                 <Textarea
                   placeholder="Provide a comprehensive description of the job..."
@@ -231,9 +271,34 @@ export function JobDetailsForm({
           name="responsibilities"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Responsibilities <span className="text-destructive">*</span>
-              </FormLabel>
+              <div className="flex items-center justify-between">
+                <FormLabel>
+                  Responsibilities <span className="text-destructive">*</span>
+                </FormLabel>
+                <Popover open={aiPopoverOpen === 'responsibilities'} onOpenChange={(open) => !open && setAiPopoverOpen(null)}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleAIGeneration('responsibilities')}
+                      className="text-xs h-auto p-1 text-primary hover:text-primary/80 hover:bg-transparent"
+                    >
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Generate with AI
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-3">
+                    <div className="text-center">
+                      <Sparkles className="h-6 w-6 mx-auto mb-2 text-primary" />
+                      <p className="text-sm font-medium">Coming Soon!</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        AI-powered content generation will be available soon.
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
               <FormControl>
                 <Textarea
                   placeholder="Describe the day-to-day responsibilities and duties..."
@@ -256,9 +321,34 @@ export function JobDetailsForm({
           name="requirements"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>
-                Requirements <span className="text-destructive">*</span>
-              </FormLabel>
+              <div className="flex items-center justify-between">
+                <FormLabel>
+                  Requirements <span className="text-destructive">*</span>
+                </FormLabel>
+                <Popover open={aiPopoverOpen === 'requirements'} onOpenChange={(open) => !open && setAiPopoverOpen(null)}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleAIGeneration('requirements')}
+                      className="text-xs h-auto p-1 text-primary hover:text-primary/80 hover:bg-transparent"
+                    >
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Generate with AI
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-3">
+                    <div className="text-center">
+                      <Sparkles className="h-6 w-6 mx-auto mb-2 text-primary" />
+                      <p className="text-sm font-medium">Coming Soon!</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        AI-powered content generation will be available soon.
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
               <FormControl>
                 <Textarea
                   placeholder="List the qualifications, experience, and attributes required..."

@@ -123,11 +123,11 @@ export default function SharedJobForm({
   const [formValidity, setFormValidity] = useState({
     step1: false,
     step2: false,
-    step3: true, // Compensation is optional
-    step4: true, // Application settings are optional
-    step5: true, // Assignment/Visibility is optional
-    step6: true, // Custom fields are optional
-    step7: true, // Preview step is always valid
+    step3: true,
+    step4: true,
+    step5: true,
+    step6: true,
+    step7: true,
   });
   const [formDirty, setFormDirty] = useState(false);
   const [subAdmins, setSubAdmins] = useState<SubAdmin[]>([]);
@@ -271,7 +271,9 @@ export default function SharedJobForm({
 
       const result = await response.json();
 
-      toast.success("Job published successfully! It's now live and accepting applications.");
+      toast.success(
+        "Job published successfully! It's now live and accepting applications."
+      );
 
       // Navigate based on user role
       if (userRole === "subadmin") {
@@ -318,7 +320,8 @@ export default function SharedJobForm({
             Job Assignment & Visibility
           </h3>
           <p className="text-muted-foreground mb-6">
-            Configure who will manage this job and how it will be visible to candidates.
+            Configure who will manage this job and how it will be visible to
+            candidates.
           </p>
         </div>
 
@@ -330,7 +333,9 @@ export default function SharedJobForm({
               Select SubAdmin (Optional)
             </label>
             {loadingSubAdmins ? (
-              <div className="text-sm text-muted-foreground">Loading SubAdmins...</div>
+              <div className="text-sm text-muted-foreground">
+                Loading SubAdmins...
+              </div>
             ) : (
               <select
                 className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -350,7 +355,8 @@ export default function SharedJobForm({
               </select>
             )}
             <p className="text-sm text-muted-foreground">
-              Assign this job to a specific recruiter or leave unassigned for manual assignment later.
+              Assign this job to a specific recruiter or leave unassigned for
+              manual assignment later.
             </p>
           </div>
         </div>
