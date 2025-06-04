@@ -109,3 +109,78 @@
 .animate-bounce-gentle {
   animation: bounce-gentle 2s ease-in-out infinite;
 }
+
+/* ReactQuill custom styles */
+.quill-wrapper .ql-container {
+  border-bottom-left-radius: calc(var(--radius) - 2px);
+  border-bottom-right-radius: calc(var(--radius) - 2px);
+  border: none;
+  font-family: inherit;
+}
+
+.quill-wrapper .ql-toolbar {
+  border-top-left-radius: calc(var(--radius) - 2px);
+  border-top-right-radius: calc(var(--radius) - 2px);
+  border: none;
+  border-bottom: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+}
+
+.quill-wrapper .ql-editor {
+  min-height: 96px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+}
+
+.quill-wrapper .ql-editor.ql-blank::before {
+  font-style: italic;
+  color: hsl(var(--muted-foreground));
+}
+
+.quill-wrapper .ql-toolbar .ql-formats {
+  margin-right: 8px;
+}
+
+.quill-wrapper .ql-toolbar button {
+  color: hsl(var(--foreground));
+}
+
+.quill-wrapper .ql-toolbar button:hover {
+  color: hsl(var(--primary));
+}
+
+.quill-wrapper .ql-toolbar button.ql-active {
+  color: hsl(var(--primary));
+}
+
+.quill-wrapper .ql-toolbar .ql-stroke {
+  stroke: hsl(var(--foreground));
+}
+
+.quill-wrapper .ql-toolbar .ql-fill {
+  fill: hsl(var(--foreground));
+}
+
+.quill-wrapper .ql-toolbar button:hover .ql-stroke {
+  stroke: hsl(var(--primary));
+}
+
+.quill-wrapper .ql-toolbar button:hover .ql-fill {
+  fill: hsl(var(--primary));
+}
+
+.quill-wrapper .ql-toolbar button.ql-active .ql-stroke {
+  stroke: hsl(var(--primary));
+}
+
+.quill-wrapper .ql-toolbar button.ql-active .ql-fill {
+  fill: hsl(var(--primary));
+}
+
+/* Dark mode support */
+.dark .quill-wrapper .ql-editor {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}

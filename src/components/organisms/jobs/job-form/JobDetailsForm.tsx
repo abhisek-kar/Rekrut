@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import "react-quill/dist/quill.snow.css";
 import {
   Form,
   FormControl,
@@ -11,7 +13,6 @@ import {
   FormMessage,
 } from "@/components/shadcn-ui/form";
 import { Button } from "@/components/shadcn-ui/button";
-import { Textarea } from "@/components/shadcn-ui/textarea";
 import { Badge } from "@/components/shadcn-ui/badge";
 import { Input } from "@/components/shadcn-ui/input";
 import {
@@ -24,6 +25,52 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { JobType } from "@/types/job";
+
+// Dynamically import ReactQuill to avoid SSR issues
+const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+
+// Custom ReactQuill wrapper for React Hook Form
+interface ReactQuillWrapperProps {
+  value?: string;
+  onChange?: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+}
+
+const ReactQuillWrapper = ({ value, onChange, placeholder, className }: ReactQuillWrapperProps) => {
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      ['blockquote', 'code-block'],
+      ['link'],
+      ['clean']
+    ],
+  };
+
+  const formats = [
+    'header', 'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet', 'blockquote', 'code-block', 'link'
+  ];
+
+  return (
+    <div className={`${className} quill-wrapper`}>
+      <ReactQuill
+        theme="snow"
+        value={value || ''}
+        onChange={onChange}
+        placeholder={placeholder}
+        modules={modules}
+        formats={formats}
+        style={{ 
+          border: '1px solid hsl(var(--border))',
+          borderRadius: 'calc(var(--radius) - 2px)',
+        }}
+      />
+    </div>
+  );
+};
 
 // Define form validation schema
 const jobDetailsSchema = z.object({
@@ -250,7 +297,7 @@ export function JobDetailsForm({
                 </Popover>
               </div>
               <FormControl>
-                <Textarea
+                <ReactQuillWrapper
                   placeholder="Provide a comprehensive description of the job..."
                   className="min-h-32"
                   {...field}
@@ -300,7 +347,7 @@ export function JobDetailsForm({
                 </Popover>
               </div>
               <FormControl>
-                <Textarea
+                <ReactQuillWrapper
                   placeholder="Describe the day-to-day responsibilities and duties..."
                   className="min-h-32"
                   {...field}
@@ -350,7 +397,7 @@ export function JobDetailsForm({
                 </Popover>
               </div>
               <FormControl>
-                <Textarea
+                <ReactQuillWrapper
                   placeholder="List the qualifications, experience, and attributes required..."
                   className="min-h-32"
                   {...field}
