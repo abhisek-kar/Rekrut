@@ -17,7 +17,9 @@ interface JobStats {
 }
 
 interface AnalyticsTabProps {
-  stats: JobStats;
+  stats?: JobStats;
+  jobId: string;
+  userRole: "admin" | "subadmin";
 }
 
 export function AnalyticsTab({ stats }: AnalyticsTabProps) {
@@ -33,7 +35,7 @@ export function AnalyticsTab({ stats }: AnalyticsTabProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard 
             title="Views" 
-            value={stats.views} 
+            value={stats?.views || 0} 
             icon={<Eye className="h-6 w-6 text-blue-600" />} 
             color="blue"
             description="Total job page views" 
@@ -41,7 +43,7 @@ export function AnalyticsTab({ stats }: AnalyticsTabProps) {
           
           <StatCard 
             title="Applications" 
-            value={stats.applications} 
+            value={stats?.applications || 0} 
             icon={<Users className="h-6 w-6 text-emerald-600" />} 
             color="emerald"
             description="Total candidates applied" 
@@ -49,7 +51,7 @@ export function AnalyticsTab({ stats }: AnalyticsTabProps) {
           
           <StatCard 
             title="Shares" 
-            value={stats.shares} 
+            value={stats?.shares || 0} 
             icon={<Share2 className="h-6 w-6 text-purple-600" />} 
             color="purple"
             description="Times job was shared" 
@@ -57,7 +59,7 @@ export function AnalyticsTab({ stats }: AnalyticsTabProps) {
           
           <StatCard 
             title="Hires" 
-            value={stats.hires} 
+            value={stats?.hires || 0} 
             icon={<UserCheck className="h-6 w-6 text-green-600" />} 
             color="green"
             description="Candidates hired" 

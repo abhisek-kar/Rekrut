@@ -19,7 +19,6 @@ import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
 import { Separator } from "@/components/shadcn-ui/separator";
 import { Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Badge } from "../shadcn-ui/badge";
 
 interface PageHeaderProps {
   title?: React.ReactNode;
@@ -94,7 +93,7 @@ export function PageHeader({
           className="h-2 min-w-2 aspect-square rounded-full  tabular-nums "
           variant="destructive"
        /> */}
-               </div>
+        </div>
       </header>
 
       {/* Page Title Header (if provided) */}
@@ -104,7 +103,9 @@ export function PageHeader({
             {(title || description) && (
               <div>
                 {title && (
-                  <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+                  <h1 className="text-2xl font-semibold tracking-tight">
+                    {title}
+                  </h1>
                 )}
                 {description && (
                   <p className="text-muted-foreground">{description}</p>

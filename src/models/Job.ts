@@ -34,9 +34,9 @@ export interface IJob extends Document {
   customFields?: Record<string, unknown>;
   visibility: string; // 'public', 'private'
   featured: boolean;
-  status: string; // 'draft', 'active', 'closed', 'archived'
+  status: string; // 'draft', 'active', 'closed', 'archived' , 'paused', 'pending_review'
   isTemplate?: boolean; // Whether this is a job template
-  templateId?: mongoose.Types.ObjectId; // Reference to template if created from one
+  templateId?: mongoose.Types.ObjectId; 
   createdBy: mongoose.Types.ObjectId;
   assignedTo?: mongoose.Types.ObjectId;
   createdAt: Date;
@@ -125,7 +125,7 @@ const JobSchema = new Schema<IJob>(
       type: String,
       required: true,
       default: "draft",
-      enum: ["draft", "active", "closed", "archived"],
+      enum: ["draft", "active", "closed", "archived", "paused", "pending_review"],
     },
     isTemplate: { type: Boolean, default: false },
     templateId: { type: Schema.Types.ObjectId, ref: "Job" },

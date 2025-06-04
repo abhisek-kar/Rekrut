@@ -38,6 +38,7 @@ import { JobType } from '@/types/job';
 interface JobGridViewProps {
   jobs: JobType[];
   selectedJobs: string[];
+  userRole?: 'admin' | 'subadmin'; // Add userRole prop
   onSelect: (jobId: string) => void;
   onBulkAction: (action: string) => void;
 }
@@ -71,10 +72,21 @@ const formatDate = (dateString: string) => {
 export function JobGridView({
   jobs,
   selectedJobs,
+  userRole = 'admin',
   onSelect,
   onBulkAction
 }: JobGridViewProps) {
   const router = useRouter();
+
+  // Get role-based routes
+  const getJobRoutes = (jobId: string) => {
+    const prefix = userRole === 'admin' ? '/admin' : '/subadmin';
+    return {
+      view: `${prefix}/jobs/${jobId}`,
+      edit: `${prefix}/jobs/${jobId}/edit`,
+      applications: `${prefix}/applications?jobId=${jobId}`,
+    };
+  };
   
   return (
     <div>
@@ -85,7 +97,7 @@ export function JobGridView({
               <div className="space-y-1">
                 <CardTitle className="text-lg font-medium">
                   <Link 
-                    href={`/jobs/${job._id}`}
+                    href={getJobRoutes(job._id).view}
                     className="hover:text-primary hover:underline"
                   >
                     {job.title}
@@ -115,8 +127,8 @@ export function JobGridView({
                   <span className="capitalize">{job.location?.type || "Not specified"}</span>
                 </div>
                 <div className="flex items-center text-sm">
-                  <Badge className={jobTypeColors[job.employmentType] || "bg-gray-100"}>
-                    {job.employmentType}
+                  <Badge className={jobTypeColors[job.employmentType || ''] || "bg-gray-100"}>
+                    {job.employmentType || 'Not specified'}
                   </Badge>
                 </div>
                 <div className="flex items-center text-sm">
@@ -133,7 +145,7 @@ export function JobGridView({
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => router.push(`/jobs/${job._id}`)}
+                onClick={() => router.push(getJobRoutes(job._id).view)}
               >
                 <Eye className="mr-2 h-4 w-4" />
                 View
@@ -148,11 +160,11 @@ export function JobGridView({
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push(`/jobs/${job._id}/edit`)}>
+                  <DropdownMenuItem onClick={() => router.push(getJobRoutes(job._id).edit)}>
                     <Edit className="mr-2 h-4 w-4" />
                     Edit Job
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push(`/jobs/${job._id}/applications`)}>
+                  <DropdownMenuItem onClick={() => router.push(getJobRoutes(job._id).applications)}>
                     <Briefcase className="mr-2 h-4 w-4" />
                     View Applications
                   </DropdownMenuItem>

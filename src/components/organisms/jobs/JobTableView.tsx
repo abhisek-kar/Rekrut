@@ -43,6 +43,7 @@ interface JobTableViewProps {
   selectedJobs: string[];
   sortBy: string;
   sortOrder: 'asc' | 'desc';
+  userRole?: 'admin' | 'subadmin'; // Add userRole prop
   onSort: (field: string) => void;
   onSelect: (jobId: string) => void;
   onSelectAll: () => void;
@@ -80,12 +81,23 @@ export function JobTableView({
   selectedJobs,
   sortBy,
   sortOrder,
+  userRole = 'admin',
   onSort,
   onSelect,
   onSelectAll,
   onBulkAction
 }: JobTableViewProps) {
   const router = useRouter();
+
+  // Get role-based routes
+  const getJobRoutes = (jobId: string) => {
+    const prefix = userRole === 'admin' ? '/admin' : '/subadmin';
+    return {
+      view: `${prefix}/jobs/${jobId}`,
+      edit: `${prefix}/jobs/${jobId}/edit`,
+      applications: `${prefix}/applications?jobId=${jobId}`,
+    };
+  };
   
   return (
     <Card>
@@ -146,7 +158,7 @@ export function JobTableView({
                   <TableCell>
                     <div className="font-medium">
                       <Link 
-                        href={`/jobs/${job._id}`}
+                        href={getJobRoutes(job._id).view}
                         className="hover:text-primary hover:underline"
                       >
                         {job.title}
@@ -161,8 +173,8 @@ export function JobTableView({
                     </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    <Badge className={jobTypeColors[job.employmentType] || "bg-gray-100"}>
-                      {job.employmentType}
+                    <Badge className={jobTypeColors[job.employmentType || ''] || "bg-gray-100"}>
+                      {job.employmentType || 'Not specified'}
                     </Badge>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
@@ -186,15 +198,15 @@ export function JobTableView({
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => router.push(`/jobs/${job._id}`)}>
+                        <DropdownMenuItem onClick={() => router.push(getJobRoutes(job._id).view)}>
                           <Eye className="mr-2 h-4 w-4" />
                           View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push(`/jobs/${job._id}/edit`)}>
+                        <DropdownMenuItem onClick={() => router.push(getJobRoutes(job._id).edit)}>
                           <Edit className="mr-2 h-4 w-4" />
                           Edit Job
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push(`/jobs/${job._id}/applications`)}>
+                        <DropdownMenuItem onClick={() => router.push(getJobRoutes(job._id).applications)}>
                           <Briefcase className="mr-2 h-4 w-4" />
                           View Applications
                         </DropdownMenuItem>

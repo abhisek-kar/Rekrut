@@ -31,7 +31,7 @@ export function CustomFieldsCard({ job }: CustomFieldsCardProps) {
               <dd className="mt-1">
                 {typeof value === 'boolean' 
                   ? (value ? 'Yes' : 'No')
-                  : value || 'Not specified'}
+                  : String(value) || 'Not specified'}
               </dd>
             </div>
           ))}

@@ -14,10 +14,17 @@ import { Users } from 'lucide-react';
 interface ApplicationsTabProps {
   jobId: string;
   applicationsCount: number;
+  userRole?: 'admin' | 'subadmin'; // Add userRole prop
 }
 
-export function ApplicationsTab({ jobId, applicationsCount }: ApplicationsTabProps) {
+export function ApplicationsTab({ jobId, applicationsCount, userRole = 'admin' }: ApplicationsTabProps) {
   const router = useRouter();
+
+  // Get role-based routes
+  const getApplicationsRoute = () => {
+    const prefix = userRole === 'admin' ? '/admin' : '/subadmin';
+    return `${prefix}/applications?jobId=${jobId}`;
+  };
   
   return (
     <Card>
@@ -39,7 +46,7 @@ export function ApplicationsTab({ jobId, applicationsCount }: ApplicationsTabPro
             <p className="text-muted-foreground mt-1 max-w-md mx-auto">
               This job has received {applicationsCount} applications. Review them to find the right candidate.
             </p>
-            <Button className="mt-4" onClick={() => router.push(`/jobs/${jobId}/applications`)}>
+            <Button className="mt-4" onClick={() => router.push(getApplicationsRoute())}>
               View All Applications
             </Button>
           </div>
@@ -50,7 +57,7 @@ export function ApplicationsTab({ jobId, applicationsCount }: ApplicationsTabPro
             <p className="text-muted-foreground mt-1 max-w-md mx-auto">
               This job hasn&apos;t received any applications yet. Applications will appear here once candidates apply.
             </p>
-            <Button className="mt-4" onClick={() => router.push(`/jobs/${jobId}/applications`)}>
+            <Button className="mt-4" onClick={() => router.push(getApplicationsRoute())}>
               View Applications Page
             </Button>
           </div>

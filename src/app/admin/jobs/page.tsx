@@ -146,14 +146,14 @@ export default function AdminJobsPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => router.push(`/jobs/${job._id}`)}
+                    onClick={() => router.push(`/admin/jobs/${job._id}`)}
                   >
                     View
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => router.push(`/jobs/${job._id}/edit`)}
+                    onClick={() => router.push(`/admin/jobs/${job._id}/edit`)}
                   >
                     Edit
                   </Button>

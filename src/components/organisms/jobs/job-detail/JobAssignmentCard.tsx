@@ -17,8 +17,9 @@ interface Recruiter {
 }
 
 interface JobAssignmentCardProps {
-  assignedRecruiter: Recruiter | null;
-  onAssignRecruiter: () => void;
+  assignedRecruiter?: Recruiter | null;
+  onAssignRecruiter?: () => void;
+  userRole : "admin" | "subadmin";
 }
 
 export function JobAssignmentCard({ 

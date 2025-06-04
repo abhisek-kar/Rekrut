@@ -46,9 +46,10 @@ interface Activity {
 
 interface ActivityTabProps {
   jobId: string;
+  userRole:"admin"|"subadmin"
 }
 
-export function ActivityTab({ jobId }: ActivityTabProps) {
+export function ActivityTab({ jobId , userRole}: ActivityTabProps) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
