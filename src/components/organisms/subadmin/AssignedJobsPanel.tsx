@@ -44,7 +44,7 @@ interface JobSummary {
 
 interface JobCountsSummary {
   all: number;
-  published: number;
+  active: number;
   draft: number;
   closed: number;
   archived: number;
@@ -117,8 +117,8 @@ export function AssignedJobsPanel() {
             <TabsTrigger value="all">
               All ({data?.counts.all || 0})
             </TabsTrigger>
-            <TabsTrigger value="published">
-              Active ({data?.counts.published || 0})
+            <TabsTrigger value="active">
+              Active ({data?.counts.active || 0})
             </TabsTrigger>
             <TabsTrigger value="draft">
               Draft ({data?.counts.draft || 0})
@@ -166,7 +166,7 @@ export function AssignedJobsPanel() {
 function JobCard({ job }: { job: JobSummary }) {
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case "published":
+      case "active":
         return "bg-green-100 text-green-800 border-green-200";
       case "draft":
         return "bg-gray-100 text-gray-800 border-gray-200";
@@ -181,7 +181,7 @@ function JobCard({ job }: { job: JobSummary }) {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case "published":
+      case "active":
         return "Active";
       case "draft":
         return "Draft";

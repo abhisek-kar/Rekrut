@@ -4,7 +4,7 @@ export interface IJob extends Document {
   title: string;
   company: string;
   department?: string;
-  location: {
+  location?: {
     type: string; // 'remote', 'onsite', 'hybrid'
     address?: string;
     city?: string;
@@ -12,13 +12,13 @@ export interface IJob extends Document {
     country?: string;
     postalCode?: string;
   };
-  description: string;
+  description?: string;
   responsibilities?: string;
   requirements?: string;
-  skills: string[];
-  experienceLevel: string; // 'entry', 'mid', 'senior'
+  skills?: string[];
+  experienceLevel?: string; // 'entry', 'mid', 'senior'
   educationRequirements?: string[];
-  employmentType: string; // 'full-time', 'part-time', 'contract', 'internship'
+  employmentType?: string; // 'full-time', 'part-time', 'contract', 'internship'
   salary?: {
     min?: number;
     max?: number;
@@ -60,20 +60,46 @@ const JobSchema = new Schema<IJob>(
       country: { type: String },
       postalCode: { type: String },
     },
-    description: { type: String, required: true },
+    description: { 
+      type: String, 
+      required: function(this: IJob) {
+        // Only required if status is not 'draft'
+        return this.status !== 'draft';
+      }
+    },
     responsibilities: { type: String },
     requirements: { type: String },
-    skills: [{ type: String }],
+    skills: {
+      type: [String],
+      validate: {
+        validator: function(this: IJob, value: string[]) {
+          // Skills are required if status is not 'draft'
+          if (this.status !== 'draft') {
+            return value && value.length > 0;
+          }
+          return true;
+        },
+        message: 'At least one skill is required for published jobs'
+      }
+    },
     experienceLevel: {
       type: String,
-      required: true,
       enum: ["entry", "mid", "senior"],
+      default: "mid",
+      required: function(this: IJob) {
+        // Only required if status is not 'draft'
+        return this.status !== 'draft';
+      }
     },
     educationRequirements: [{ type: String }],
     employmentType: {
       type: String,
-      required: true,
       enum: ["full-time", "part-time", "contract", "internship"],
+      default: "full-time",
+      required: function(this: IJob) {
+        // Only required if status is not 'draft'
+        return this.status !== 'draft';
+      }
     },
     salary: {
       min: { type: Number },

@@ -29,13 +29,13 @@ export interface JobType {
   company: string;
   department?: string;
   location: JobLocation;
-  description: string;
+  description?: string;
   responsibilities?: string;
   requirements?: string;
-  skills: string[];
-  experienceLevel: JobExperienceLevel;
+  skills?: string[];
+  experienceLevel?: JobExperienceLevel;
   educationRequirements?: string[];
-  employmentType: JobEmploymentType;
+  employmentType?: JobEmploymentType;
   salary?: JobSalary;
   benefits?: string[];
   perks?: string[];

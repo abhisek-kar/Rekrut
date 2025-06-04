@@ -22,7 +22,7 @@ import { useRouter } from "next/navigation";
 import { Badge } from "../shadcn-ui/badge";
 
 interface PageHeaderProps {
-  title?: string;
+  title?: React.ReactNode;
   description?: string;
   actions?: React.ReactNode;
   customBreadcrumbs?: BreadcrumbItem[];

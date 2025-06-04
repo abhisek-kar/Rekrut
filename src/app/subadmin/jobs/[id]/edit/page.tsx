@@ -195,7 +195,7 @@ export default function SubAdminEditJobPage() {
       // Prepare job data for updating
       const jobToUpdate = {
         ...jobData,
-        status: jobData.status === "draft" ? "published" : jobData.status, // Publish if it was a draft
+        status: jobData.status === "draft" ? "active" : jobData.status, // Use "active" instead of "published"
       };
 
       // API call to update job

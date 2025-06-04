@@ -79,7 +79,7 @@ const initialAdminJobData: Partial<JobType> = {
 
 // SubAdmin interface for assignment
 interface SubAdmin {
-  _id: string;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -112,6 +112,7 @@ export default function AdminCreateJobPage() {
         const response = await fetch("/api/users/subadmins");
         if (response.ok) {
           const data = await response.json();
+          
           setSubAdmins(data.users || []);
         }
       } catch (error) {
@@ -213,7 +214,7 @@ export default function AdminCreateJobPage() {
       // Add admin-specific data
       const jobToPublish = {
         ...jobData,
-        status: "published", // Use "published" to match schema
+        status: "active", // Use "active" to match schema
         createdBy: user?.id,
       };
 
@@ -294,7 +295,7 @@ export default function AdminCreateJobPage() {
               >
                 <option value="">Unassigned</option>
                 {subAdmins.map((subAdmin) => (
-                  <option key={subAdmin._id} value={subAdmin._id}>
+                  <option key={subAdmin.id} value={subAdmin.id}>
                     {subAdmin.firstName} {subAdmin.lastName} ({subAdmin.email})
                   </option>
                 ))}

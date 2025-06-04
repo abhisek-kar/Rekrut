@@ -177,6 +177,7 @@ class Logger {
       statusCode >= 500 ? "error" : statusCode >= 400 ? "warn" : "info";
     this[level](
       `API Response: ${method} ${url} - ${statusCode} (${duration}ms)`,
+      undefined,
       {
         method,
         url,

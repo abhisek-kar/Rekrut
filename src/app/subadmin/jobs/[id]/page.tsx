@@ -189,7 +189,6 @@ export default function SubAdminJobDetailPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-      case "published":
         return "bg-green-100 text-green-800 border-green-200";
       case "draft":
         return "bg-gray-100 text-gray-800 border-gray-200";
@@ -277,7 +276,7 @@ export default function SubAdminJobDetailPage() {
                   Duplicate Job
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => handleStatusChange("published")} disabled={job.status === "published"}>
+                <DropdownMenuItem onClick={() => handleStatusChange("active")} disabled={job.status === "active"}>
                   Publish Job
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleStatusChange("closed")} disabled={job.status === "closed"}>

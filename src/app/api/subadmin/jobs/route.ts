@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
     // Get status counts for this SubAdmin
     const statusCounts = {
       all: await Job.countDocuments({ assignedTo: session.user.id }),
-      active: await Job.countDocuments({ assignedTo: session.user.id, status: 'published' }),
+      active: await Job.countDocuments({ assignedTo: session.user.id, status: 'active' }),
       draft: await Job.countDocuments({ assignedTo: session.user.id, status: 'draft' }),
       closed: await Job.countDocuments({ assignedTo: session.user.id, status: 'closed' }),
       archived: await Job.countDocuments({ assignedTo: session.user.id, status: 'archived' }),

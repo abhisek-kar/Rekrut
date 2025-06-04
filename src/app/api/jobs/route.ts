@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/db/connect';
 import { authOptions } from '@/lib/auth/nextauth';
-import { createJobSchema } from '@/lib/validators/job';
+import { createJobSchema, createDraftJobSchema } from '@/lib/validators/job';
 import Job from '@/models/Job';
 import { ZodError } from 'zod';
 import Activity from '@/models/Activity';
@@ -96,9 +96,14 @@ export async function POST(request: NextRequest) {
     // Parse job data from request
     const data = await request.json();
     
-    // Validate job data
+    // Validate job data based on status
     try {
-      createJobSchema.parse(data);
+      // Use relaxed validation for drafts, full validation for active/published jobs
+      if (data.status === 'draft') {
+        createDraftJobSchema.parse(data);
+      } else {
+        createJobSchema.parse(data);
+      }
     } catch (error) {
       if (error instanceof ZodError) {
         return NextResponse.json(

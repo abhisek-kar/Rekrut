@@ -48,8 +48,24 @@ export const jobSchema = z.object({
   }),
   benefits: z.array(z.string()).optional(),
   perks: z.array(z.string()).optional(),
-  applicationDeadline: z.date().optional().nullable(),
-  expectedStartDate: z.date().optional().nullable(),
+  applicationDeadline: z.preprocess(
+    (val) => {
+      if (typeof val === 'string' && val.trim() !== '') {
+        return new Date(val);
+      }
+      return val;
+    },
+    z.date().optional().nullable()
+  ),
+  expectedStartDate: z.preprocess(
+    (val) => {
+      if (typeof val === 'string' && val.trim() !== '') {
+        return new Date(val);
+      }
+      return val;
+    },
+    z.date().optional().nullable()
+  ),
   applicationInstructions: z.string().optional(),
   requiredDocuments: z.array(z.string()).optional(),
   customFields: z.record(z.any()).optional(),
@@ -64,8 +80,74 @@ export const jobSchema = z.object({
   templateId: z.string().optional(),
 });
 
-// Schema for creating a new job
+// Schema for creating a new job (full validation for published jobs)
 export const createJobSchema = jobSchema;
+
+// Schema for creating draft jobs (relaxed validation)
+export const createDraftJobSchema = z.object({
+  title: z.string()
+    .min(3, "Job title must be at least 3 characters")
+    .max(100, "Job title must be less than 100 characters"),
+  company: z.string()
+    .min(2, "Company name must be at least 2 characters")
+    .max(100, "Company name must be less than 100 characters"),
+  department: z.string().optional(),
+  location: z.object({
+    type: z.enum(['remote', 'onsite', 'hybrid'], {
+      errorMap: () => ({ message: "Please select a valid location type" })
+    }),
+    address: z.string().optional(),
+    city: z.string().optional(),
+    state: z.string().optional(),
+    country: z.string().optional(),
+    postalCode: z.string().optional(),
+  }),
+  description: z.string().optional(), // Optional for drafts
+  responsibilities: z.string().optional(),
+  requirements: z.string().optional(),
+  skills: z.array(z.string()).optional(), // Optional for drafts
+  experienceLevel: z.enum(['entry', 'mid', 'senior']).optional().default('mid'),
+  educationRequirements: z.array(z.string()).optional(),
+  employmentType: z.enum(['full-time', 'part-time', 'contract', 'internship']).optional().default('full-time'),
+  salary: z.object({
+    min: z.number().optional().nullable(),
+    max: z.number().optional().nullable(),
+    currency: z.string().optional(),
+    visible: z.boolean().default(false),
+  }).optional(),
+  benefits: z.array(z.string()).optional(),
+  perks: z.array(z.string()).optional(),
+  applicationDeadline: z.preprocess(
+    (val) => {
+      if (typeof val === 'string' && val.trim() !== '') {
+        return new Date(val);
+      }
+      return val;
+    },
+    z.date().optional().nullable()
+  ),
+  expectedStartDate: z.preprocess(
+    (val) => {
+      if (typeof val === 'string' && val.trim() !== '') {
+        return new Date(val);
+      }
+      return val;
+    },
+    z.date().optional().nullable()
+  ),
+  applicationInstructions: z.string().optional(),
+  requiredDocuments: z.array(z.string()).optional(),
+  customFields: z.record(z.any()).optional(),
+  visibility: z.enum(['public', 'private']).optional().default('public'),
+  featured: z.boolean().default(false),
+  status: z.enum(['draft', 'active', 'closed', 'archived'], {
+    errorMap: () => ({ message: "Please select a valid status" })
+  }),
+  isTemplate: z.boolean().optional(),
+  templateId: z.string().optional(),
+  createdBy: z.string().optional(),
+  assignedTo: z.string().optional(),
+});
 
 // Schema for updating an existing job
 export const updateJobSchema = jobSchema.partial();
@@ -86,6 +168,7 @@ export const jobAssignmentSchema = z.object({
 
 // Type definitions based on the schemas
 export type CreateJobInput = z.infer<typeof createJobSchema>;
+export type CreateDraftJobInput = z.infer<typeof createDraftJobSchema>;
 export type UpdateJobInput = z.infer<typeof updateJobSchema>;
 export type JobStatusInput = z.infer<typeof jobStatusSchema>;
 export type JobAssignmentInput = z.infer<typeof jobAssignmentSchema>;

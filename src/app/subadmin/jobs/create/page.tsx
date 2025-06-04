@@ -179,7 +179,7 @@ export default function SubAdminCreateJobPage() {
       // Prepare job data for publishing with SubAdmin auto-assignment
       const jobToPublish = {
         ...jobData,
-        status: "published", // Use "published" instead of "active" to match schema
+        status: "active", // Use "active" to match schema
         assignedTo: user?.id, // Auto-assign to current SubAdmin
       };
 

@@ -119,7 +119,7 @@ export default function SubAdminJobsPage() {
 
       // Apply status filter based on active tab
       if (activeTab !== "all") {
-        params.set("status", activeTab === "active" ? "published" : activeTab);
+        params.set("status", activeTab === "active" ? "active" : activeTab);
       }
 
       // Apply search filter
@@ -191,7 +191,6 @@ export default function SubAdminJobsPage() {
     const getStatusColor = (status: string) => {
       switch (status) {
         case "active":
-        case "published":
           return "bg-green-100 text-green-800 border-green-200";
         case "draft":
           return "bg-gray-100 text-gray-800 border-gray-200";
@@ -206,7 +205,7 @@ export default function SubAdminJobsPage() {
 
     const getStatusLabel = (status: string) => {
       switch (status) {
-        case "published":
+        case "active":
           return "Active";
         case "draft":
           return "Draft";
