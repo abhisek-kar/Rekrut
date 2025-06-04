@@ -28,6 +28,7 @@ const openSans = Open_Sans({
 export const metadata: Metadata = {
   title: "Rekrut ATS",
   description: "A recruitment platform",
+  
 };
 
 export default function RootLayout({
@@ -37,6 +38,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      
       <body className={`${poppins.variable} ${openSans.variable}`}>
         <ErrorBoundary level="global">
           <SessionProviderWrapper>
