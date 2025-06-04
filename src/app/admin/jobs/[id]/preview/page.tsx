@@ -1,7 +1,13 @@
-import React from 'react'
+import { PageHeader } from "@/components/shared/PageHeader";
+import React from "react";
 
 export default function JobPreviewPage() {
   return (
-    <div>JobPreviewPage</div>
-  )
+    <div className="min-h-screen flex flex-col ">
+      <PageHeader
+        title="Job Preview"
+        description="Preview the job details before publishing."
+      />
+    </div>
+  );
 }

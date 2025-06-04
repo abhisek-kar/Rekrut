@@ -2,15 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/shadcn-ui/breadcrumb";
-import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
-import { Separator } from "@/components/shadcn-ui/separator";
 import { Button } from "@/components/shadcn-ui/button";
 import { Badge } from "@/components/shadcn-ui/badge";
 import {
@@ -28,7 +19,6 @@ import {
 } from "@/components/shadcn-ui/dropdown-menu";
 import { toast } from "sonner";
 import {
-  Briefcase,
   ArrowLeft,
   Eye,
   Edit3,
@@ -54,6 +44,7 @@ import {
 import { JobType } from "@/types/job";
 import { useAuth } from "@/hooks/useAuth";
 import { PageHeader } from "@/components/shared/PageHeader";
+import { SectionLoader } from "@/components/atoms/loader";
 
 interface SharedJobViewProps {
   jobId: string;
@@ -108,29 +99,15 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
       jobsList: `${prefix}/jobs`,
       jobView: `${prefix}/jobs/${jobId}`,
       jobEdit: `${prefix}/jobs/${jobId}/edit`,
-      publicView: `/jobs/${jobId}`,
+      publicView: `${prefix}/jobs/${jobId}/preview`,
       applications: `${prefix}/applications?jobId=${jobId}`,
-      duplicate: `${prefix}/jobs/${jobId}/duplicate`,
-      assign: userRole === "admin" ? `/jobs/${jobId}/assign` : null,
+      assign: userRole === "admin" ? `/admin/jobs/${jobId}/assign` : null,
     };
   };
 
   const routes = getRoutes();
 
-  // Role-based breadcrumb context
-  const getBreadcrumbContext = () => {
-    const baseContext: Record<string, string> = {
-      dashboard:
-        userRole === "admin" ? "Admin Dashboard" : "SubAdmin Dashboard",
-      jobs: userRole === "admin" ? "All Jobs" : "My Jobs",
-    };
-
-    if (job) {
-      baseContext[jobId] = job.title;
-    }
-
-    return baseContext;
-  };
+ 
 
   // Get status color based on job status
   const getStatusColor = (status: string) => {
@@ -181,11 +158,6 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
     toast.success("Public job link copied to clipboard");
   };
 
-  // Handle job duplication
-  const handleDuplicate = () => {
-    router.push(routes.duplicate);
-  };
-
   // Handle job assignment (admin only)
   const handleAssignRecruiter = () => {
     if (userRole === "admin" && routes.assign) {
@@ -220,14 +192,7 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">Loading job details...</p>
-        </div>
-      </div>
-    );
+    return <SectionLoader message="Fetching job details..." height="400px" />;
   }
 
   if (!job) {
@@ -253,7 +218,7 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
       {/* Page Header */}
       <PageHeader
         title={"Job Details"}
-        description={""}
+        description={"View and manage job details"}
         actions={
           <div className="flex items-center gap-2">
             <Badge className={getStatusColor(job.status)}>
@@ -284,10 +249,7 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
                   <Share2 className="w-4 h-4 mr-2" />
                   Copy Job Link
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleDuplicate}>
-                  <FileText className="w-4 h-4 mr-2" />
-                  Duplicate Job
-                </DropdownMenuItem>
+
                 {userRole === "admin" && (
                   <>
                     <DropdownMenuSeparator />
@@ -345,19 +307,13 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-6">
-                  <JobDetailsCard job={job} />
-                  <ApplicationSettingsCard job={job} />
-                  <CustomFieldsCard job={job} />
-                </div>
-                <div className="space-y-6">
-                  <JobAssignmentCard
-                    userRole={userRole}
-                    onAssignRecruiter={handleAssignRecruiter}
-                  />
-                </div>
-              </div>
+              <JobDetailsCard job={job} />
+              <ApplicationSettingsCard job={job} />
+              <CustomFieldsCard job={job} />
+              <JobAssignmentCard
+                userRole={userRole}
+                onAssignRecruiter={handleAssignRecruiter}
+              />
             </TabsContent>
 
             <TabsContent value="applications">

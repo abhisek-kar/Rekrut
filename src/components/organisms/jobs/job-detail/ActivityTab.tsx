@@ -74,7 +74,7 @@ export function ActivityTab({ jobId , userRole}: ActivityTabProps) {
       if (reset) {
         setActivities(data.data);
       } else {
-        setActivities((prev) => [...prev, ...data.data]);
+        setActivities((prev) => [...prev, ...data?.data || []]);
       }
 
       setHasMore(data.data.length === 10);
