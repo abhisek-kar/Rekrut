@@ -16,6 +16,7 @@ import {
   CustomFieldsForm,
   PreviewForm,
 } from "@/components/organisms/jobs/job-form";
+import { ConfirmationDialog } from "@/components/molecules/ConfirmationDialog";
 
 // SubAdmin interface for assignment
 interface SubAdmin {
@@ -131,6 +132,7 @@ export default function SharedJobForm({
   const [formDirty, setFormDirty] = useState(false);
   const [subAdmins, setSubAdmins] = useState<SubAdmin[]>([]);
   const [loadingSubAdmins, setLoadingSubAdmins] = useState(false);
+  const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
 
   // Fetch SubAdmins for assignment (admin only)
   useEffect(() => {
@@ -290,14 +292,21 @@ export default function SharedJobForm({
   // Handle cancel/back navigation
   const handleCancel = () => {
     if (formDirty) {
-      const confirmLeave = window.confirm(
-        "You have unsaved changes. Are you sure you want to leave? Your changes will be lost."
-      );
-      if (!confirmLeave) {
-        return;
-      }
+      setShowUnsavedChangesModal(true);
+    } else {
+      router.push(redirectPath);
     }
+  };
+
+  // Handle confirmation to leave without saving
+  const handleConfirmLeave = () => {
+    setShowUnsavedChangesModal(false);
     router.push(redirectPath);
+  };
+
+  // Handle cancel leaving (stay on form)
+  const handleCancelLeave = () => {
+    setShowUnsavedChangesModal(false);
   };
 
   // Admin-specific Assignment & Visibility Form (Step 5)
@@ -493,25 +502,38 @@ export default function SharedJobForm({
   };
 
   return (
-    <JobFormLayout
-      title="Create New Job"
-      subtitle={getSubtitle()}
-      currentStep={currentStep}
-      totalSteps={formSteps.length}
-      steps={formSteps}
-      isSubmitting={isSubmitting}
-      isValid={isCurrentStepValid}
-      isDirty={formDirty}
-      onNext={handleNextStep}
-      onPrevious={handlePreviousStep}
-      onCancel={handleCancel}
-      onSave={handleSaveAsDraft}
-      onSubmit={handlePublishJob}
-      cancelUrl={getCancelUrl()}
-      backToText={getBackToText()}
-      breadcrumbContext={breadcrumbContext}
-    >
-      {renderStepForm()}
-    </JobFormLayout>
+    <>
+      <JobFormLayout
+        title="Create New Job"
+        subtitle={getSubtitle()}
+        currentStep={currentStep}
+        totalSteps={formSteps.length}
+        steps={formSteps}
+        isSubmitting={isSubmitting}
+        isValid={isCurrentStepValid}
+        isDirty={formDirty}
+        onNext={handleNextStep}
+        onPrevious={handlePreviousStep}
+        onCancel={handleCancel}
+        onSave={handleSaveAsDraft}
+        onSubmit={handlePublishJob}
+        cancelUrl={getCancelUrl()}
+        backToText={getBackToText()}
+        breadcrumbContext={breadcrumbContext}
+      >
+        {renderStepForm()}
+      </JobFormLayout>
+
+      <ConfirmationDialog
+        open={showUnsavedChangesModal}
+        title="Unsaved Changes"
+        description="You have unsaved changes. Are you sure you want to leave? Your changes will be lost."
+        actionLabel="Leave Without Saving"
+        actionVariant="destructive"
+        cancelLabel="Stay on Page"
+        onAction={handleConfirmLeave}
+        onCancel={handleCancelLeave}
+      />
+    </>
   );
 }

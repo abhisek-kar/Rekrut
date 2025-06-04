@@ -558,7 +558,7 @@ export function PreviewForm({ data, onValidityChange }: PreviewFormProps) {
                                   ? value
                                     ? "Yes"
                                     : "No"
-                                  : value || "Not specified"}
+                                  : String(value) || "Not specified"}
                               </dd>
                             </div>
                           )
