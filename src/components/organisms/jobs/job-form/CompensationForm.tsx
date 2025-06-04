@@ -101,7 +101,7 @@ export function CompensationForm({
       workingHours: data.workingHours || "",
     },
     mode: "onChange",
-  });
+  }) as any;
 
   // Update parent component when form values change
   const onSubmit = (values: CompensationFormValues) => {

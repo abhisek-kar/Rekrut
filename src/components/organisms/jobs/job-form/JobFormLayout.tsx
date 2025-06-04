@@ -31,6 +31,7 @@ interface JobFormLayoutProps {
   isValid: boolean;
   isDirty: boolean;
   isEdit?: boolean;
+  userRole?: "admin" | "subadmin";
   cancelUrl?: string;
   backToText?: string;
   customBreadcrumbs?: BreadcrumbItem[];
@@ -53,8 +54,9 @@ export function JobFormLayout({
   isValid,
   isDirty,
   isEdit = false,
-  cancelUrl = "/jobs",
-  backToText = "Back to Jobs",
+  userRole = "admin",
+  cancelUrl,
+  backToText,
   customBreadcrumbs,
   breadcrumbContext,
   onNext,
@@ -68,8 +70,18 @@ export function JobFormLayout({
   const isFirstStep = currentStep === 1;
   const isLastStep = currentStep === totalSteps;
 
+  // Generate default cancel URL based on user role if not provided
+  const defaultCancelUrl = userRole === "admin" ? "/admin/jobs" : "/subadmin/jobs";
+  const finalCancelUrl = cancelUrl || defaultCancelUrl;
+
+  // Generate default back text based on user role if not provided
+  const defaultBackToText = userRole === "admin" ? "Back to Jobs" : "Back to My Jobs";
+  const finalBackToText = backToText || defaultBackToText;
+
   // Generate step progress description
-  const stepProgress = `Step ${currentStep} of ${totalSteps}: ${steps[currentStep - 1]?.title}`;
+  const stepProgress = `Step ${currentStep} of ${totalSteps}: ${
+    steps[currentStep - 1]?.title
+  }`;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -81,24 +93,21 @@ export function JobFormLayout({
         breadcrumbContext={breadcrumbContext}
       />
 
-      {/* Main Content */}
-      <main className="flex-1 p-4 md:p-6">
-        <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-          {/* Form Steps */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {steps.map((step, index) => {
-              const stepNumber = index + 1;
-              const isActive = stepNumber === currentStep;
-              const isCompleted = stepNumber < currentStep;
+      {/* Form Steps */}
+      <div className="flex flex-wrap gap-2 mb-4 py-4 px-2 mx-auto select-none">
+        {steps.map((step, index) => {
+          const stepNumber = index + 1;
+          const isActive = stepNumber === currentStep;
+          const isCompleted = stepNumber < currentStep;
 
-              return (
-                <div
-                  key={stepNumber}
-                  className={`flex items-center ${index > 0 ? "ml-2" : ""}`}
-                >
-                  {index > 0 && <div className="h-0.5 w-4 bg-gray-200 mr-2" />}
-                  <div
-                    className={`
+          return (
+            <div
+              key={stepNumber}
+              className={`flex items-center ${index > 0 ? "ml-2" : ""}`}
+            >
+              {index > 0 && <div className="h-0.5 w-4 bg-gray-200 mr-2" />}
+              <div
+                className={`
                       flex items-center justify-center rounded-full w-8 h-8 text-sm font-medium
                       ${
                         isActive
@@ -108,11 +117,11 @@ export function JobFormLayout({
                           : "bg-gray-100 text-gray-500"
                       }
                     `}
-                  >
-                    {isCompleted ? <Check className="h-4 w-4" /> : stepNumber}
-                  </div>
-                  <span
-                    className={`ml-2 text-sm font-medium hidden sm:inline-block
+              >
+                {isCompleted ? <Check className="h-4 w-4" /> : stepNumber}
+              </div>
+              <span
+                className={`ml-2 text-sm font-medium hidden sm:inline-block
                       ${
                         isActive
                           ? "text-foreground"
@@ -121,14 +130,17 @@ export function JobFormLayout({
                           : "text-muted-foreground"
                       }
                     `}
-                  >
-                    {step.title}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+              >
+                {step.title}
+              </span>
+            </div>
+          );
+        })}
+      </div>
 
+      {/* Main Content */}
+      <main className="flex-1 p-4 md:p-6">
+        <div className="flex flex-col gap-6 max-w-4xl mx-auto">
           {/* Step Content */}
           <Card>
             <CardHeader>
@@ -142,10 +154,10 @@ export function JobFormLayout({
               <div>
                 <Button
                   variant="outline"
-                  onClick={onCancel || (() => router.push(cancelUrl))}
+                  onClick={onCancel || (() => router.push(finalCancelUrl))}
                   disabled={isSubmitting}
                 >
-                  {backToText}
+                  {finalBackToText}
                 </Button>
               </div>
               <div className="flex gap-2">

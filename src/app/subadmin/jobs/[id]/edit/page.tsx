@@ -347,6 +347,7 @@ export default function SubAdminEditJobPage() {
       isValid={isCurrentStepValid}
       isDirty={formDirty}
       isEdit={true}
+      userRole="subadmin"
       onNext={handleNextStep}
       onPrevious={handlePreviousStep}
       onCancel={handleCancel}

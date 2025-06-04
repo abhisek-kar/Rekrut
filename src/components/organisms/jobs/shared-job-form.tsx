@@ -117,7 +117,7 @@ export default function SharedJobForm({
     status: "draft",
   };
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(2);
   const [jobData, setJobData] = useState<Partial<JobType>>(initialJobData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formValidity, setFormValidity] = useState({
@@ -512,6 +512,7 @@ export default function SharedJobForm({
         isSubmitting={isSubmitting}
         isValid={isCurrentStepValid}
         isDirty={formDirty}
+        userRole={userRole}
         onNext={handleNextStep}
         onPrevious={handlePreviousStep}
         onCancel={handleCancel}

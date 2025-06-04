@@ -279,6 +279,7 @@ export default function CreateTemplateJobPage() {
       isSubmitting={isSubmitting}
       isValid={isCurrentStepValid}
       isDirty={formDirty}
+      userRole="admin"
       onNext={handleNextStep}
       onPrevious={handlePreviousStep}
       onSave={handleSaveAsDraft}

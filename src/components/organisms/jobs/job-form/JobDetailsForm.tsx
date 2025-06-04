@@ -43,6 +43,69 @@ interface JobDetailsFormProps {
   onValidityChange: (isValid: boolean) => void;
 }
 
+// Common technical skills suggestions
+const technicalSkillSuggestions = [
+  "JavaScript",
+  "TypeScript",
+  "React",
+  "Node.js",
+  "Python",
+  "Java",
+  "SQL",
+  "AWS",
+  "Docker",
+  "Git",
+  "HTML/CSS",
+  "Angular",
+  "Vue.js",
+  "MongoDB",
+  "PostgreSQL",
+  "Redis",
+  "Kubernetes",
+  "GraphQL",
+  "REST APIs",
+  "Microservices",
+];
+
+// Common soft skills suggestions
+const softSkillSuggestions = [
+  "Communication",
+  "Leadership",
+  "Problem Solving",
+  "Team Collaboration",
+  "Project Management",
+  "Critical Thinking",
+  "Adaptability",
+  "Time Management",
+  "Analytical Skills",
+  "Customer Service",
+  "Creativity",
+  "Attention to Detail",
+  "Conflict Resolution",
+  "Public Speaking",
+  "Negotiation",
+];
+
+// Common education requirements suggestions
+const educationSuggestions = [
+  "Bachelor's Degree",
+  "Master's Degree",
+  "High School Diploma",
+  "Associate Degree",
+  "PhD",
+  "Bachelor's in Computer Science",
+  "Bachelor's in Engineering",
+  "Bachelor's in Business Administration",
+  "Master's in Business Administration (MBA)",
+  "Bachelor's in Marketing",
+  "Bachelor's in Finance",
+  "Bachelor's in Psychology",
+  "Certification in Project Management",
+  "Technical Certification",
+  "Professional License",
+  "Industry-specific Certification",
+];
+
 export function JobDetailsForm({
   data,
   onChange,
@@ -90,9 +153,10 @@ export function JobDetailsForm({
   }, [form, onValidityChange, onChange, onSubmit]);
 
   // Add a new skill
-  const handleAddSkill = () => {
-    if (newSkill.trim() && !form.getValues().skills.includes(newSkill.trim())) {
-      const updatedSkills = [...form.getValues().skills, newSkill.trim()];
+  const handleAddSkill = (skillText?: string) => {
+    const skill = skillText || newSkill.trim();
+    if (skill && !form.getValues().skills.includes(skill)) {
+      const updatedSkills = [...form.getValues().skills, skill];
       form.setValue("skills", updatedSkills);
       setNewSkill("");
     }
@@ -107,14 +171,15 @@ export function JobDetailsForm({
   };
 
   // Add a new education requirement
-  const handleAddEducation = () => {
+  const handleAddEducation = (educationText?: string) => {
+    const education = educationText || newEducation.trim();
     if (
-      newEducation.trim() &&
-      !form.getValues().educationRequirements?.includes(newEducation.trim())
+      education &&
+      !form.getValues().educationRequirements?.includes(education)
     ) {
       const updatedEducation = [
         ...(form.getValues().educationRequirements || []),
-        newEducation.trim(),
+        education,
       ];
       form.setValue("educationRequirements", updatedEducation);
       setNewEducation("");
@@ -232,7 +297,7 @@ export function JobDetailsForm({
                       }
                     }}
                   />
-                  <Button type="button" onClick={handleAddSkill} size="sm">
+                  <Button type="button" onClick={() => handleAddSkill()} size="sm">
                     <Plus className="h-4 w-4 mr-1" />
                     Add
                   </Button>
@@ -240,11 +305,11 @@ export function JobDetailsForm({
 
                 <div>
                   {form.getValues().skills.length === 0 ? (
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground mb-2">
                       No skills added yet
                     </div>
                   ) : (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 mb-4">
                       {form.getValues().skills.map((skill, index) => (
                         <Badge
                           key={index}
@@ -264,6 +329,40 @@ export function JobDetailsForm({
                       ))}
                     </div>
                   )}
+
+                  {/* Technical Skills Suggestions */}
+                  <div className="mt-4">
+                    <p className="text-sm font-medium mb-2">Common technical skills:</p>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {technicalSkillSuggestions.map((skill) => (
+                        <Badge
+                          key={skill}
+                          variant="outline"
+                          className="cursor-pointer hover:bg-secondary"
+                          onClick={() => handleAddSkill(skill)}
+                        >
+                          + {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Soft Skills Suggestions */}
+                  <div className="mt-3">
+                    <p className="text-sm font-medium mb-2">Common soft skills:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {softSkillSuggestions.map((skill) => (
+                        <Badge
+                          key={skill}
+                          variant="outline"
+                          className="cursor-pointer hover:bg-secondary"
+                          onClick={() => handleAddSkill(skill)}
+                        >
+                          + {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
               <FormDescription>
@@ -295,7 +394,7 @@ export function JobDetailsForm({
                       }
                     }}
                   />
-                  <Button type="button" onClick={handleAddEducation} size="sm">
+                  <Button type="button" onClick={() => handleAddEducation()} size="sm">
                     <Plus className="h-4 w-4 mr-1" />
                     Add
                   </Button>
@@ -303,11 +402,11 @@ export function JobDetailsForm({
 
                 <div>
                   {!form.getValues().educationRequirements?.length ? (
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-sm text-muted-foreground mb-2">
                       No education requirements added yet
                     </div>
                   ) : (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 mb-4">
                       {form
                         ?.getValues()
                         ?.educationRequirements?.map((education, index) => (
@@ -329,6 +428,23 @@ export function JobDetailsForm({
                         ))}
                     </div>
                   )}
+
+                  {/* Education Suggestions */}
+                  <div className="mt-2">
+                    <p className="text-sm font-medium mb-2">Common education requirements:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {educationSuggestions.map((education) => (
+                        <Badge
+                          key={education}
+                          variant="outline"
+                          className="cursor-pointer hover:bg-secondary"
+                          onClick={() => handleAddEducation(education)}
+                        >
+                          + {education}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
               <FormDescription>
