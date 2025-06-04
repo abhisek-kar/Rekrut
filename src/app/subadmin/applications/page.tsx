@@ -50,6 +50,8 @@ import { useAuth } from "@/context/AuthContext";
 import { SectionLoader } from "@/components/atoms/loader";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { formatDistanceToNow } from "date-fns";
+import { subAdminApplicationsService } from "@/services";
+import type { Application, ApplicationsListResponse } from "@/services";
 
 // Interface for SubAdmin application data
 interface SubAdminApplication {
@@ -113,7 +115,7 @@ export default function SubAdminApplicationsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("applicationDate");
   const [sortOrder, setSortOrder] = useState("desc");
-  const [applications, setApplications] = useState<SubAdminApplication[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [counts, setCounts] = useState({
     all: 0,
     applied: 0,
@@ -131,44 +133,34 @@ export default function SubAdminApplicationsPage() {
   // Get jobId from URL params if specified
   const jobIdFilter = searchParams.get('jobId');
 
-  // Fetch SubAdmin's applications
+  // Fetch SubAdmin's applications using the new API client
   const fetchApplications = useCallback(async () => {
     try {
       setLoading(true);
 
-      // Build query parameters
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: itemsPerPage.toString(),
-        sortBy: sortBy,
-        sortOrder: sortOrder,
+      const data = await subAdminApplicationsService.getApplications({
+        page: currentPage,
+        pageSize: itemsPerPage,
+        sortBy: sortBy as 'createdAt' | 'updatedAt' | 'applicationDate' | 'status',
+        sortOrder: sortOrder as 'asc' | 'desc',
+        status: activeTab !== "all" ? activeTab as Application['status'] : undefined,
+        jobId: jobIdFilter || undefined,
+        search: searchTerm.trim() || undefined
       });
-
-      // Apply status filter based on active tab
-      if (activeTab !== "all") {
-        params.set("status", activeTab);
-      }
-
-      // Apply job filter if specified
-      if (jobIdFilter) {
-        params.set("jobId", jobIdFilter);
-      }
-
-      // Apply search filter
-      if (searchTerm.trim()) {
-        params.set("search", searchTerm.trim());
-      }
-
-      const response = await fetch(`/api/subadmin/applications?${params.toString()}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch applications");
-      }
-
-      const data: ApplicationsResponse = await response.json();
       
       setApplications(data.applications);
-      setCounts(data.counts);
+      
+      // Calculate counts from the response data
+      setCounts({
+        all: data.total,
+        applied: data.applications.filter(app => app.status === 'applied').length,
+        screening: data.applications.filter(app => app.status === 'screening').length,
+        interview_scheduled: data.applications.filter(app => app.status === 'interview_scheduled').length,
+        interviewed: data.applications.filter(app => app.status === 'interviewed').length,
+        offered: data.applications.filter(app => app.status === 'offered').length,
+        hired: data.applications.filter(app => app.status === 'hired').length,
+        rejected: data.applications.filter(app => app.status === 'rejected').length,
+      });
 
     } catch (error) {
       console.error("Error fetching applications:", error);
@@ -181,18 +173,14 @@ export default function SubAdminApplicationsPage() {
 
   // Fetch applications when component mounts or dependencies change
   useEffect(() => {
-    if (user?.id) {
-      fetchApplications();
-    }
-  }, [fetchApplications, user?.id]);
+    fetchApplications();
+  }, [fetchApplications]);
 
   // Handle search with debouncing
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (user?.id) {
-        setCurrentPage(1);
-        fetchApplications();
-      }
+      setCurrentPage(1);
+      fetchApplications();
     }, 300);
 
     return () => clearTimeout(timeoutId);
@@ -215,20 +203,10 @@ export default function SubAdminApplicationsPage() {
   // Handle status update
   const handleStatusUpdate = async (applicationId: string, newStatus: string) => {
     try {
-      const response = await fetch(`/api/applications/${applicationId}/status`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          status: newStatus,
-          reason: `Status updated by ${user?.firstName} ${user?.lastName}`,
-        }),
+      await subAdminApplicationsService.updateApplicationStatus(applicationId, {
+        status: newStatus,
+        reason: `Status updated by ${user?.firstName} ${user?.lastName}`,
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to update status");
-      }
 
       // Refresh applications
       fetchApplications();

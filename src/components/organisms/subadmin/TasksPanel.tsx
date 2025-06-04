@@ -23,6 +23,7 @@ import { Badge } from "@/components/shadcn-ui/badge";
 import { formatDistanceToNow, format } from "date-fns";
 import Link from "next/link";
 import { toast } from "sonner";
+import { tasksService } from "@/services";
 import { SectionLoader } from "@/components/atoms/loader";
 import { ButtonLoader } from "@/components/atoms/loader";
 import { Skeleton } from "@/components/shadcn-ui/skeleton";
@@ -67,13 +68,10 @@ export function TasksPanel() {
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/subadmin/tasks?status=pending&limit=5');
-      
-      if (!response.ok) {
-        throw new Error("Failed to fetch tasks data");
-      }
-      
-      const data = await response.json();
+      const data = await tasksService.getSubAdminTasks({ 
+        status: 'pending', 
+        limit: 5 
+      });
       setData(data);
     } catch (err) {
       setError("Error loading tasks");
@@ -167,19 +165,9 @@ function TaskItem({ task, onTaskComplete }: { task: Task; onTaskComplete: () => 
   const handleTaskComplete = async () => {
     setIsCompleting(true);
     try {
-      const response = await fetch(`/api/subadmin/tasks/${task._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          status: 'completed',
-        }),
+      await tasksService.updateTask(task._id, {
+        status: 'completed',
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to update task");
-      }
 
       toast.success("Task marked as complete");
       onTaskComplete();

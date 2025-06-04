@@ -14,6 +14,8 @@ import {
 } from "@/components/admin/dashboard";
 import { Activity } from "@/components/admin/dashboard/activity-feed";
 import { Button } from "@/components/shadcn-ui/button";
+import { adminDashboardService } from "@/services";
+import type { AdminDashboardData, DashboardActivity } from "@/services";
 
 // Define types for dashboard data
 type JobStatusItem = {
@@ -127,34 +129,17 @@ export default function AdminDashboardPage() {
   const [dateRange, setDateRange] = useState("30days");
   const [activityFilter, setActivityFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
-  const [activities, setActivities] = useState<Activity[]>([]);
+  const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(null);
+  const [activities, setActivities] = useState<DashboardActivity[]>([]);
 
-  // Fetch dashboard data
+  // Fetch dashboard data using the new API client
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/admin/dashboard?dateRange=${dateRange}`);
-        
-        if (!response.ok) {
-          if (response.status === 401) {
-            toast.error("Authentication error. Please log in again.");
-            // Use sample data for development
-            setDashboardData({
-              metrics: sampleMetrics,
-              charts: {
-                jobStatusDistribution: sampleJobStatusData,
-                applicationFunnel: sampleApplicationFunnelData,
-                applicationsOverTime: sampleApplicationsOverTime
-              }
-            });
-            return;
-          }
-          throw new Error('Failed to fetch dashboard data');
-        }
-        
-        const data = await response.json();
+        const data = await adminDashboardService.getDashboardData({
+          dateRange: dateRange as '30days' | '60days' | '90days' | 'thisyear'
+        });
         setDashboardData(data);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -177,24 +162,28 @@ export default function AdminDashboardPage() {
     fetchDashboardData();
   }, [dateRange]);
 
-  // Fetch activities
+  // Fetch activities using the new API client
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const response = await fetch(`/api/admin/activity?limit=5&type=${activityFilter}`);
-        
-        if (!response.ok) {
-          if (response.status === 401) {
-            toast.error("Authentication error. Please log in again.");
-            // Use sample data for development
-            setActivities(sampleActivities);
-            return;
-          }
-          throw new Error('Failed to fetch activity data');
-        }
-        
-        const data = await response.json();
-        setActivities(data.activities);
+        const data = await adminDashboardService.getActivities({
+          limit: 5,
+          type: activityFilter === 'all' ? undefined : activityFilter
+        });
+        // Convert to Activity type format for compatibility
+        const formattedActivities = data.activities.map((activity): Activity => ({
+          id: activity.id,
+          userAvatar: activity.user.profilePicture,
+          userInitials: activity.user.name.split(' ').map(n => n[0]).join(''),
+          userName: activity.user.name,
+          action: activity.description,
+          entityType: activity.entityType.toLowerCase() as 'job' | 'candidate' | 'application',
+          entityId: activity.entityId,
+          entityName: activity.entityName,
+          timestamp: activity.createdAt,
+          relativeTime: new Date(activity.createdAt).toLocaleString()
+        }));
+        setActivities(formattedActivities);
       } catch (error) {
         console.error("Error fetching activities:", error);
         toast.error("Failed to load activity feed");

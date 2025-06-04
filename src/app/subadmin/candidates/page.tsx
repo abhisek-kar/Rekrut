@@ -48,7 +48,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { SectionLoader } from "@/components/atoms/loader";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { formatDistanceToNow } from "date-fns";
+import { candidatesService } from "@/services";
 
 // Interface for SubAdmin candidate data
 interface SubAdminCandidate {
@@ -141,41 +141,31 @@ export default function SubAdminCandidatesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  // Fetch SubAdmin's candidates
+  // Fetch SubAdmin's candidates using the new API client
   const fetchCandidates = useCallback(async () => {
     try {
       setLoading(true);
 
       // Build query parameters
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: itemsPerPage.toString(),
+      const params = {
+        page: currentPage,
+        limit: itemsPerPage,
         sortBy: sortBy,
-        sortOrder: sortOrder,
-      });
+        sortOrder: sortOrder as 'asc' | 'desc',
+        status: activeTab !== "all" ? activeTab : undefined,
+        applicationStatus: applicationStatusFilter !== "all" ? applicationStatusFilter : undefined,
+        search: searchTerm.trim() || undefined,
+      };
 
-      // Apply status filter based on active tab
-      if (activeTab !== "all") {
-        params.set("status", activeTab);
-      }
+      // Remove undefined values
+      const cleanParams = Object.entries(params).reduce((acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as Record<string, any>);
 
-      // Apply application status filter
-      if (applicationStatusFilter !== "all") {
-        params.set("applicationStatus", applicationStatusFilter);
-      }
-
-      // Apply search filter
-      if (searchTerm.trim()) {
-        params.set("search", searchTerm.trim());
-      }
-
-      const response = await fetch(`/api/subadmin/candidates?${params.toString()}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch candidates");
-      }
-
-      const data: CandidatesResponse = await response.json();
+      const data = await candidatesService.getSubAdminCandidates(cleanParams);
       
       setCandidates(data.candidates);
       setStats(data.stats);

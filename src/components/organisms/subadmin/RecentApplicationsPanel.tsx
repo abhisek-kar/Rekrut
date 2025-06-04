@@ -15,7 +15,7 @@ import { RefreshCwIcon, ChevronRightIcon } from "lucide-react";
 import { SectionLoader } from "@/components/atoms/loader";
 import { Skeleton } from "@/components/shadcn-ui/skeleton";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
+import { subAdminApplicationsService } from "@/services";
 
 interface Candidate {
   _id: string;
@@ -62,13 +62,7 @@ export function RecentApplicationsPanel() {
   const fetchApplications = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/subadmin/applications/recent?limit=5');
-      
-      if (!response.ok) {
-        throw new Error("Failed to fetch applications data");
-      }
-      
-      const data = await response.json();
+      const data = await subAdminApplicationsService.getRecentApplications({ limit: 5 });
       setData(data);
     } catch (err) {
       setError("Error loading recent applications");

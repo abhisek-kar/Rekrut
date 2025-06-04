@@ -7,6 +7,8 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { Button } from "@/components/shadcn-ui/button";
 import { Plus , PlusCircle} from "lucide-react";
 import { useRouter } from "next/navigation";
+import { usersService } from "@/services";
+import type { User } from "@/services";
 
 export default function SubAdminsPage() {
   const router = useRouter();
@@ -14,18 +16,32 @@ export default function SubAdminsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch the list of subadmins from the API
+    // Fetch the list of subadmins using the new API client
     const fetchSubadmins = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/users/subadmins');
+        const data = await usersService.getUsers({
+          role: 'SUBADMIN',
+          pageSize: 100, // Get all subadmins for now
+          sortBy: 'name',
+          sortOrder: 'asc'
+        });
         
-        if (!response.ok) {
-          throw new Error('Failed to fetch subadmins');
-        }
-
-        const data = await response.json();
-        setSubadmins(data.users);
+        // Convert User type to SubAdmin type for component compatibility
+        const convertedSubadmins: SubAdmin[] = data.users.map((user: User) => ({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          status: user.status,
+          createdAt: user.createdAt,
+          lastLoginAt: user.lastLoginAt,
+          department: user.department,
+          phone: user.phone,
+          profilePicture: user.profilePicture,
+          // Add any other SubAdmin-specific fields if needed
+        }));
+        
+        setSubadmins(convertedSubadmins);
       } catch (error) {
         console.error('Error fetching subadmins:', error);
         toast.error('Failed to load subadmins');

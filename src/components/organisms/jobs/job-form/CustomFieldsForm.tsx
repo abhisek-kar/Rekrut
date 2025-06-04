@@ -27,6 +27,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { JobType } from "@/types/job";
 import { Info, Loader2 } from "lucide-react";
+import { apiClient } from '@/lib/api-client';
 
 // We'll build this schema dynamically based on the custom fields
 const customFieldsSchema = z.object({
@@ -83,14 +84,14 @@ export function CustomFieldsForm({
     const fetchCustomFields = async () => {
       setLoading(true);
       try {
-        // Fetch custom fields for jobs
-        const response = await fetch("/api/custom-fields/entities/job");
-        if (!response.ok) {
-          throw new Error("Failed to fetch custom fields");
+        // Fetch custom fields for jobs using the new API client
+        const response = await apiClient.get("/api/custom-fields/entities/job");
+        
+        if (response.success) {
+          setCustomFields(response.data.fields || []);
+        } else {
+          throw new Error(response.error?.message || "Failed to fetch custom fields");
         }
-
-        const data = await response.json();
-        setCustomFields(data.fields || []);
 
         // This form is always valid
         onValidityChange(true);

@@ -42,6 +42,8 @@ import { useAuth } from "@/context/AuthContext";
 import { SectionLoader } from "@/components/atoms/loader";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { formatDistanceToNow } from "date-fns";
+import { subAdminJobsService } from "@/services";
+import type { Job, JobsListResponse } from "@/services";
 
 // Interface for SubAdmin job data
 interface SubAdminJob {
@@ -92,7 +94,7 @@ export default function SubAdminJobsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("updatedAt");
   const [sortOrder, setSortOrder] = useState("desc");
-  const [jobs, setJobs] = useState<SubAdminJob[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [counts, setCounts] = useState({
     all: 0,
     active: 0,
@@ -104,40 +106,30 @@ export default function SubAdminJobsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  // Fetch SubAdmin's assigned jobs
+  // Fetch SubAdmin's assigned jobs using the new API client
   const fetchJobs = useCallback(async () => {
     try {
       setLoading(true);
 
-      // Build query parameters
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: itemsPerPage.toString(),
-        sortBy: sortBy,
-        sortOrder: sortOrder
+      const data = await subAdminJobsService.getAssignedJobs({
+        page: currentPage,
+        pageSize: itemsPerPage,
+        sortBy: sortBy as 'createdAt' | 'updatedAt' | 'title' | 'status',
+        sortOrder: sortOrder as 'asc' | 'desc',
+        status: activeTab !== "all" ? activeTab as Job['status'] : undefined,
+        search: searchTerm.trim() || undefined
       });
-
-      // Apply status filter based on active tab
-      if (activeTab !== "all") {
-        params.set("status", activeTab === "active" ? "active" : activeTab);
-      }
-
-      // Apply search filter
-      if (searchTerm.trim()) {
-        params.set("search", searchTerm.trim());
-      }
-
-      const response = await fetch(`/api/subadmin/jobs?${params.toString()}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch jobs");
-      }
-
-      const data: JobsResponse = await response.json();
       
-      // Jobs already come with application counts from the API
       setJobs(data.jobs);
-      setCounts(data.counts);
+      
+      // Update counts based on the response
+      setCounts({
+        all: data.total,
+        active: data.jobs.filter(j => j.status === 'active').length,
+        draft: data.jobs.filter(j => j.status === 'draft').length,
+        closed: data.jobs.filter(j => j.status === 'closed').length,
+        archived: data.jobs.filter(j => j.status === 'archived').length
+      });
 
     } catch (error) {
       console.error("Error fetching jobs:", error);
@@ -146,22 +138,18 @@ export default function SubAdminJobsPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, activeTab, searchTerm, sortBy, sortOrder, user?.id]);
+  }, [currentPage, activeTab, searchTerm, sortBy, sortOrder]);
 
   // Fetch jobs when component mounts or dependencies change
   useEffect(() => {
-    if (user?.id) {
-      fetchJobs();
-    }
-  }, [fetchJobs, user?.id]);
+    fetchJobs();
+  }, [fetchJobs]);
 
   // Handle search with debouncing
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (user?.id) {
-        setCurrentPage(1); // Reset to first page on search
-        fetchJobs();
-      }
+      setCurrentPage(1); // Reset to first page on search
+      fetchJobs();
     }, 300);
 
     return () => clearTimeout(timeoutId);
@@ -187,7 +175,7 @@ export default function SubAdminJobsPage() {
   };
 
   // Render job card
-  const renderJobCard = (job: SubAdminJob) => {
+  const renderJobCard = (job: Job) => {
     const getStatusColor = (status: string) => {
       switch (status) {
         case "active":

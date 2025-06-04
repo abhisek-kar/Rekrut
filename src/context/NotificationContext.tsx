@@ -1,12 +1,6 @@
 import React, { createContext, useContext, ReactNode, useState, useCallback, useEffect } from 'react';
-
-interface Notification {
-  id: string;
-  message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  read: boolean;
-  createdAt: string;
-}
+import { notificationsService } from '@/services';
+import type { Notification } from '@/services';
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -29,16 +23,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
-      // In a real implementation, this would fetch from API
-      const response = await fetch('/api/notifications');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch notifications');
-      }
-      
-      const data = await response.json();
+      const data = await notificationsService.getNotifications({ 
+        pageSize: 50,
+        read: undefined // Get both read and unread
+      });
       setNotifications(data.notifications);
-      setUnreadCount(data.notifications.filter((n: Notification) => !n.read).length);
+      setUnreadCount(data.unreadCount);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -57,18 +47,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const markAsRead = useCallback(async (id: string) => {
     try {
-      const response = await fetch(`/api/notifications/${id}/read`, {
-        method: 'PUT'
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to mark notification as read');
-      }
+      await notificationsService.markAsRead(id);
       
       setNotifications(prev => 
         prev.map(notification => 
           notification.id === id 
-            ? { ...notification, read: true } 
+            ? { ...notification, read: true, readAt: new Date().toISOString() } 
             : notification
         )
       );
@@ -80,16 +64,14 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const markAllAsRead = useCallback(async () => {
     try {
-      const response = await fetch('/api/notifications/read-all', {
-        method: 'PUT'
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to mark all notifications as read');
-      }
+      await notificationsService.markAllAsRead();
       
       setNotifications(prev => 
-        prev.map(notification => ({ ...notification, read: true }))
+        prev.map(notification => ({ 
+          ...notification, 
+          read: true,
+          readAt: new Date().toISOString() 
+        }))
       );
       setUnreadCount(0);
     } catch (err) {

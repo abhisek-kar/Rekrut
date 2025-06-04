@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { apiClient } from '@/lib/api-client';
 
 interface DbHealthStatus {
   status: 'healthy' | 'unhealthy' | 'loading' | 'error';
@@ -27,13 +28,19 @@ export function useDbHealth(intervalMs: number = 30000) {
 
   const checkHealth = async () => {
     try {
-      const response = await fetch('/api/health');
-      const data = await response.json();
+      const response = await apiClient.get('/api/health');
       
-      setHealthStatus({
-        status: response.ok ? 'healthy' : 'unhealthy',
-        ...data
-      });
+      if (response.success) {
+        setHealthStatus({
+          status: 'healthy',
+          ...response.data
+        });
+      } else {
+        setHealthStatus({
+          status: 'unhealthy',
+          error: response.error?.message || 'Health check failed'
+        });
+      }
     } catch (error) {
       setHealthStatus({
         status: 'error',

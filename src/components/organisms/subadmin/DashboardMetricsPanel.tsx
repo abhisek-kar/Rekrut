@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/shadcn-ui/card";
 import { BriefcaseIcon, UsersIcon, CalendarIcon, UserPlusIcon } from "lucide-react";
-import { SectionLoader } from "@/components/atoms/loader";
+import { subAdminDashboardService } from "@/services";
 import { Skeleton } from "@/components/shadcn-ui/skeleton";
 
 interface DashboardMetrics {
@@ -29,13 +29,7 @@ export function DashboardMetricsPanel() {
     const fetchMetrics = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/subadmin/dashboard");
-        
-        if (!response.ok) {
-          throw new Error("Failed to fetch dashboard data");
-        }
-        
-        const data = await response.json();
+        const data = await subAdminDashboardService.getDashboardData();
         setMetrics(data.metrics);
       } catch (err) {
         setError("Error loading dashboard metrics");

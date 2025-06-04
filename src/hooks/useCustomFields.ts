@@ -2,6 +2,7 @@
 // This is a placeholder file for the hook structure
 
 import { useState, useEffect } from 'react';
+import { apiClient } from '@/lib/api-client';
 
 interface CustomField {
   id: string;
@@ -21,16 +22,15 @@ export function useCustomFields(entityType: 'job' | 'candidate' | 'application')
     const fetchCustomFields = async () => {
       try {
         setLoading(true);
-        // In a real implementation, this would fetch from API
-        const response = await fetch(`/api/custom-fields/entities/${entityType}`);
+        // Use the new API client for custom fields
+        const response = await apiClient.get(`/api/custom-fields/entities/${entityType}`);
         
-        if (!response.ok) {
-          throw new Error('Failed to fetch custom fields');
+        if (response.success) {
+          setFields(response.data.fields);
+          setError(null);
+        } else {
+          throw new Error(response.error?.message || 'Failed to fetch custom fields');
         }
-        
-        const data = await response.json();
-        setFields(data.fields);
-        setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {

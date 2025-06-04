@@ -25,6 +25,8 @@ import {
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Badge } from "@/components/shadcn-ui/badge";
+import { usersService, adminDashboardService } from "@/services";
+import type { ApiUser } from "@/services/users.service";
 
 // Types
 type Activity = {
@@ -39,13 +41,7 @@ type Activity = {
   createdAt: string;
 };
 
-type UserInfo = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  profilePhoto?: string;
-};
+type UserInfo = ApiUser;
 
 // Helper function to get initials
 function getInitials(name: string) {
@@ -101,27 +97,19 @@ export default function UserActivityPage() {
   const [filter, setFilter] = useState("all");
   
   useEffect(() => {
-    // Fetch the user details and activities
+    // Fetch the user details and activities using services
     const fetchUserAndActivities = async () => {
       try {
         setIsLoading(true);
         
-        // Fetch user details
-        const userResponse = await fetch(`/api/users/subadmins/${id}`);
-        if (!userResponse.ok) {
-          throw new Error('Failed to fetch user details');
-        }
-        const userData = await userResponse.json();
+        // Fetch user details using UsersService
+        const userData = await usersService.getUserById(id);
         
-        // Fetch user activities
-        const activitiesResponse = await fetch(`/api/admin/activity?userId=${id}`);
-        if (!activitiesResponse.ok) {
-          throw new Error('Failed to fetch user activities');
-        }
-        const activitiesData = await activitiesResponse.json();
+        // Fetch user activities using AdminDashboardService
+        const activitiesData = await adminDashboardService.getUserActivities(id);
         
-        setUser(userData.user);
-        setActivities(activitiesData.activities);
+        setUser(userData);
+        setActivities(activitiesData.activities || activitiesData);
       } catch (error) {
         console.error('Error fetching data:', error);
         toast.error('Failed to load user activity');
