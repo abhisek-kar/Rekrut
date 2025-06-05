@@ -1,10 +1,11 @@
-import { PageHeader } from "@/components/shared/PageHeader";
-import React from "react";
+"use client";
 
-export default function JobEditPage() {
-  return (
-    <div className="min-h-screen flex flex-col ">
-      <PageHeader title="Job Edit" description="Edit the job details " />
-    </div>
-  );
+import { useParams } from "next/navigation";
+import SharedJobEdit from "@/components/organisms/jobs/shared-job-edit";
+
+export default function AdminEditJobPage() {
+  const params = useParams();
+  const jobId = params.id as string;
+
+  return <SharedJobEdit jobId={jobId} userRole="admin" />;
 }

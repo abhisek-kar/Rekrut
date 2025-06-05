@@ -58,6 +58,27 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
 
+   const getBreadcrumbContext = () => {
+      const baseContext = {
+        [jobId]: job?.title || "Job Details",
+        edit: "Edit Job",
+      };
+  
+      if (userRole === "admin") {
+        return {
+          admin: "Admin",
+          jobs: "Jobs Management",
+          ...baseContext,
+        };
+      } else {
+        return {
+          subadmin: "SubAdmin",
+          jobs: "My Jobs",
+          ...baseContext,
+        };
+      }
+    };
+
   // Fetch job data
   useEffect(() => {
     fetchJobData();
@@ -219,6 +240,7 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
       <PageHeader
         title={"Job Details"}
         description={"View and manage job details"}
+        breadcrumbContext={getBreadcrumbContext()}
         actions={
           <div className="flex items-center gap-2">
             <Badge className={getStatusColor(job.status)}>
