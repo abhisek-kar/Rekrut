@@ -10,6 +10,7 @@ import { Badge } from "@/components/shadcn-ui/badge";
 import { Separator } from "@/components/shadcn-ui/separator";
 import { GraduationCap } from "lucide-react";
 import { JobType } from '@/types/job';
+import { parseHtml, parseRichText } from "@/lib/html-parser";
 
 interface JobDetailsCardProps {
   job: JobType;
@@ -27,37 +28,41 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
           <h3 className="text-lg font-medium">Job Description</h3>
           <div className="prose max-w-none">
             {job.description ? (
-              <p>{job.description}</p>
+              <div>{parseRichText(job.description)}</div>
             ) : (
-              <p className="text-muted-foreground">No job description provided.</p>
+              <p className="text-muted-foreground">
+                No job description provided.
+              </p>
             )}
           </div>
         </div>
-        
+
         {/* Responsibilities */}
         <div className="space-y-2">
           <h3 className="text-lg font-medium">Responsibilities</h3>
           <div className="prose max-w-none">
             {job.responsibilities ? (
-              <p>{job.responsibilities}</p>
+              <div>{parseRichText(job.responsibilities)}</div>
             ) : (
-              <p className="text-muted-foreground">No responsibilities provided.</p>
+              <p className="text-muted-foreground">
+                No responsibilities provided.
+              </p>
             )}
           </div>
         </div>
-        
+
         {/* Requirements */}
         <div className="space-y-2">
           <h3 className="text-lg font-medium">Requirements</h3>
           <div className="prose max-w-none">
             {job.requirements ? (
-              <p>{job.requirements}</p>
+              <div>{parseRichText(job.requirements)}</div>
             ) : (
               <p className="text-muted-foreground">No requirements provided.</p>
             )}
           </div>
         </div>
-        
+
         {/* Skills */}
         {job.skills && job.skills.length > 0 && (
           <div className="space-y-2">
@@ -71,7 +76,7 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
             </div>
           </div>
         )}
-        
+
         {/* Education Requirements */}
         {job.educationRequirements && job.educationRequirements.length > 0 && (
           <div className="space-y-2">
@@ -86,14 +91,14 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
             </div>
           </div>
         )}
-        
+
         {/* Benefits & Perks */}
-        {((job.benefits && job.benefits.length > 0) || 
+        {((job.benefits && job.benefits.length > 0) ||
           (job.perks && job.perks.length > 0)) && (
           <div className="space-y-4">
             <Separator />
             <h3 className="text-lg font-medium">Benefits & Perks</h3>
-            
+
             {job.benefits && job.benefits.length > 0 && (
               <div className="space-y-2">
                 <h4 className="text-md font-medium">Benefits</h4>
@@ -106,7 +111,7 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
                 </div>
               </div>
             )}
-            
+
             {job.perks && job.perks.length > 0 && (
               <div className="space-y-2">
                 <h4 className="text-md font-medium">Perks</h4>

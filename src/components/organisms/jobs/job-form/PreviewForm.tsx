@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { Form } from "@/components/shadcn-ui/form";
 import { Button } from "@/components/shadcn-ui/button";
 import { Badge } from "@/components/shadcn-ui/badge";
+import { parseRichText } from "@/lib/html-parser";
 import {
   Card,
   CardContent,
@@ -216,7 +217,7 @@ export function PreviewForm({ data, onValidityChange }: PreviewFormProps) {
                   <h3 className="text-lg font-medium">Job Description</h3>
                   <div className="prose max-w-none">
                     {data.description ? (
-                      <p>{data.description}</p>
+                      <div>{parseRichText(data.description)}</div>
                     ) : (
                       <p className="text-muted-foreground">
                         No job description provided.
@@ -230,7 +231,7 @@ export function PreviewForm({ data, onValidityChange }: PreviewFormProps) {
                   <h3 className="text-lg font-medium">Responsibilities</h3>
                   <div className="prose max-w-none">
                     {data.responsibilities ? (
-                      <p>{data.responsibilities}</p>
+                      <div>{parseRichText(data.responsibilities)}</div>
                     ) : (
                       <p className="text-muted-foreground">
                         No responsibilities provided.
@@ -244,7 +245,7 @@ export function PreviewForm({ data, onValidityChange }: PreviewFormProps) {
                   <h3 className="text-lg font-medium">Requirements</h3>
                   <div className="prose max-w-none">
                     {data.requirements ? (
-                      <p>{data.requirements}</p>
+                      <div>{parseRichText(data.requirements)}</div>
                     ) : (
                       <p className="text-muted-foreground">
                         No requirements provided.
@@ -374,7 +375,11 @@ export function PreviewForm({ data, onValidityChange }: PreviewFormProps) {
                   <Calendar className="h-4 w-4 mr-1" />
                   <span>Posted: {formatDate(new Date())}</span>
                 </div>
-                <Button size="lg" className="bg-primary">
+                <Button
+                  onClick={() => {}}
+                  size="lg"
+                  className="bg-primary cursor-default"
+                >
                   Apply Now
                 </Button>
               </CardFooter>

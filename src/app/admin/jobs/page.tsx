@@ -10,7 +10,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/shadcn-ui/tabs";
-import { PlusCircle, Briefcase } from "lucide-react";
+import { PlusCircle, Briefcase, Edit3, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { SectionLoader } from "@/components/atoms/loader";
@@ -148,13 +148,16 @@ export default function AdminJobsPage() {
                     size="sm"
                     onClick={() => router.push(`/admin/jobs/${job._id}`)}
                   >
+                    <Eye className="w-4 h-4 mr-2" />
                     View
                   </Button>
+
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => router.push(`/admin/jobs/${job._id}/edit`)}
                   >
+                    <Edit3 className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
                 </div>
@@ -205,8 +208,8 @@ export default function AdminJobsPage() {
             onClick={() => router.push("/admin/jobs/create")}
             className="gap-1"
           >
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Create New Job
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Create New Job
           </Button>
         }
       />

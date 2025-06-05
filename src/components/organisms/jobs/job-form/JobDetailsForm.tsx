@@ -37,35 +37,48 @@ interface ReactQuillWrapperProps {
   className?: string;
 }
 
-const ReactQuillWrapper = ({ value, onChange, placeholder, className }: ReactQuillWrapperProps) => {
+const ReactQuillWrapper = ({
+  value,
+  onChange,
+  placeholder,
+  className,
+}: ReactQuillWrapperProps) => {
   const modules = {
     toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      ['blockquote', 'code-block'],
-      ['link'],
-      ['clean']
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["blockquote", "code-block"],
+      ["link"],
+      ["clean"],
     ],
   };
 
   const formats = [
-    'header', 'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet', 'blockquote', 'code-block', 'link'
+    "header",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "list",
+    "bullet",
+    "blockquote",
+    "code-block",
+    "link",
   ];
 
   return (
     <div className={`${className} quill-wrapper`}>
       <ReactQuill
         theme="snow"
-        value={value || ''}
+        value={value || ""}
         onChange={onChange}
         placeholder={placeholder}
         modules={modules}
         formats={formats}
-        style={{ 
-          border: '1px solid hsl(var(--border))',
-          borderRadius: 'calc(var(--radius) - 2px)',
+        style={{
+          border: "1px solid hsl(var(--border))",
+          borderRadius: "calc(var(--radius) - 2px)",
         }}
       />
     </div>
@@ -168,7 +181,9 @@ export function JobDetailsForm({
   const [aiPopoverOpen, setAiPopoverOpen] = useState<string | null>(null);
 
   // AI Generation placeholder function (to be implemented)
-  const handleAIGeneration = (fieldType: 'description' | 'responsibilities' | 'requirements') => {
+  const handleAIGeneration = (
+    fieldType: "description" | "responsibilities" | "requirements"
+  ) => {
     setAiPopoverOpen(fieldType);
     // Auto-close popover after 2 seconds
     setTimeout(() => {
@@ -272,13 +287,16 @@ export function JobDetailsForm({
                 <FormLabel>
                   Job Description <span className="text-destructive">*</span>
                 </FormLabel>
-                <Popover open={aiPopoverOpen === 'description'} onOpenChange={(open) => !open && setAiPopoverOpen(null)}>
+                <Popover
+                  open={aiPopoverOpen === "description"}
+                  onOpenChange={(open) => !open && setAiPopoverOpen(null)}
+                >
                   <PopoverTrigger asChild>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleAIGeneration('description')}
+                      onClick={() => handleAIGeneration("description")}
                       className="text-xs h-auto p-1 text-primary hover:text-primary/80 hover:bg-transparent"
                     >
                       <Sparkles className="h-3 w-3 mr-1" />
@@ -322,13 +340,16 @@ export function JobDetailsForm({
                 <FormLabel>
                   Responsibilities <span className="text-destructive">*</span>
                 </FormLabel>
-                <Popover open={aiPopoverOpen === 'responsibilities'} onOpenChange={(open) => !open && setAiPopoverOpen(null)}>
+                <Popover
+                  open={aiPopoverOpen === "responsibilities"}
+                  onOpenChange={(open) => !open && setAiPopoverOpen(null)}
+                >
                   <PopoverTrigger asChild>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleAIGeneration('responsibilities')}
+                      onClick={() => handleAIGeneration("responsibilities")}
                       className="text-xs h-auto p-1 text-primary hover:text-primary/80 hover:bg-transparent"
                     >
                       <Sparkles className="h-3 w-3 mr-1" />
@@ -372,13 +393,16 @@ export function JobDetailsForm({
                 <FormLabel>
                   Requirements <span className="text-destructive">*</span>
                 </FormLabel>
-                <Popover open={aiPopoverOpen === 'requirements'} onOpenChange={(open) => !open && setAiPopoverOpen(null)}>
+                <Popover
+                  open={aiPopoverOpen === "requirements"}
+                  onOpenChange={(open) => !open && setAiPopoverOpen(null)}
+                >
                   <PopoverTrigger asChild>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleAIGeneration('requirements')}
+                      onClick={() => handleAIGeneration("requirements")}
                       className="text-xs h-auto p-1 text-primary hover:text-primary/80 hover:bg-transparent"
                     >
                       <Sparkles className="h-3 w-3 mr-1" />
@@ -434,7 +458,11 @@ export function JobDetailsForm({
                       }
                     }}
                   />
-                  <Button type="button" onClick={() => handleAddSkill()} size="sm">
+                  <Button
+                    type="button"
+                    onClick={() => handleAddSkill()}
+                    size="sm"
+                  >
                     <Plus className="h-4 w-4 mr-1" />
                     Add
                   </Button>
@@ -469,7 +497,9 @@ export function JobDetailsForm({
 
                   {/* Technical Skills Suggestions */}
                   <div className="mt-4">
-                    <p className="text-sm font-medium mb-2">Common technical skills:</p>
+                    <p className="text-sm font-medium mb-2">
+                      Common technical skills:
+                    </p>
                     <div className="flex flex-wrap gap-2 mb-3">
                       {technicalSkillSuggestions.map((skill) => (
                         <Badge
@@ -486,7 +516,9 @@ export function JobDetailsForm({
 
                   {/* Soft Skills Suggestions */}
                   <div className="mt-3">
-                    <p className="text-sm font-medium mb-2">Common soft skills:</p>
+                    <p className="text-sm font-medium mb-2">
+                      Common soft skills:
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       {softSkillSuggestions.map((skill) => (
                         <Badge
@@ -531,7 +563,11 @@ export function JobDetailsForm({
                       }
                     }}
                   />
-                  <Button type="button" onClick={() => handleAddEducation()} size="sm">
+                  <Button
+                    type="button"
+                    onClick={() => handleAddEducation()}
+                    size="sm"
+                  >
                     <Plus className="h-4 w-4 mr-1" />
                     Add
                   </Button>
@@ -568,7 +604,9 @@ export function JobDetailsForm({
 
                   {/* Education Suggestions */}
                   <div className="mt-2">
-                    <p className="text-sm font-medium mb-2">Common education requirements:</p>
+                    <p className="text-sm font-medium mb-2">
+                      Common education requirements:
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       {educationSuggestions.map((education) => (
                         <Badge
