@@ -30,12 +30,6 @@ import {
   DialogTitle,
 } from "@/components/shadcn-ui/dialog";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/shadcn-ui/tabs";
-import {
   Search,
   MoreHorizontal,
   Table as TableIcon,
@@ -131,7 +125,6 @@ export function JobsListView({
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   // Filter and search state
-  const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("updatedAt");
   const [sortOrder, setSortOrder] = useState("desc");
@@ -139,6 +132,7 @@ export function JobsListView({
 
   // Advanced filters
   const [filters, setFilters] = useState({
+    status: "all",
     department: "all",
     employmentType: "all",
     experienceLevel: "all",
@@ -153,15 +147,6 @@ export function JobsListView({
   const [pagination, setPagination] = useState({
     total: 0,
     pages: 0,
-  });
-
-  // Counts for tabs
-  const [counts, setCounts] = useState({
-    all: 0,
-    active: 0,
-    draft: 0,
-    closed: 0,
-    archived: 0,
   });
 
   // Bulk actions dialog
@@ -181,8 +166,8 @@ export function JobsListView({
       });
 
       // Apply status filter
-      if (activeTab !== "all") {
-        params.set("status", activeTab);
+      if (filters.status !== "all") {
+        params.set("status", filters.status);
       }
 
       // Apply search
@@ -202,15 +187,7 @@ export function JobsListView({
 
       const data: JobsResponse = await response.json();
       setJobs(data.jobs || []);
-      setCounts(
-        data.counts || {
-          all: 0,
-          active: 0,
-          draft: 0,
-          closed: 0,
-          archived: 0,
-        }
-      );
+
       setPagination({
         total: data.pagination?.total || 0,
         pages: data.pagination?.pages || 0,
@@ -219,21 +196,12 @@ export function JobsListView({
       console.error("Error fetching jobs:", error);
       toast.error("Failed to load jobs");
       setJobs([]);
-      // Reset counts to default on error
-      setCounts({
-        all: 0,
-        active: 0,
-        draft: 0,
-        closed: 0,
-        archived: 0,
-      });
     } finally {
       setLoading(false);
     }
   }, [
     currentPage,
     itemsPerPage,
-    activeTab,
     searchTerm,
     sortBy,
     sortOrder,
@@ -326,7 +294,6 @@ export function JobsListView({
     try {
       const params = new URLSearchParams({
         format,
-        status: activeTab !== "all" ? activeTab : "",
         search: searchTerm,
         ...filters,
       });
@@ -361,6 +328,7 @@ export function JobsListView({
   // Reset filters
   const resetFilters = () => {
     setFilters({
+      status: "all",
       department: "all",
       employmentType: "all",
       experienceLevel: "all",
@@ -369,8 +337,17 @@ export function JobsListView({
       dateRange: "all",
     });
     setSearchTerm("");
-    setActiveTab("all");
     setCurrentPage(1);
+  };
+
+  // Count applied filters
+  const getAppliedFiltersCount = () => {
+    let count = 0;
+    if (searchTerm.trim()) count++;
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value !== "all") count++;
+    });
+    return count;
   };
 
   // Render job content based on view mode
@@ -458,12 +435,20 @@ export function JobsListView({
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
-              "transition-colors p-2",
+              "transition-colors p-2 relative",
               showFilters && "bg-muted border-primary text-primary"
             )}
           >
             <SlidersHorizontal className="h-4 w-4 mr-2" />
             Filters
+            {getAppliedFiltersCount() > 0 && (
+              <Badge
+                variant="secondary"
+                className="ml-2 h-5 w-5 p-0 text-xs flex items-center justify-center bg-foreground text-background rounded-full"
+              >
+                {getAppliedFiltersCount()}
+              </Badge>
+            )}
           </Button>
 
           {/* Enhanced View mode toggle */}
@@ -549,7 +534,30 @@ export function JobsListView({
       {showFilters && (
         <Card className="">
           <CardContent className="p-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Status
+                </label>
+                <Select
+                  value={filters.status}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, status: value }))
+                  }
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="All Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="closed">Closed</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground">
                   Department
@@ -640,15 +648,17 @@ export function JobsListView({
                 </Select>
               </div>
 
+              {/* Clear All button aligned to the right of the grid */}
               <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Quick Actions
-                </label>
+                <div className="text-xs font-medium text-muted-foreground mt-2">
+                  &nbsp;
+                </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={resetFilters}
-                  className="text-muted-foreground hover:text-foreground"
+                  className="w-full text-muted-foreground hover:text-foreground flex items-center justify-center"
+                  disabled={getAppliedFiltersCount() === 0}
                 >
                   <X className="h-4 w-4 mr-2" />
                   Clear All
@@ -659,49 +669,25 @@ export function JobsListView({
         </Card>
       )}
 
-      {/* Status tabs */}
-      <Tabs
-        value={activeTab}
-        onValueChange={(value) => {
-          setActiveTab(value);
-          setCurrentPage(1);
-        }}
-      >
-        <TabsList>
-          <TabsTrigger value="all">All ({counts?.all || 0})</TabsTrigger>
-          <TabsTrigger value="active">
-            Active ({counts?.active || 0})
-          </TabsTrigger>
-          <TabsTrigger value="draft">Drafts ({counts?.draft || 0})</TabsTrigger>
-          <TabsTrigger value="closed">
-            Closed ({counts?.closed || 0})
-          </TabsTrigger>
-          <TabsTrigger value="archived">
-            Archived ({counts?.archived || 0})
-          </TabsTrigger>
-        </TabsList>
+      {/* Main Content */}
+      <div className="space-y-6">
+        <JobContentRenderer />
 
-        <TabsContent value={activeTab} className="mt-6">
-          <div className="space-y-6">
-            <JobContentRenderer />
-
-            {/* Pagination */}
-            {!loading && jobs.length > 0 && (
-              <JobsPagination
-                currentPage={currentPage}
-                totalPages={pagination.pages}
-                totalItems={pagination.total}
-                itemsPerPage={itemsPerPage}
-                onPageChange={goToPage}
-                onItemsPerPageChange={(newItemsPerPage) => {
-                  setItemsPerPage(newItemsPerPage);
-                  setCurrentPage(1);
-                }}
-              />
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+        {/* Pagination */}
+        {!loading && jobs.length > 0 && (
+          <JobsPagination
+            currentPage={currentPage}
+            totalPages={pagination.pages}
+            totalItems={pagination.total}
+            itemsPerPage={itemsPerPage}
+            onPageChange={goToPage}
+            onItemsPerPageChange={(newItemsPerPage) => {
+              setItemsPerPage(newItemsPerPage);
+              setCurrentPage(1);
+            }}
+          />
+        )}
+      </div>
 
       {/* Bulk action confirmation dialog */}
       <Dialog open={showBulkDialog} onOpenChange={setShowBulkDialog}>
