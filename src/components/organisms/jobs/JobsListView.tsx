@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/shadcn-ui/button";
-import { Card, CardContent } from "@/components/shadcn-ui/card";
 import { Badge } from "@/components/shadcn-ui/badge";
 import { Input } from "@/components/shadcn-ui/input";
 import {
@@ -20,19 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuLabel,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
 } from "@/components/shadcn-ui/dropdown-menu";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/shadcn-ui/dialog";
 import {
   Search,
   MoreHorizontal,
@@ -42,14 +29,9 @@ import {
   Archive,
   SlidersHorizontal,
   AlignJustify,
-  X,
   CheckCircle,
-  Pause,
-  FileText,
   Eye,
-  EyeOff,
   Star,
-  StarOff,
   UserPlus,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -57,6 +39,10 @@ import { cn } from "@/lib/utils";
 import { JobGridView, JobTableView } from "./JobViewComponents";
 import { JobsPagination } from "./JobsPagination";
 import { SectionLoader } from "@/components/atoms/loader";
+import { BulkActionDialogs } from "./dialogs/BulkActionDialogs";
+import { BulkConfirmationDialog } from "./dialogs/BulkConfirmationDialog";
+import { JobFilters } from "./filters/JobFilters";
+import { useBulkActions } from "@/hooks/useBulkActions";
 
 // Enhanced job interface
 interface JobItem {
@@ -168,14 +154,14 @@ export function JobsListView({
     pages: 0,
   });
 
-  // Bulk actions dialog
-  const [showBulkDialog, setShowBulkDialog] = useState(false);
-  const [bulkAction, setBulkAction] = useState<string>("");
-  const [bulkActionData, setBulkActionData] = useState<any>(null);
-  
-  // User data for assignment
-  const [users, setUsers] = useState<Array<{_id: string, firstName: string, lastName: string, email: string}>>([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
+  // Bulk actions using custom hook
+  const bulkActions = useBulkActions({
+    apiEndpoint,
+    onSuccess: () => {
+      setSelectedJobs([]);
+      fetchJobs();
+    },
+  });
 
   // Fetch jobs
   const fetchJobs = useCallback(async () => {
@@ -239,25 +225,10 @@ export function JobsListView({
 
   // Fetch users for assignment (only for admin)
   useEffect(() => {
-    const fetchUsers = async () => {
-      if (userRole !== "admin") return;
-      
-      try {
-        setLoadingUsers(true);
-        const response = await fetch("/api/users/subadmins?limit=100");
-        if (response.ok) {
-          const data = await response.json();
-          setUsers(data.users || []);
-        }
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      } finally {
-        setLoadingUsers(false);
-      }
-    };
-
-    fetchUsers();
-  }, [userRole]);
+    if (userRole === "admin") {
+      bulkActions.fetchUsers();
+    }
+  }, [userRole, bulkActions.fetchUsers]);
 
   // Handle search with debouncing
   useEffect(() => {
@@ -288,11 +259,7 @@ export function JobsListView({
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    return status.charAt(0).toUpperCase() + status.slice(1);
-  };
-
-  // Selection handlers
+  // Bulk actions
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       setSelectedJobs(jobs.map((job) => job._id));
@@ -306,55 +273,6 @@ export function JobsListView({
       setSelectedJobs((prev) => [...prev, jobId]);
     } else {
       setSelectedJobs((prev) => prev.filter((id) => id !== jobId));
-    }
-  };
-
-  // Bulk actions
-  const handleBulkAction = async (action: string, data?: any) => {
-    setBulkAction(action);
-    setBulkActionData(data);
-    setShowBulkDialog(true);
-  };
-
-  const executeBulkAction = async () => {
-    try {
-      const requestBody: any = {
-        action: bulkAction,
-        jobIds: selectedJobs,
-      };
-
-      // Add additional data for specific actions
-      if (bulkActionData) {
-        requestBody.data = bulkActionData;
-      }
-
-      const response = await fetch(`${apiEndpoint}/bulk`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!response.ok) throw new Error("Bulk action failed");
-
-      const actionLabels: Record<string, string> = {
-        'change-status': `Status changed to ${bulkActionData?.status}`,
-        'assign': `Assigned to ${bulkActionData?.assigneeName}`,
-        'set-visibility': `Visibility changed to ${bulkActionData?.visibility}`,
-        'set-featured': `Featured status ${bulkActionData?.featured ? 'enabled' : 'disabled'}`,
-        'set-template': `Template status ${bulkActionData?.isTemplate ? 'enabled' : 'disabled'}`,
-        'archive': 'archived',
-        'close': 'closed',
-        'delete': 'deleted',
-      };
-
-      toast.success(`Bulk ${actionLabels[bulkAction] || bulkAction} completed successfully`);
-      setSelectedJobs([]);
-      fetchJobs();
-    } catch (error) {
-      toast.error(`Failed to ${bulkAction} selected jobs`);
-    } finally {
-      setShowBulkDialog(false);
-      setBulkActionData(null);
     }
   };
 
@@ -578,98 +496,50 @@ export function JobsListView({
                   Actions ({selectedJobs.length})
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>Status Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => handleBulkAction("change-status", { status: "active" })}>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>Bulk Actions</DropdownMenuLabel>
+                
+                <DropdownMenuItem onClick={() => bulkActions.handleBulkActionType("status")}>
                   <CheckCircle className="h-4 w-4 mr-2" />
-                  Set Active
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleBulkAction("change-status", { status: "paused" })}>
-                  <Pause className="h-4 w-4 mr-2" />
-                  Set Paused
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleBulkAction("change-status", { status: "closed" })}>
-                  <X className="h-4 w-4 mr-2" />
-                  Set Closed
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleBulkAction("change-status", { status: "draft" })}>
-                  <FileText className="h-4 w-4 mr-2" />
-                  Set Draft
+                  Change Status
                 </DropdownMenuItem>
                 
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Visibility Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => handleBulkAction("set-visibility", { visibility: "public" })}>
+                <DropdownMenuItem onClick={() => bulkActions.handleBulkActionType("visibility")}>
                   <Eye className="h-4 w-4 mr-2" />
-                  Make Public
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleBulkAction("set-visibility", { visibility: "private" })}>
-                  <EyeOff className="h-4 w-4 mr-2" />
-                  Make Private
+                  Change Visibility
                 </DropdownMenuItem>
                 
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Feature Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => handleBulkAction("set-featured", { featured: true })}>
+                <DropdownMenuItem onClick={() => bulkActions.handleBulkActionType("feature")}>
                   <Star className="h-4 w-4 mr-2" />
-                  Feature Jobs
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleBulkAction("set-featured", { featured: false })}>
-                  <StarOff className="h-4 w-4 mr-2" />
-                  Unfeature Jobs
+                  Feature Actions
                 </DropdownMenuItem>
                 
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Template Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => handleBulkAction("set-template", { isTemplate: true })}>
+                {/* Template Actions - Commented out as requested */}
+                {/* <DropdownMenuItem onClick={() => bulkActions.handleBulkActionType("template")}>
                   <FileText className="h-4 w-4 mr-2" />
-                  Set as Template
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleBulkAction("set-template", { isTemplate: false })}>
-                  <FileText className="h-4 w-4 mr-2" />
-                  Remove Template Status
-                </DropdownMenuItem>
+                  Template Actions
+                </DropdownMenuItem> */}
                 
-                {userRole === "admin" && users.length > 0 && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuLabel>Assignment</DropdownMenuLabel>
-                    <DropdownMenuSub>
-                      <DropdownMenuSubTrigger>
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        Assign To
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent>
-                        {users.map((user) => (
-                          <DropdownMenuItem 
-                            key={user._id}
-                            onClick={() => handleBulkAction("assign", { 
-                              assignedTo: user._id, 
-                              assigneeName: user.firstName + " " + user.lastName 
-                            })}
-                          >
-                            {user.firstName} {user.lastName}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
-                  </>
+                {userRole === "admin" && bulkActions.users.length > 0 && (
+                  <DropdownMenuItem onClick={() => bulkActions.handleBulkActionType("assign")}>
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Assign Jobs
+                  </DropdownMenuItem>
                 )}
                 
                 <DropdownMenuSeparator />
-                <DropdownMenuLabel>Archive Actions</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => handleBulkAction("archive")}>
+                
+                <DropdownMenuItem onClick={() => bulkActions.handleBulkActionType("archive")}>
                   <Archive className="h-4 w-4 mr-2" />
-                  Archive Selected
+                  Archive Jobs
                 </DropdownMenuItem>
                 
-                <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => handleBulkAction("delete")}
+                  onClick={() => bulkActions.handleBulkActionType("delete")}
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Selected
+                  Delete Jobs
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -679,185 +549,13 @@ export function JobsListView({
 
       {/* Advanced Filters Section */}
       {showFilters && (
-        <Card className="">
-          <CardContent className="p-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Status
-                </label>
-                <Select
-                  value={filters.status}
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({ ...prev, status: value }))
-                  }
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="All Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                    <SelectItem value="archived">Archived</SelectItem>
-                    <SelectItem value="paused">Paused</SelectItem>
-                    <SelectItem value="pending_review">Pending Review</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Department
-                </label>
-                <Select
-                  value={filters.department}
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({ ...prev, department: value }))
-                  }
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="All Departments" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Departments</SelectItem>
-                    <SelectItem value="engineering">Engineering</SelectItem>
-                    <SelectItem value="marketing">Marketing</SelectItem>
-                    <SelectItem value="sales">Sales</SelectItem>
-                    <SelectItem value="hr">HR</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Employment Type
-                </label>
-                <Select
-                  value={filters.employmentType}
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({ ...prev, employmentType: value }))
-                  }
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="All Types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    <SelectItem value="full-time">Full-time</SelectItem>
-                    <SelectItem value="part-time">Part-time</SelectItem>
-                    <SelectItem value="contract">Contract</SelectItem>
-                    <SelectItem value="internship">Internship</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Experience Level
-                </label>
-                <Select
-                  value={filters.experienceLevel}
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({ ...prev, experienceLevel: value }))
-                  }
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="All Levels" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Levels</SelectItem>
-                    <SelectItem value="entry">Entry Level</SelectItem>
-                    <SelectItem value="mid">Mid Level</SelectItem>
-                    <SelectItem value="senior">Senior Level</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Location Type
-                </label>
-                <Select
-                  value={filters.locationType}
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({ ...prev, locationType: value }))
-                  }
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="All Locations" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Locations</SelectItem>
-                    <SelectItem value="remote">Remote</SelectItem>
-                    <SelectItem value="onsite">Onsite</SelectItem>
-                    <SelectItem value="hybrid">Hybrid</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Visibility
-                </label>
-                <Select
-                  value={filters.visibility}
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({ ...prev, visibility: value }))
-                  }
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="All Visibility" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    <SelectItem value="public">Public</SelectItem>
-                    <SelectItem value="private">Private</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Featured
-                </label>
-                <Select
-                  value={filters.featured}
-                  onValueChange={(value) =>
-                    setFilters((prev) => ({ ...prev, featured: value }))
-                  }
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="All Jobs" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Jobs</SelectItem>
-                    <SelectItem value="true">Featured Only</SelectItem>
-                    <SelectItem value="false">Non-Featured</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Clear All button aligned to the right of the grid */}
-              <div className="space-y-2">
-                <div className="text-xs font-medium text-muted-foreground mt-2">
-                  &nbsp;
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={resetFilters}
-                  className="w-full text-muted-foreground hover:text-foreground flex items-center justify-center"
-                  disabled={getAppliedFiltersCount() === 0}
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Clear All
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <JobFilters
+          filters={filters}
+          setFilters={setFilters}
+          resetFilters={resetFilters}
+          getAppliedFiltersCount={getAppliedFiltersCount}
+          userRole={userRole}
+        />
       )}
 
       {/* Main Content */}
@@ -880,62 +578,40 @@ export function JobsListView({
         )}
       </div>
 
-      {/* Bulk action confirmation dialog */}
-      <Dialog open={showBulkDialog} onOpenChange={setShowBulkDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirm Bulk Action</DialogTitle>
-            <DialogDescription className="space-y-2">
-              {bulkAction === "change-status" && (
-                <span>
-                  Are you sure you want to change the status of {selectedJobs.length} selected job(s) to <strong>{bulkActionData?.status}</strong>?
-                </span>
-              )}
-              {bulkAction === "assign" && (
-                <span>
-                  Are you sure you want to assign {selectedJobs.length} selected job(s) to <strong>{bulkActionData?.assigneeName}</strong>?
-                </span>
-              )}
-              {bulkAction === "set-visibility" && (
-                <span>
-                  Are you sure you want to set the visibility of {selectedJobs.length} selected job(s) to <strong>{bulkActionData?.visibility}</strong>?
-                </span>
-              )}
-              {bulkAction === "set-featured" && (
-                <span>
-                  Are you sure you want to {bulkActionData?.featured ? "feature" : "unfeature"} {selectedJobs.length} selected job(s)?
-                </span>
-              )}
-              {bulkAction === "set-template" && (
-                <span>
-                  Are you sure you want to {bulkActionData?.isTemplate ? "set as templates" : "remove template status from"} {selectedJobs.length} selected job(s)?
-                </span>
-              )}
-              {!["change-status", "assign", "set-visibility", "set-featured", "set-template"].includes(bulkAction) && (
-                <span>
-                  Are you sure you want to {bulkAction} {selectedJobs.length} selected job(s)? This action cannot be undone.
-                </span>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowBulkDialog(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={executeBulkAction}
-              variant={bulkAction === "delete" ? "destructive" : "default"}
-            >
-              {bulkAction === "change-status" && `Change to ${bulkActionData?.status}`}
-              {bulkAction === "assign" && "Assign Jobs"}
-              {bulkAction === "set-visibility" && `Set ${bulkActionData?.visibility}`}
-              {bulkAction === "set-featured" && (bulkActionData?.featured ? "Feature Jobs" : "Unfeature Jobs")}
-              {bulkAction === "set-template" && (bulkActionData?.isTemplate ? "Set as Templates" : "Remove Template Status")}
-              {!["change-status", "assign", "set-visibility", "set-featured", "set-template"].includes(bulkAction) && `Confirm ${bulkAction}`}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Bulk Action Dialogs */}
+      <BulkActionDialogs
+        selectedJobsCount={selectedJobs.length}
+        bulkActionData={bulkActions.bulkActionData}
+        setBulkActionData={bulkActions.setBulkActionData}
+        setBulkAction={bulkActions.setBulkAction}
+        setShowBulkDialog={bulkActions.setShowBulkDialog}
+        users={bulkActions.users}
+        loadingUsers={bulkActions.loadingUsers}
+        userRole={userRole}
+        showStatusDialog={bulkActions.showStatusDialog}
+        setShowStatusDialog={bulkActions.setShowStatusDialog}
+        showVisibilityDialog={bulkActions.showVisibilityDialog}
+        setShowVisibilityDialog={bulkActions.setShowVisibilityDialog}
+        showFeatureDialog={bulkActions.showFeatureDialog}
+        setShowFeatureDialog={bulkActions.setShowFeatureDialog}
+        showAssignDialog={bulkActions.showAssignDialog}
+        setShowAssignDialog={bulkActions.setShowAssignDialog}
+        showArchiveDialog={bulkActions.showArchiveDialog}
+        setShowArchiveDialog={bulkActions.setShowArchiveDialog}
+        showDeleteDialog={bulkActions.showDeleteDialog}
+        setShowDeleteDialog={bulkActions.setShowDeleteDialog}
+      />
+
+      {/* Bulk Confirmation Dialog */}
+      <BulkConfirmationDialog
+        isOpen={bulkActions.showBulkDialog}
+        onClose={() => bulkActions.setShowBulkDialog(false)}
+        onConfirm={() => bulkActions.executeBulkAction(selectedJobs)}
+        bulkAction={bulkActions.bulkAction}
+        bulkActionData={bulkActions.bulkActionData}
+        selectedJobsCount={selectedJobs.length}
+        isLoading={bulkActions.isExecuting}
+      />
     </div>
   );
 }
