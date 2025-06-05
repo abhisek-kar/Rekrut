@@ -39,10 +39,9 @@ import { cn } from "@/lib/utils";
 import { JobGridView, JobTableView } from "./JobViewComponents";
 import { JobsPagination } from "./JobsPagination";
 import { SectionLoader } from "@/components/atoms/loader";
-import { BulkActionDialogs } from "./dialogs/BulkActionDialogs";
-import { BulkConfirmationDialog } from "./dialogs/BulkConfirmationDialog";
+import { JobActionDialogs } from "./dialogs/JobActionDialogs";
 import { JobFilters } from "./filters/JobFilters";
-import { useBulkActions } from "@/hooks/useBulkActions";
+import { useJobActions } from "@/hooks/useJobActions";
 
 // Enhanced job interface
 interface JobItem {
@@ -154,9 +153,9 @@ export function JobsListView({
     pages: 0,
   });
 
-  // Bulk actions using custom hook
-  const bulkActions = useBulkActions({
-    apiEndpoint,
+  // Bulk actions using unified job actions hook
+  const jobActions = useJobActions({
+    userRole,
     onSuccess: () => {
       setSelectedJobs([]);
       fetchJobs();
@@ -226,9 +225,9 @@ export function JobsListView({
   // Fetch users for assignment (only for admin)
   useEffect(() => {
     if (userRole === "admin") {
-      bulkActions.fetchUsers();
+      jobActions.fetchUsers();
     }
-  }, [userRole, bulkActions.fetchUsers]);
+  }, [userRole, jobActions.fetchUsers]);
 
   // Handle search with debouncing
   useEffect(() => {
@@ -354,6 +353,7 @@ export function JobsListView({
       editBaseUrl,
       userRole,
       loading,
+      jobActions,
     };
 
     switch (viewMode) {
@@ -499,29 +499,23 @@ export function JobsListView({
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuLabel>Bulk Actions</DropdownMenuLabel>
                 
-                <DropdownMenuItem onClick={() => bulkActions.handleBulkActionType("status")}>
+                <DropdownMenuItem onClick={() => jobActions.handleJobAction("status", selectedJobs)}>
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Change Status
                 </DropdownMenuItem>
                 
-                <DropdownMenuItem onClick={() => bulkActions.handleBulkActionType("visibility")}>
+                <DropdownMenuItem onClick={() => jobActions.handleJobAction("visibility", selectedJobs)}>
                   <Eye className="h-4 w-4 mr-2" />
                   Change Visibility
                 </DropdownMenuItem>
                 
-                <DropdownMenuItem onClick={() => bulkActions.handleBulkActionType("feature")}>
+                <DropdownMenuItem onClick={() => jobActions.handleJobAction("feature", selectedJobs)}>
                   <Star className="h-4 w-4 mr-2" />
                   Feature Actions
                 </DropdownMenuItem>
                 
-                {/* Template Actions - Commented out as requested */}
-                {/* <DropdownMenuItem onClick={() => bulkActions.handleBulkActionType("template")}>
-                  <FileText className="h-4 w-4 mr-2" />
-                  Template Actions
-                </DropdownMenuItem> */}
-                
-                {userRole === "admin" && bulkActions.users.length > 0 && (
-                  <DropdownMenuItem onClick={() => bulkActions.handleBulkActionType("assign")}>
+                {userRole === "admin" && jobActions.users.length > 0 && (
+                  <DropdownMenuItem onClick={() => jobActions.handleJobAction("assign", selectedJobs)}>
                     <UserPlus className="h-4 w-4 mr-2" />
                     Assign Jobs
                   </DropdownMenuItem>
@@ -529,13 +523,13 @@ export function JobsListView({
                 
                 <DropdownMenuSeparator />
                 
-                <DropdownMenuItem onClick={() => bulkActions.handleBulkActionType("archive")}>
+                <DropdownMenuItem onClick={() => jobActions.handleJobAction("archive", selectedJobs)}>
                   <Archive className="h-4 w-4 mr-2" />
                   Archive Jobs
                 </DropdownMenuItem>
                 
                 <DropdownMenuItem
-                  onClick={() => bulkActions.handleBulkActionType("delete")}
+                  onClick={() => jobActions.handleJobAction("delete", selectedJobs)}
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
@@ -578,39 +572,28 @@ export function JobsListView({
         )}
       </div>
 
-      {/* Bulk Action Dialogs */}
-      <BulkActionDialogs
-        selectedJobsCount={selectedJobs.length}
-        bulkActionData={bulkActions.bulkActionData}
-        setBulkActionData={bulkActions.setBulkActionData}
-        setBulkAction={bulkActions.setBulkAction}
-        setShowBulkDialog={bulkActions.setShowBulkDialog}
-        users={bulkActions.users}
-        loadingUsers={bulkActions.loadingUsers}
+      {/* Unified Job Action Dialogs */}
+      <JobActionDialogs
+        showStatusDialog={jobActions.showStatusDialog}
+        setShowStatusDialog={jobActions.setShowStatusDialog}
+        showVisibilityDialog={jobActions.showVisibilityDialog}
+        setShowVisibilityDialog={jobActions.setShowVisibilityDialog}
+        showFeatureDialog={jobActions.showFeatureDialog}
+        setShowFeatureDialog={jobActions.setShowFeatureDialog}
+        showAssignDialog={jobActions.showAssignDialog}
+        setShowAssignDialog={jobActions.setShowAssignDialog}
+        showArchiveDialog={jobActions.showArchiveDialog}
+        setShowArchiveDialog={jobActions.setShowArchiveDialog}
+        showDeleteDialog={jobActions.showDeleteDialog}
+        setShowDeleteDialog={jobActions.setShowDeleteDialog}
+        jobCount={selectedJobs.length}
+        isBulkAction={selectedJobs.length > 1}
+        actionData={jobActions.actionData}
+        setActionData={jobActions.setActionData}
+        onExecute={jobActions.executeAction}
+        users={jobActions.users}
+        loadingUsers={jobActions.loadingUsers}
         userRole={userRole}
-        showStatusDialog={bulkActions.showStatusDialog}
-        setShowStatusDialog={bulkActions.setShowStatusDialog}
-        showVisibilityDialog={bulkActions.showVisibilityDialog}
-        setShowVisibilityDialog={bulkActions.setShowVisibilityDialog}
-        showFeatureDialog={bulkActions.showFeatureDialog}
-        setShowFeatureDialog={bulkActions.setShowFeatureDialog}
-        showAssignDialog={bulkActions.showAssignDialog}
-        setShowAssignDialog={bulkActions.setShowAssignDialog}
-        showArchiveDialog={bulkActions.showArchiveDialog}
-        setShowArchiveDialog={bulkActions.setShowArchiveDialog}
-        showDeleteDialog={bulkActions.showDeleteDialog}
-        setShowDeleteDialog={bulkActions.setShowDeleteDialog}
-      />
-
-      {/* Bulk Confirmation Dialog */}
-      <BulkConfirmationDialog
-        isOpen={bulkActions.showBulkDialog}
-        onClose={() => bulkActions.setShowBulkDialog(false)}
-        onConfirm={() => bulkActions.executeBulkAction(selectedJobs)}
-        bulkAction={bulkActions.bulkAction}
-        bulkActionData={bulkActions.bulkActionData}
-        selectedJobsCount={selectedJobs.length}
-        isLoading={bulkActions.isExecuting}
       />
     </div>
   );

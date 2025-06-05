@@ -10,22 +10,11 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/shadcn-ui/tabs";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/shadcn-ui/dropdown-menu";
 import { toast } from "sonner";
 import {
   ArrowLeft,
   Eye,
   Edit3,
-  MoreHorizontal,
-  Share2,
-  FileText,
-  UserPlus,
 } from "lucide-react";
 
 // Import job detail components
@@ -45,6 +34,9 @@ import { JobType } from "@/types/job";
 import { useAuth } from "@/hooks/useAuth";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionLoader } from "@/components/atoms/loader";
+import { useJobActions } from "@/hooks/useJobActions";
+import { JobActionDialogs } from "./dialogs/JobActionDialogs";
+import { JobActionsDropdown } from "./JobActionsDropdown";
 
 interface SharedJobViewProps {
   jobId: string;
@@ -57,6 +49,14 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
   const [job, setJob] = useState<JobType | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Initialize unified job actions
+  const jobActions = useJobActions({
+    userRole,
+    onSuccess: () => {
+      fetchJobData(); // Refresh job data after action
+    },
+  });
 
    const getBreadcrumbContext = () => {
       const baseContext = {
@@ -78,6 +78,13 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
         };
       }
     };
+
+  // Fetch users for assignment (only for admin)
+  useEffect(() => {
+    if (userRole === "admin") {
+      jobActions.fetchUsers();
+    }
+  }, [userRole, jobActions.fetchUsers]);
 
   // Fetch job data
   useEffect(() => {
@@ -149,27 +156,10 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
     }
   };
 
-  // Handle status change
-  const handleStatusChange = async (newStatus: string) => {
-    try {
-      const response = await fetch(`/api/jobs/${jobId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update job status");
-      }
-
-      await fetchJobData(); // Refresh job data
-      toast.success(`Job ${newStatus} successfully`);
-    } catch (error) {
-      console.error("Error updating status:", error);
-      toast.error("Failed to update job status");
-    }
+  // Handle status change using unified action system
+  const handleStatusChange = (newStatus: string) => {
+    jobActions.handleJobAction('status', jobId);
+    jobActions.setActionData({ status: newStatus });
   };
 
   // Copy job link
@@ -186,30 +176,9 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
     }
   };
 
-  // Handle job deletion
-  const handleDelete = async () => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this job? This action cannot be undone."
-      )
-    ) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/jobs/${jobId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete job");
-      }
-
-      toast.success("Job deleted successfully");
-      router.push(routes.jobsList);
-    } catch (error) {
-      toast.error("Failed to delete job");
-    }
+  // Handle job deletion using unified action system
+  const handleDelete = () => {
+    jobActions.handleJobAction('delete', jobId);
   };
 
   if (loading) {
@@ -260,55 +229,12 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
               <Edit3 className="w-4 h-4 mr-2" />
               Edit
             </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <MoreHorizontal className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={copyJobLink}>
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Copy Job Link
-                </DropdownMenuItem>
-
-                {userRole === "admin" && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleAssignRecruiter}>
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Assign Recruiter
-                    </DropdownMenuItem>
-                  </>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => handleStatusChange("active")}
-                  disabled={job.status === "active"}
-                >
-                  Publish Job
-                </DropdownMenuItem>
-                {/* <DropdownMenuItem 
-                  onClick={() => handleStatusChange("draaft")} 
-                  disabled={job.status === "draft"}
-                >
-                  Pause Job
-                </DropdownMenuItem> */}
-                <DropdownMenuItem
-                  onClick={() => handleStatusChange("closed")}
-                  disabled={job.status === "closed"}
-                >
-                  Close Job
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={handleDelete}
-                  className="text-destructive"
-                >
-                  Delete Job
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <JobActionsDropdown
+              jobId={jobId}
+              jobActions={jobActions}
+              userRole={userRole}
+              showCopyLink={true}
+            />
           </div>
         }
       />
@@ -356,6 +282,30 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
           </Tabs>
         </div>
       </main>
+
+      {/* Unified Job Action Dialogs */}
+      <JobActionDialogs
+        showStatusDialog={jobActions.showStatusDialog}
+        setShowStatusDialog={jobActions.setShowStatusDialog}
+        showVisibilityDialog={jobActions.showVisibilityDialog}
+        setShowVisibilityDialog={jobActions.setShowVisibilityDialog}
+        showFeatureDialog={jobActions.showFeatureDialog}
+        setShowFeatureDialog={jobActions.setShowFeatureDialog}
+        showAssignDialog={jobActions.showAssignDialog}
+        setShowAssignDialog={jobActions.setShowAssignDialog}
+        showArchiveDialog={jobActions.showArchiveDialog}
+        setShowArchiveDialog={jobActions.setShowArchiveDialog}
+        showDeleteDialog={jobActions.showDeleteDialog}
+        setShowDeleteDialog={jobActions.setShowDeleteDialog}
+        jobCount={jobActions.getJobCount()}
+        isBulkAction={jobActions.isBulkAction()}
+        actionData={jobActions.actionData}
+        setActionData={jobActions.setActionData}
+        onExecute={jobActions.executeAction}
+        users={jobActions.users}
+        loadingUsers={jobActions.loadingUsers}
+        userRole={userRole}
+      />
     </div>
   );
 }

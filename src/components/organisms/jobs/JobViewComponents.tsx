@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import { JobActionsDropdown } from "./JobActionsDropdown";
 
 interface JobItem {
   _id: string;
@@ -79,6 +80,15 @@ interface JobViewProps {
   editBaseUrl: string;
   userRole: "admin" | "subadmin";
   loading: boolean;
+  jobActions?: {
+    handleJobAction: (action: string, jobId: string) => void;
+    users: Array<{
+      _id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+    }>;
+  };
 }
 
 // Status helpers
@@ -135,6 +145,7 @@ export function JobGridView({
   viewBaseUrl,
   editBaseUrl,
   userRole,
+  jobActions,
 }: JobViewProps) {
   const router = useRouter();
 
@@ -253,33 +264,44 @@ export function JobGridView({
                   >
                     <Edit3 className="w-3 h-3" />
                   </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() =>
-                          navigator.clipboard.writeText(
-                            `${window.location.origin}/jobs/${job._id}`
-                          )
-                        }
-                      >
-                        <Copy className="w-4 h-4 mr-2" />
-                        Copy Link
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Archive className="w-4 h-4 mr-2" />
-                        Archive
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600">
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {jobActions ? (
+                    <JobActionsDropdown
+                      jobId={job._id}
+                      jobActions={jobActions}
+                      userRole={userRole}
+                      showCopyLink={true}
+                      triggerVariant="icon"
+                      triggerSize="sm"
+                    />
+                  ) : (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() =>
+                            navigator.clipboard.writeText(
+                              `${window.location.origin}/jobs/${job._id}`
+                            )
+                          }
+                        >
+                          <Copy className="w-4 h-4 mr-2" />
+                          Copy Link
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Archive className="w-4 h-4 mr-2" />
+                          Archive
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600">
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
               </div>
             </div>
@@ -299,6 +321,7 @@ export function JobTableView({
   viewBaseUrl,
   editBaseUrl,
   userRole,
+  jobActions,
 }: JobViewProps) {
   const router = useRouter();
 
@@ -432,33 +455,44 @@ export function JobTableView({
                   >
                     <Edit3 className="w-4 h-4" />
                   </Button>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() =>
-                          navigator.clipboard.writeText(
-                            `${window.location.origin}/jobs/${job._id}`
-                          )
-                        }
-                      >
-                        <Copy className="w-4 h-4 mr-2" />
-                        Copy Link
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <Archive className="w-4 h-4 mr-2" />
-                        Archive
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600">
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  {jobActions ? (
+                    <JobActionsDropdown
+                      jobId={job._id}
+                      jobActions={jobActions}
+                      userRole={userRole}
+                      showCopyLink={true}
+                      triggerVariant="icon"
+                      triggerSize="sm"
+                    />
+                  ) : (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() =>
+                            navigator.clipboard.writeText(
+                              `${window.location.origin}/jobs/${job._id}`
+                            )
+                          }
+                        >
+                          <Copy className="w-4 h-4 mr-2" />
+                          Copy Link
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Archive className="w-4 h-4 mr-2" />
+                          Archive
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-red-600">
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                 </div>
               </TableCell>
             </TableRow>
