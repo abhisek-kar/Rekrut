@@ -12,43 +12,76 @@ export async function GET(request: NextRequest) {
   try {
     await dbConnect();
     
-    // Parse query parameters
-    const searchParams = request.nextUrl.searchParams;
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const search = searchParams.get('search') || '';
-    const status = searchParams.get('status') || 'active';
-    const createdBy = searchParams.get('createdBy') || '';
-    const assignedTo = searchParams.get('assignedTo') || '';
-    const sortBy = searchParams.get('sortBy') || 'createdAt';
-    const sortOrder = searchParams.get('sortOrder') || 'desc';
-    
-    // Build query
-    const query: Record<string, unknown> = {};
-    
-    // Status filter
-    if (status) {
-      query.status = status;
-    }
-    
-    // Search filter (title, company, or description)
-    if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { company: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
-    }
-    
-    // Created by filter
-    if (createdBy) {
-      query.createdBy = new mongoose.Types.ObjectId(createdBy);
-    }
-    
-    // Assigned to filter
-    if (assignedTo) {
-      query.assignedTo = new mongoose.Types.ObjectId(assignedTo);
-    }
+  // Parse query parameters
+  const searchParams = request.nextUrl.searchParams;
+  const page = parseInt(searchParams.get('page') || '1');
+  const limit = parseInt(searchParams.get('limit') || '10');
+  const search = searchParams.get('search') || '';
+  const status = searchParams.get('status') || '';
+  const createdBy = searchParams.get('createdBy') || '';
+  const assignedTo = searchParams.get('assignedTo') || '';
+  const sortBy = searchParams.get('sortBy') || 'createdAt';
+  const sortOrder = searchParams.get('sortOrder') || 'desc';
+  
+  // Advanced filter parameters
+  const department = searchParams.get('department') || '';
+  const employmentType = searchParams.get('employmentType') || '';
+  const experienceLevel = searchParams.get('experienceLevel') || '';
+  const locationType = searchParams.get('locationType') || '';
+  const visibility = searchParams.get('visibility') || '';
+  const featured = searchParams.get('featured') || '';
+  
+  // Build query
+  const query: Record<string, unknown> = {};
+  
+  // Status filter
+  if (status && status !== 'all') {
+    query.status = status;
+  }
+  
+  // Search filter (title, company, or description)
+  if (search) {
+    query.$or = [
+      { title: { $regex: search, $options: 'i' } },
+      { company: { $regex: search, $options: 'i' } },
+      { description: { $regex: search, $options: 'i' } }
+    ];
+  }
+  
+  // Created by filter
+  if (createdBy) {
+    query.createdBy = new mongoose.Types.ObjectId(createdBy);
+  }
+  
+  // Assigned to filter
+  if (assignedTo && assignedTo !== 'all') {
+    query.assignedTo = new mongoose.Types.ObjectId(assignedTo);
+  }
+  
+  // Advanced filters
+  if (department && department !== 'all') {
+    query.department = department;
+  }
+  
+  if (employmentType && employmentType !== 'all') {
+    query.employmentType = employmentType;
+  }
+  
+  if (experienceLevel && experienceLevel !== 'all') {
+    query.experienceLevel = experienceLevel;
+  }
+  
+  if (locationType && locationType !== 'all') {
+    query['location.type'] = locationType;
+  }
+  
+  if (visibility && visibility !== 'all') {
+    query.visibility = visibility;
+  }
+  
+  if (featured && featured !== 'all') {
+    query.featured = featured === 'true';
+  }
     
     // Get total count for pagination
     const totalJobs = await Job.countDocuments(query);

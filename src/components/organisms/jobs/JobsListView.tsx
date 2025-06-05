@@ -19,6 +19,10 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@/components/shadcn-ui/dropdown-menu";
 
 import {
@@ -39,6 +43,14 @@ import {
   SlidersHorizontal,
   AlignJustify,
   X,
+  CheckCircle,
+  Pause,
+  FileText,
+  Eye,
+  EyeOff,
+  Star,
+  StarOff,
+  UserPlus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -61,6 +73,9 @@ interface JobItem {
   status: string;
   employmentType: string;
   experienceLevel: string;
+  visibility: string; // 'public' | 'private'
+  featured: boolean;
+  isTemplate?: boolean;
   createdAt: string;
   updatedAt: string;
   assignedTo?: {
@@ -90,6 +105,8 @@ interface JobsResponse {
     draft: number;
     closed: number;
     archived: number;
+    paused: number;
+    pending_review: number;
   };
   pagination: {
     total: number;
@@ -139,6 +156,8 @@ export function JobsListView({
     locationType: "all",
     assignedTo: "all",
     dateRange: "all",
+    visibility: "all", // 'all' | 'public' | 'private'
+    featured: "all", // 'all' | 'true' | 'false'
   });
 
   // Pagination
@@ -152,6 +171,11 @@ export function JobsListView({
   // Bulk actions dialog
   const [showBulkDialog, setShowBulkDialog] = useState(false);
   const [bulkAction, setBulkAction] = useState<string>("");
+  const [bulkActionData, setBulkActionData] = useState<any>(null);
+  
+  // User data for assignment
+  const [users, setUsers] = useState<Array<{_id: string, firstName: string, lastName: string, email: string}>>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
   // Fetch jobs
   const fetchJobs = useCallback(async () => {
@@ -213,6 +237,28 @@ export function JobsListView({
     fetchJobs();
   }, [fetchJobs]);
 
+  // Fetch users for assignment (only for admin)
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (userRole !== "admin") return;
+      
+      try {
+        setLoadingUsers(true);
+        const response = await fetch("/api/users/subadmins?limit=100");
+        if (response.ok) {
+          const data = await response.json();
+          setUsers(data.users || []);
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+
+    fetchUsers();
+  }, [userRole]);
+
   // Handle search with debouncing
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -233,6 +279,10 @@ export function JobsListView({
         return "bg-red-100 text-red-800 border-red-200";
       case "archived":
         return "bg-purple-100 text-purple-800 border-purple-200";
+      case "paused":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "pending_review":
+        return "bg-orange-100 text-orange-800 border-orange-200";
       default:
         return "bg-blue-100 text-blue-800 border-blue-200";
     }
@@ -260,32 +310,51 @@ export function JobsListView({
   };
 
   // Bulk actions
-  const handleBulkAction = async (action: string) => {
+  const handleBulkAction = async (action: string, data?: any) => {
     setBulkAction(action);
+    setBulkActionData(data);
     setShowBulkDialog(true);
   };
 
   const executeBulkAction = async () => {
     try {
-      // Implementation depends on your API
+      const requestBody: any = {
+        action: bulkAction,
+        jobIds: selectedJobs,
+      };
+
+      // Add additional data for specific actions
+      if (bulkActionData) {
+        requestBody.data = bulkActionData;
+      }
+
       const response = await fetch(`${apiEndpoint}/bulk`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: bulkAction,
-          jobIds: selectedJobs,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) throw new Error("Bulk action failed");
 
-      toast.success(`Bulk ${bulkAction} completed successfully`);
+      const actionLabels: Record<string, string> = {
+        'change-status': `Status changed to ${bulkActionData?.status}`,
+        'assign': `Assigned to ${bulkActionData?.assigneeName}`,
+        'set-visibility': `Visibility changed to ${bulkActionData?.visibility}`,
+        'set-featured': `Featured status ${bulkActionData?.featured ? 'enabled' : 'disabled'}`,
+        'set-template': `Template status ${bulkActionData?.isTemplate ? 'enabled' : 'disabled'}`,
+        'archive': 'archived',
+        'close': 'closed',
+        'delete': 'deleted',
+      };
+
+      toast.success(`Bulk ${actionLabels[bulkAction] || bulkAction} completed successfully`);
       setSelectedJobs([]);
       fetchJobs();
     } catch (error) {
       toast.error(`Failed to ${bulkAction} selected jobs`);
     } finally {
       setShowBulkDialog(false);
+      setBulkActionData(null);
     }
   };
 
@@ -335,6 +404,8 @@ export function JobsListView({
       locationType: "all",
       assignedTo: "all",
       dateRange: "all",
+      visibility: "all",
+      featured: "all",
     });
     setSearchTerm("");
     setCurrentPage(1);
@@ -504,18 +575,94 @@ export function JobsListView({
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
                   <MoreHorizontal className="h-4 w-4 mr-2" />
-                  Actions
+                  Actions ({selectedJobs.length})
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Status Actions</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => handleBulkAction("change-status", { status: "active" })}>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Set Active
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleBulkAction("change-status", { status: "paused" })}>
+                  <Pause className="h-4 w-4 mr-2" />
+                  Set Paused
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleBulkAction("change-status", { status: "closed" })}>
+                  <X className="h-4 w-4 mr-2" />
+                  Set Closed
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleBulkAction("change-status", { status: "draft" })}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Set Draft
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Visibility Actions</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => handleBulkAction("set-visibility", { visibility: "public" })}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  Make Public
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleBulkAction("set-visibility", { visibility: "private" })}>
+                  <EyeOff className="h-4 w-4 mr-2" />
+                  Make Private
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Feature Actions</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => handleBulkAction("set-featured", { featured: true })}>
+                  <Star className="h-4 w-4 mr-2" />
+                  Feature Jobs
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleBulkAction("set-featured", { featured: false })}>
+                  <StarOff className="h-4 w-4 mr-2" />
+                  Unfeature Jobs
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Template Actions</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => handleBulkAction("set-template", { isTemplate: true })}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Set as Template
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleBulkAction("set-template", { isTemplate: false })}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Remove Template Status
+                </DropdownMenuItem>
+                
+                {userRole === "admin" && users.length > 0 && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel>Assignment</DropdownMenuLabel>
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Assign To
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent>
+                        {users.map((user) => (
+                          <DropdownMenuItem 
+                            key={user._id}
+                            onClick={() => handleBulkAction("assign", { 
+                              assignedTo: user._id, 
+                              assigneeName: user.firstName + " " + user.lastName 
+                            })}
+                          >
+                            {user.firstName} {user.lastName}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                  </>
+                )}
+                
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Archive Actions</DropdownMenuLabel>
                 <DropdownMenuItem onClick={() => handleBulkAction("archive")}>
                   <Archive className="h-4 w-4 mr-2" />
                   Archive Selected
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleBulkAction("close")}>
-                  <X className="h-4 w-4 mr-2" />
-                  Close Selected
-                </DropdownMenuItem>
+                
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => handleBulkAction("delete")}
@@ -534,7 +681,7 @@ export function JobsListView({
       {showFilters && (
         <Card className="">
           <CardContent className="p-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
               <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground">
                   Status
@@ -554,6 +701,8 @@ export function JobsListView({
                     <SelectItem value="draft">Draft</SelectItem>
                     <SelectItem value="closed">Closed</SelectItem>
                     <SelectItem value="archived">Archived</SelectItem>
+                    <SelectItem value="paused">Paused</SelectItem>
+                    <SelectItem value="pending_review">Pending Review</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -648,6 +797,48 @@ export function JobsListView({
                 </Select>
               </div>
 
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Visibility
+                </label>
+                <Select
+                  value={filters.visibility}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, visibility: value }))
+                  }
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="All Visibility" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="public">Public</SelectItem>
+                    <SelectItem value="private">Private</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Featured
+                </label>
+                <Select
+                  value={filters.featured}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, featured: value }))
+                  }
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="All Jobs" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Jobs</SelectItem>
+                    <SelectItem value="true">Featured Only</SelectItem>
+                    <SelectItem value="false">Non-Featured</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Clear All button aligned to the right of the grid */}
               <div className="space-y-2">
                 <div className="text-xs font-medium text-muted-foreground mt-2">
@@ -691,12 +882,40 @@ export function JobsListView({
 
       {/* Bulk action confirmation dialog */}
       <Dialog open={showBulkDialog} onOpenChange={setShowBulkDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Confirm Bulk Action</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to {bulkAction} {selectedJobs.length}{" "}
-              selected job(s)? This action cannot be undone.
+            <DialogDescription className="space-y-2">
+              {bulkAction === "change-status" && (
+                <span>
+                  Are you sure you want to change the status of {selectedJobs.length} selected job(s) to <strong>{bulkActionData?.status}</strong>?
+                </span>
+              )}
+              {bulkAction === "assign" && (
+                <span>
+                  Are you sure you want to assign {selectedJobs.length} selected job(s) to <strong>{bulkActionData?.assigneeName}</strong>?
+                </span>
+              )}
+              {bulkAction === "set-visibility" && (
+                <span>
+                  Are you sure you want to set the visibility of {selectedJobs.length} selected job(s) to <strong>{bulkActionData?.visibility}</strong>?
+                </span>
+              )}
+              {bulkAction === "set-featured" && (
+                <span>
+                  Are you sure you want to {bulkActionData?.featured ? "feature" : "unfeature"} {selectedJobs.length} selected job(s)?
+                </span>
+              )}
+              {bulkAction === "set-template" && (
+                <span>
+                  Are you sure you want to {bulkActionData?.isTemplate ? "set as templates" : "remove template status from"} {selectedJobs.length} selected job(s)?
+                </span>
+              )}
+              {!["change-status", "assign", "set-visibility", "set-featured", "set-template"].includes(bulkAction) && (
+                <span>
+                  Are you sure you want to {bulkAction} {selectedJobs.length} selected job(s)? This action cannot be undone.
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -707,7 +926,12 @@ export function JobsListView({
               onClick={executeBulkAction}
               variant={bulkAction === "delete" ? "destructive" : "default"}
             >
-              Confirm {bulkAction}
+              {bulkAction === "change-status" && `Change to ${bulkActionData?.status}`}
+              {bulkAction === "assign" && "Assign Jobs"}
+              {bulkAction === "set-visibility" && `Set ${bulkActionData?.visibility}`}
+              {bulkAction === "set-featured" && (bulkActionData?.featured ? "Feature Jobs" : "Unfeature Jobs")}
+              {bulkAction === "set-template" && (bulkActionData?.isTemplate ? "Set as Templates" : "Remove Template Status")}
+              {!["change-status", "assign", "set-visibility", "set-featured", "set-template"].includes(bulkAction) && `Confirm ${bulkAction}`}
             </Button>
           </DialogFooter>
         </DialogContent>

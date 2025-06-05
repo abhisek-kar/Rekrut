@@ -37,6 +37,14 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'updatedAt';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
     
+    // Advanced filter parameters
+    const department = searchParams.get('department') || '';
+    const employmentType = searchParams.get('employmentType') || '';
+    const experienceLevel = searchParams.get('experienceLevel') || '';
+    const locationType = searchParams.get('locationType') || '';
+    const visibility = searchParams.get('visibility') || '';
+    const featured = searchParams.get('featured') || '';
+    
     // Build query - only show jobs assigned to this SubAdmin
     const query: Record<string, unknown> = {
       assignedTo: new mongoose.Types.ObjectId(session.user.id)
@@ -58,6 +66,31 @@ export async function GET(request: NextRequest) {
         { company: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } }
       ];
+    }
+    
+    // Advanced filters
+    if (department && department !== 'all') {
+      query.department = department;
+    }
+    
+    if (employmentType && employmentType !== 'all') {
+      query.employmentType = employmentType;
+    }
+    
+    if (experienceLevel && experienceLevel !== 'all') {
+      query.experienceLevel = experienceLevel;
+    }
+    
+    if (locationType && locationType !== 'all') {
+      query['location.type'] = locationType;
+    }
+    
+    if (visibility && visibility !== 'all') {
+      query.visibility = visibility;
+    }
+    
+    if (featured && featured !== 'all') {
+      query.featured = featured === 'true';
     }
     
     // Get total count for pagination
