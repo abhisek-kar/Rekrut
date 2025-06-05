@@ -6,7 +6,6 @@ import { Button } from "@/components/shadcn-ui/button";
 import { Card, CardContent } from "@/components/shadcn-ui/card";
 import { Badge } from "@/components/shadcn-ui/badge";
 import { Input } from "@/components/shadcn-ui/input";
-import { Checkbox } from "@/components/shadcn-ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -22,14 +21,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
 } from "@/components/shadcn-ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/shadcn-ui/table";
+
 import {
   Dialog,
   DialogContent,
@@ -45,7 +37,6 @@ import {
   TabsTrigger,
 } from "@/components/shadcn-ui/tabs";
 import {
-  PlusCircle,
   Search,
   Filter,
   MoreHorizontal,
@@ -66,6 +57,7 @@ import {
   ChevronFirst,
   ChevronLast,
   SlidersHorizontal,
+  AlignJustify,
   X,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -162,12 +154,12 @@ export function JobsListView({
 
   // Advanced filters
   const [filters, setFilters] = useState({
-    department: "",
-    employmentType: "",
-    experienceLevel: "",
-    locationType: "",
-    assignedTo: "",
-    dateRange: "",
+    department: "all",
+    employmentType: "all",
+    experienceLevel: "all",
+    locationType: "all",
+    assignedTo: "all",
+    dateRange: "all",
   });
 
   // Pagination
@@ -225,13 +217,15 @@ export function JobsListView({
 
       const data: JobsResponse = await response.json();
       setJobs(data.jobs || []);
-      setCounts(data.counts || {
-        all: 0,
-        active: 0,
-        draft: 0,
-        closed: 0,
-        archived: 0,
-      });
+      setCounts(
+        data.counts || {
+          all: 0,
+          active: 0,
+          draft: 0,
+          closed: 0,
+          archived: 0,
+        }
+      );
       setPagination({
         total: data.pagination?.total || 0,
         pages: data.pagination?.pages || 0,
@@ -251,7 +245,16 @@ export function JobsListView({
     } finally {
       setLoading(false);
     }
-  }, [currentPage, itemsPerPage, activeTab, searchTerm, sortBy, sortOrder, filters, apiEndpoint]);
+  }, [
+    currentPage,
+    itemsPerPage,
+    activeTab,
+    searchTerm,
+    sortBy,
+    sortOrder,
+    filters,
+    apiEndpoint,
+  ]);
 
   useEffect(() => {
     fetchJobs();
@@ -289,7 +292,7 @@ export function JobsListView({
   // Selection handlers
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedJobs(jobs.map(job => job._id));
+      setSelectedJobs(jobs.map((job) => job._id));
     } else {
       setSelectedJobs([]);
     }
@@ -297,9 +300,9 @@ export function JobsListView({
 
   const handleSelectJob = (jobId: string, checked: boolean) => {
     if (checked) {
-      setSelectedJobs(prev => [...prev, jobId]);
+      setSelectedJobs((prev) => [...prev, jobId]);
     } else {
-      setSelectedJobs(prev => prev.filter(id => id !== jobId));
+      setSelectedJobs((prev) => prev.filter((id) => id !== jobId));
     }
   };
 
@@ -343,7 +346,9 @@ export function JobsListView({
         ...filters,
       });
 
-      const response = await fetch(`${apiEndpoint}/export?${params.toString()}`);
+      const response = await fetch(
+        `${apiEndpoint}/export?${params.toString()}`
+      );
       if (!response.ok) throw new Error("Export failed");
 
       const blob = await response.blob();
@@ -371,12 +376,12 @@ export function JobsListView({
   // Reset filters
   const resetFilters = () => {
     setFilters({
-      department: "",
-      employmentType: "",
-      experienceLevel: "",
-      locationType: "",
-      assignedTo: "",
-      dateRange: "",
+      department: "all",
+      employmentType: "all",
+      experienceLevel: "all",
+      locationType: "all",
+      assignedTo: "all",
+      dateRange: "all",
     });
     setSearchTerm("");
     setActiveTab("all");
@@ -413,47 +418,104 @@ export function JobsListView({
   // Render components will be continued...
   return (
     <div className="flex flex-col space-y-6">
-      {/* Header with controls */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-bold">Jobs Management</h2>
-          {selectedJobs.length > 0 && (
-            <Badge variant="secondary">
-              {selectedJobs.length} selected
-            </Badge>
-          )}
+      {/* Top Controls Bar */}
+      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between bg-background rounded-lg ">
+        {/* Left section - Search and Quick Actions */}
+        <div className="flex flex-col sm:flex-row gap-3 flex-1 w-full lg:w-auto">
+          {/* Search */}
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Search jobs by title, company, or department..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 bg-background"
+            />
+          </div>
+
+          {/* Sort */}
+          <Select
+            value={`${sortBy}-${sortOrder}`}
+            onValueChange={(value) => {
+              const [field, order] = value.split("-");
+              setSortBy(field);
+              setSortOrder(order);
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-48 bg-background">
+              <SelectValue placeholder="Sort by..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="updatedAt-desc">Recently Updated</SelectItem>
+              <SelectItem value="createdAt-desc">Recently Created</SelectItem>
+              <SelectItem value="title-asc">Title A-Z</SelectItem>
+              <SelectItem value="title-desc">Title Z-A</SelectItem>
+              <SelectItem value="company-asc">Company A-Z</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* View mode toggle */}
-          <div className="flex items-center border rounded-md">
-            <Button
-              variant={viewMode === "grid" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("grid")}
-              className="rounded-r-none"
-            >
-              <Grid3X3 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === "table" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("table")}
-              className="rounded-l-none"
-            >
-              <TableIcon className="h-4 w-4" />
-            </Button>
+        {/* Right section - View Controls and Actions */}
+        <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-end">
+          {/* Selection indicator */}
+          {selectedJobs.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="px-3 py-1">
+                {selectedJobs.length} selected
+              </Badge>
+            </div>
+          )}
+
+          {/* Filter toggle */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowFilters(!showFilters)}
+            className={cn(
+              "transition-colors p-2",
+              showFilters && "bg-muted border-primary text-primary"
+            )}
+          >
+            <SlidersHorizontal className="h-4 w-4 mr-2" />
+            Filters
+          </Button>
+
+          {/* Enhanced View mode toggle */}
+          <div className="flex items-center gap-2 p-1 border rounded-lg bg-muted">
+            {[
+              { mode: "grid" as ViewMode, label: "Grid", Icon: TableIcon },
+              { mode: "table" as ViewMode, label: "List", Icon: AlignJustify },
+            ].map(({ mode, label, Icon }) => {
+              const isActive = viewMode === mode;
+              return (
+                <Button
+                  key={mode}
+                  size="sm"
+                  onClick={() => setViewMode(mode)}
+                  className={cn(
+                    "flex items-center gap-1 px-3 py-2 rounded-md transition-colors",
+                    isActive
+                      ? "bg-foreground text-background"
+                      : "bg-background text-foreground hover:bg-muted"
+                  )}
+                >
+                  <Icon className="w-4 h-4 mr-2" />
+                  {label}
+                </Button>
+              );
+            })}
           </div>
 
           {/* Export dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="hidden sm:flex">
                 <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
+            <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => handleExport("csv")}>
                 Export as CSV
               </DropdownMenuItem>
@@ -472,10 +534,10 @@ export function JobsListView({
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
                   <MoreHorizontal className="h-4 w-4 mr-2" />
-                  Actions ({selectedJobs.length})
+                  Actions
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => handleBulkAction("archive")}>
                   <Archive className="h-4 w-4 mr-2" />
                   Archive Selected
@@ -485,9 +547,9 @@ export function JobsListView({
                   Close Selected
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => handleBulkAction("delete")}
-                  className="text-red-600"
+                  className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete Selected
@@ -495,149 +557,162 @@ export function JobsListView({
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-
-          <Button onClick={() => router.push(createUrl)}>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Create Job
-          </Button>
         </div>
       </div>
 
-      {/* Search and filters */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Search jobs..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-
-          {/* Sort */}
-          <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
-            const [field, order] = value.split("-");
-            setSortBy(field);
-            setSortOrder(order);
-            setCurrentPage(1);
-          }}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Sort by..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="updatedAt-desc">Recently Updated</SelectItem>
-              <SelectItem value="createdAt-desc">Recently Created</SelectItem>
-              <SelectItem value="title-asc">Title A-Z</SelectItem>
-              <SelectItem value="title-desc">Title Z-A</SelectItem>
-              <SelectItem value="company-asc">Company A-Z</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Toggle filters */}
-          <Button 
-            variant="outline" 
-            onClick={() => setShowFilters(!showFilters)}
-            className={cn(showFilters && "bg-secondary")}
-          >
-            <SlidersHorizontal className="h-4 w-4 mr-2" />
-            Filters
-          </Button>
-        </div>
-
-        {/* Advanced filters */}
-        {showFilters && (
-          <Card className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              <Select
-                value={filters.department}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, department: value }))}
+      {/* Advanced Filters Section */}
+      {showFilters && (
+        <Card className="border-l-4 border-l-primary">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                Advanced Filters
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={resetFilters}
+                className="text-muted-foreground hover:text-foreground"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Department" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Departments</SelectItem>
-                  <SelectItem value="engineering">Engineering</SelectItem>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="sales">Sales</SelectItem>
-                  <SelectItem value="hr">HR</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={filters.employmentType}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, employmentType: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Employment Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="full-time">Full-time</SelectItem>
-                  <SelectItem value="part-time">Part-time</SelectItem>
-                  <SelectItem value="contract">Contract</SelectItem>
-                  <SelectItem value="internship">Internship</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={filters.experienceLevel}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, experienceLevel: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Experience Level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Levels</SelectItem>
-                  <SelectItem value="entry">Entry Level</SelectItem>
-                  <SelectItem value="mid">Mid Level</SelectItem>
-                  <SelectItem value="senior">Senior Level</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={filters.locationType}
-                onValueChange={(value) => setFilters(prev => ({ ...prev, locationType: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Location Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Locations</SelectItem>
-                  <SelectItem value="remote">Remote</SelectItem>
-                  <SelectItem value="onsite">Onsite</SelectItem>
-                  <SelectItem value="hybrid">Hybrid</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Button variant="outline" onClick={resetFilters} className="w-full">
-                Reset Filters
+                <X className="h-4 w-4 mr-2" />
+                Clear All
               </Button>
             </div>
-          </Card>
-        )}
-      </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Department
+                </label>
+                <Select
+                  value={filters.department}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, department: value }))
+                  }
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="All Departments" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Departments</SelectItem>
+                    <SelectItem value="engineering">Engineering</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
+                    <SelectItem value="sales">Sales</SelectItem>
+                    <SelectItem value="hr">HR</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Employment Type
+                </label>
+                <Select
+                  value={filters.employmentType}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, employmentType: value }))
+                  }
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="All Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="full-time">Full-time</SelectItem>
+                    <SelectItem value="part-time">Part-time</SelectItem>
+                    <SelectItem value="contract">Contract</SelectItem>
+                    <SelectItem value="internship">Internship</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Experience Level
+                </label>
+                <Select
+                  value={filters.experienceLevel}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, experienceLevel: value }))
+                  }
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="All Levels" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="entry">Entry Level</SelectItem>
+                    <SelectItem value="mid">Mid Level</SelectItem>
+                    <SelectItem value="senior">Senior Level</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Location Type
+                </label>
+                <Select
+                  value={filters.locationType}
+                  onValueChange={(value) =>
+                    setFilters((prev) => ({ ...prev, locationType: value }))
+                  }
+                >
+                  <SelectTrigger className="bg-background">
+                    <SelectValue placeholder="All Locations" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Locations</SelectItem>
+                    <SelectItem value="remote">Remote</SelectItem>
+                    <SelectItem value="onsite">Onsite</SelectItem>
+                    <SelectItem value="hybrid">Hybrid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Quick Actions
+                </label>
+                <Button
+                  variant="outline"
+                  onClick={resetFilters}
+                  className="w-full bg-background"
+                  size="sm"
+                >
+                  Reset All Filters
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Status tabs */}
-      <Tabs value={activeTab} onValueChange={(value) => {
-        setActiveTab(value);
-        setCurrentPage(1);
-      }}>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => {
+          setActiveTab(value);
+          setCurrentPage(1);
+        }}
+      >
         <TabsList>
           <TabsTrigger value="all">All ({counts?.all || 0})</TabsTrigger>
-          <TabsTrigger value="active">Active ({counts?.active || 0})</TabsTrigger>
+          <TabsTrigger value="active">
+            Active ({counts?.active || 0})
+          </TabsTrigger>
           <TabsTrigger value="draft">Drafts ({counts?.draft || 0})</TabsTrigger>
-          <TabsTrigger value="closed">Closed ({counts?.closed || 0})</TabsTrigger>
-          <TabsTrigger value="archived">Archived ({counts?.archived || 0})</TabsTrigger>
+          <TabsTrigger value="closed">
+            Closed ({counts?.closed || 0})
+          </TabsTrigger>
+          <TabsTrigger value="archived">
+            Archived ({counts?.archived || 0})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value={activeTab} className="mt-6">
           <div className="space-y-6">
             <JobContentRenderer />
-            
+
             {/* Pagination */}
             {!loading && jobs.length > 0 && (
               <JobsPagination
@@ -662,15 +737,15 @@ export function JobsListView({
           <DialogHeader>
             <DialogTitle>Confirm Bulk Action</DialogTitle>
             <DialogDescription>
-              Are you sure you want to {bulkAction} {selectedJobs.length} selected job(s)?
-              This action cannot be undone.
+              Are you sure you want to {bulkAction} {selectedJobs.length}{" "}
+              selected job(s)? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowBulkDialog(false)}>
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={executeBulkAction}
               variant={bulkAction === "delete" ? "destructive" : "default"}
             >
