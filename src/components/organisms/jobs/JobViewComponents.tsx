@@ -102,9 +102,13 @@ const getStatusLabel = (status: string) => {
 };
 
 // Format salary range
-const formatSalary = (salary?: { min?: number; max?: number; currency?: string }) => {
+const formatSalary = (salary?: {
+  min?: number;
+  max?: number;
+  currency?: string;
+}) => {
   if (!salary || (!salary.min && !salary.max)) return null;
-  
+
   const currency = salary.currency || "USD";
   const formatter = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -124,7 +128,14 @@ const formatSalary = (salary?: { min?: number; max?: number; currency?: string }
 };
 
 // Grid View Component
-export function JobGridView({ jobs, selectedJobs, onSelectJob, viewBaseUrl, editBaseUrl, userRole }: JobViewProps) {
+export function JobGridView({
+  jobs,
+  selectedJobs,
+  onSelectJob,
+  viewBaseUrl,
+  editBaseUrl,
+  userRole,
+}: JobViewProps) {
   const router = useRouter();
 
   if (jobs.length === 0) {
@@ -132,7 +143,9 @@ export function JobGridView({ jobs, selectedJobs, onSelectJob, viewBaseUrl, edit
       <div className="text-center py-12">
         <Briefcase className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
         <h3 className="text-lg font-medium mb-2">No jobs found</h3>
-        <p className="text-muted-foreground">Try adjusting your filters or search terms</p>
+        <p className="text-muted-foreground">
+          Try adjusting your filters or search terms
+        </p>
       </div>
     );
   }
@@ -145,7 +158,9 @@ export function JobGridView({ jobs, selectedJobs, onSelectJob, viewBaseUrl, edit
             <div className="flex items-start justify-between mb-4">
               <Checkbox
                 checked={selectedJobs.includes(job._id)}
-                onCheckedChange={(checked) => onSelectJob(job._id, checked as boolean)}
+                onCheckedChange={(checked) =>
+                  onSelectJob(job._id, checked as boolean)
+                }
               />
               <Badge className={getStatusColor(job.status)}>
                 {getStatusLabel(job.status)}
@@ -172,7 +187,8 @@ export function JobGridView({ jobs, selectedJobs, onSelectJob, viewBaseUrl, edit
               <div className="flex items-center text-sm text-gray-600">
                 <MapPin className="w-4 h-4 mr-2" />
                 <span>
-                  {job.location.type.charAt(0).toUpperCase() + job.location.type.slice(1)}
+                  {job.location.type.charAt(0).toUpperCase() +
+                    job.location.type.slice(1)}
                   {job.location.city && ` • ${job.location.city}`}
                   {job.location.state && `, ${job.location.state}`}
                 </span>
@@ -207,14 +223,17 @@ export function JobGridView({ jobs, selectedJobs, onSelectJob, viewBaseUrl, edit
 
               {userRole === "admin" && job.assignedTo && (
                 <div className="text-xs text-gray-500">
-                  Assigned to: {job.assignedTo.firstName} {job.assignedTo.lastName}
+                  Assigned to: {job.assignedTo.firstName}{" "}
+                  {job.assignedTo.lastName}
                 </div>
               )}
 
               <div className="flex items-center justify-between pt-3 border-t">
                 <div className="text-xs text-gray-500 flex items-center">
                   <Calendar className="w-3 h-3 mr-1" />
-                  {formatDistanceToNow(new Date(job.updatedAt), { addSuffix: true })}
+                  {formatDistanceToNow(new Date(job.updatedAt), {
+                    addSuffix: true,
+                  })}
                 </div>
 
                 <div className="flex items-center gap-1">
@@ -228,7 +247,9 @@ export function JobGridView({ jobs, selectedJobs, onSelectJob, viewBaseUrl, edit
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => router.push(`${editBaseUrl}/${job._id}/edit`)}
+                    onClick={() =>
+                      router.push(`${editBaseUrl}/${job._id}/edit`)
+                    }
                   >
                     <Edit3 className="w-3 h-3" />
                   </Button>
@@ -240,7 +261,11 @@ export function JobGridView({ jobs, selectedJobs, onSelectJob, viewBaseUrl, edit
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        onClick={() => navigator.clipboard.writeText(`${window.location.origin}/jobs/${job._id}`)}
+                        onClick={() =>
+                          navigator.clipboard.writeText(
+                            `${window.location.origin}/jobs/${job._id}`
+                          )
+                        }
                       >
                         <Copy className="w-4 h-4 mr-2" />
                         Copy Link
@@ -265,159 +290,16 @@ export function JobGridView({ jobs, selectedJobs, onSelectJob, viewBaseUrl, edit
   );
 }
 
-// List View Component
-export function JobListView({ jobs, selectedJobs, onSelectJob, viewBaseUrl, editBaseUrl, userRole }: JobViewProps) {
-  const router = useRouter();
-
-  if (jobs.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <Briefcase className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-        <h3 className="text-lg font-medium mb-2">No jobs found</h3>
-        <p className="text-muted-foreground">Try adjusting your filters or search terms</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      {jobs.map((job) => (
-        <Card key={job._id} className="hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <Checkbox
-                checked={selectedJobs.includes(job._id)}
-                onCheckedChange={(checked) => onSelectJob(job._id, checked as boolean)}
-                className="mt-1"
-              />
-              
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg text-gray-900 mb-1">
-                      {job.title}
-                    </h3>
-                    <div className="flex items-center text-sm text-gray-600 mb-2">
-                      <Briefcase className="w-4 h-4 mr-2" />
-                      <span>{job.company}</span>
-                      {job.department && (
-                        <>
-                          <span className="mx-2">•</span>
-                          <span>{job.department}</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <Badge className={getStatusColor(job.status)}>
-                    {getStatusLabel(job.status)}
-                  </Badge>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <MapPin className="w-4 h-4 mr-2" />
-                    <span>
-                      {job.location.type.charAt(0).toUpperCase() + job.location.type.slice(1)}
-                      {job.location.city && ` • ${job.location.city}`}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {job.employmentType}
-                    </Badge>
-                    <Badge variant="secondary" className="text-xs">
-                      {job.experienceLevel} level
-                    </Badge>
-                  </div>
-
-                  {job.salary && (
-                    <div className="text-sm font-medium text-green-600">
-                      {formatSalary(job.salary)}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-6 text-sm text-gray-500">
-                    {job.applicationCounts && (
-                      <div className="flex items-center">
-                        <Users className="w-4 h-4 mr-1" />
-                        <span>{job.applicationCounts.total} applications</span>
-                        {job.applicationCounts.new > 0 && (
-                          <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                            {job.applicationCounts.new} new
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      {formatDistanceToNow(new Date(job.updatedAt), { addSuffix: true })}
-                    </div>
-
-                    {userRole === "admin" && job.assignedTo && (
-                      <div>
-                        Assigned to: {job.assignedTo.firstName} {job.assignedTo.lastName}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => router.push(`${viewBaseUrl}/${job._id}`)}
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
-                      View
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => router.push(`${editBaseUrl}/${job._id}/edit`)}
-                    >
-                      <Edit3 className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => navigator.clipboard.writeText(`${window.location.origin}/jobs/${job._id}`)}
-                        >
-                          <Copy className="w-4 h-4 mr-2" />
-                          Copy Link
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Archive className="w-4 h-4 mr-2" />
-                          Archive
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}
-
 // Table View Component
-export function JobTableView({ jobs, selectedJobs, onSelectJob, onSelectAll, viewBaseUrl, editBaseUrl, userRole }: JobViewProps) {
+export function JobTableView({
+  jobs,
+  selectedJobs,
+  onSelectJob,
+  onSelectAll,
+  viewBaseUrl,
+  editBaseUrl,
+  userRole,
+}: JobViewProps) {
   const router = useRouter();
 
   if (jobs.length === 0) {
@@ -425,7 +307,9 @@ export function JobTableView({ jobs, selectedJobs, onSelectJob, onSelectAll, vie
       <div className="text-center py-12">
         <Briefcase className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
         <h3 className="text-lg font-medium mb-2">No jobs found</h3>
-        <p className="text-muted-foreground">Try adjusting your filters or search terms</p>
+        <p className="text-muted-foreground">
+          Try adjusting your filters or search terms
+        </p>
       </div>
     );
   }
@@ -458,14 +342,18 @@ export function JobTableView({ jobs, selectedJobs, onSelectJob, onSelectAll, vie
               <TableCell>
                 <Checkbox
                   checked={selectedJobs.includes(job._id)}
-                  onCheckedChange={(checked) => onSelectJob(job._id, checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    onSelectJob(job._id, checked as boolean)
+                  }
                 />
               </TableCell>
               <TableCell>
                 <div>
                   <div className="font-medium">{job.title}</div>
                   {job.department && (
-                    <div className="text-sm text-gray-500">{job.department}</div>
+                    <div className="text-sm text-gray-500">
+                      {job.department}
+                    </div>
                   )}
                 </div>
               </TableCell>
@@ -475,7 +363,8 @@ export function JobTableView({ jobs, selectedJobs, onSelectJob, onSelectAll, vie
                   <div className="capitalize">{job.location.type}</div>
                   {job.location.city && (
                     <div className="text-sm text-gray-500">
-                      {job.location.city}{job.location.state && `, ${job.location.state}`}
+                      {job.location.city}
+                      {job.location.state && `, ${job.location.state}`}
                     </div>
                   )}
                 </div>
@@ -483,7 +372,9 @@ export function JobTableView({ jobs, selectedJobs, onSelectJob, onSelectAll, vie
               <TableCell>
                 <div>
                   <div className="text-sm">{job.employmentType}</div>
-                  <div className="text-xs text-gray-500">{job.experienceLevel}</div>
+                  <div className="text-xs text-gray-500">
+                    {job.experienceLevel}
+                  </div>
                 </div>
               </TableCell>
               <TableCell>
@@ -494,7 +385,9 @@ export function JobTableView({ jobs, selectedJobs, onSelectJob, onSelectAll, vie
               <TableCell>
                 {job.applicationCounts ? (
                   <div>
-                    <div className="font-medium">{job.applicationCounts.total}</div>
+                    <div className="font-medium">
+                      {job.applicationCounts.total}
+                    </div>
                     {job.applicationCounts.new > 0 && (
                       <div className="text-xs text-blue-600">
                         {job.applicationCounts.new} new
@@ -517,7 +410,9 @@ export function JobTableView({ jobs, selectedJobs, onSelectJob, onSelectAll, vie
                 </TableCell>
               )}
               <TableCell className="text-sm text-gray-500">
-                {formatDistanceToNow(new Date(job.updatedAt), { addSuffix: true })}
+                {formatDistanceToNow(new Date(job.updatedAt), {
+                  addSuffix: true,
+                })}
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-1">
@@ -531,7 +426,9 @@ export function JobTableView({ jobs, selectedJobs, onSelectJob, onSelectAll, vie
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => router.push(`${editBaseUrl}/${job._id}/edit`)}
+                    onClick={() =>
+                      router.push(`${editBaseUrl}/${job._id}/edit`)
+                    }
                   >
                     <Edit3 className="w-4 h-4" />
                   </Button>
@@ -543,7 +440,11 @@ export function JobTableView({ jobs, selectedJobs, onSelectJob, onSelectAll, vie
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        onClick={() => navigator.clipboard.writeText(`${window.location.origin}/jobs/${job._id}`)}
+                        onClick={() =>
+                          navigator.clipboard.writeText(
+                            `${window.location.origin}/jobs/${job._id}`
+                          )
+                        }
                       >
                         <Copy className="w-4 h-4 mr-2" />
                         Copy Link

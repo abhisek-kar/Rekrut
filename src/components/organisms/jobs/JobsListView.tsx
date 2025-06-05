@@ -19,7 +19,6 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuCheckboxItem,
 } from "@/components/shadcn-ui/dropdown-menu";
 
 import {
@@ -38,29 +37,15 @@ import {
 } from "@/components/shadcn-ui/tabs";
 import {
   Search,
-  Filter,
   MoreHorizontal,
-  Grid3X3,
   Table as TableIcon,
-  Eye,
-  Edit3,
-  Calendar,
-  MapPin,
-  Briefcase,
-  Users,
   Download,
   Trash2,
-  Copy,
   Archive,
-  ChevronLeft,
-  ChevronRight,
-  ChevronFirst,
-  ChevronLast,
   SlidersHorizontal,
   AlignJustify,
   X,
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { JobGridView, JobTableView } from "./JobViewComponents";
@@ -562,22 +547,8 @@ export function JobsListView({
 
       {/* Advanced Filters Section */}
       {showFilters && (
-        <Card className="border-l-4 border-l-primary">
+        <Card className="">
           <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                Advanced Filters
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={resetFilters}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-4 w-4 mr-2" />
-                Clear All
-              </Button>
-            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground">
@@ -674,12 +645,13 @@ export function JobsListView({
                   Quick Actions
                 </label>
                 <Button
-                  variant="outline"
-                  onClick={resetFilters}
-                  className="w-full bg-background"
+                  variant="ghost"
                   size="sm"
+                  onClick={resetFilters}
+                  className="text-muted-foreground hover:text-foreground"
                 >
-                  Reset All Filters
+                  <X className="h-4 w-4 mr-2" />
+                  Clear All
                 </Button>
               </div>
             </div>
