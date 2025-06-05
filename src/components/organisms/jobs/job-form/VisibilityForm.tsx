@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import {
   Form,
   FormControl,
@@ -13,7 +13,12 @@ import {
 import { Input } from "@/components/shadcn-ui/input";
 import { Textarea } from "@/components/shadcn-ui/textarea";
 import { Switch } from "@/components/shadcn-ui/switch";
-import { Card, CardContent } from "@/components/shadcn-ui/card";
+import { Button } from "@/components/shadcn-ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/shadcn-ui/popover";
 import {
   Tooltip,
   TooltipContent,
@@ -21,7 +26,15 @@ import {
   TooltipTrigger,
 } from "@/components/shadcn-ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/shadcn-ui/radio-group";
-import { Globe, EyeOff, Star, Share2, Search, Info } from "lucide-react";
+import {
+  Globe,
+  EyeOff,
+  Star,
+  Share2,
+  Search,
+  Info,
+  Sparkles,
+} from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -30,8 +43,8 @@ import { JobType } from "@/types/job";
 // Define form validation schema
 const visibilitySchema = z.object({
   visibility: z.enum(["public", "private"]),
-  featured: z.boolean().default(false),
-  allowSocialSharing: z.boolean().default(true),
+  featured: z.boolean().optional(),
+  allowSocialSharing: z.boolean().optional(),
   seoTitle: z.string().optional(),
   seoDescription: z
     .string()
@@ -60,19 +73,34 @@ export function VisibilityForm({
     defaultValues: {
       visibility: data.visibility || "public",
       featured: data.featured || false,
-      allowSocialSharing: data.allowSocialSharing !== false,
+      allowSocialSharing: (data as any).allowSocialSharing !== false,
       seoTitle: data.seoTitle || "",
       seoDescription: data.seoDescription || "",
       referralBonus: data.referralBonus?.toString() || "",
       internalNotes: data.internalNotes || "",
     },
     mode: "onChange",
-  });
+  }) as any;
+
+  // AI Generation state and function
+  const [aiPopoverOpen, setAiPopoverOpen] = useState<string | null>(null);
+
+  // AI Generation placeholder function (to be implemented)
+  const handleAIGeneration = (fieldType: "seoTitle" | "seoDescription") => {
+    setAiPopoverOpen(fieldType);
+    // Auto-close popover after 2 seconds
+    setTimeout(() => {
+      setAiPopoverOpen(null);
+    }, 2000);
+  };
 
   // Update parent component when form values change
-  const onSubmit = useCallback((values: VisibilityFormValues) => {
-    onChange(values);
-  }, [onChange]);
+  const onSubmit = useCallback(
+    (values: VisibilityFormValues) => {
+      onChange(values);
+    },
+    [onChange]
+  );
 
   // Update parent on form validity changes
   useEffect(() => {
@@ -204,9 +232,37 @@ export function VisibilityForm({
         {/* SEO Settings */}
         {form.watch("visibility") === "public" && (
           <div className="space-y-4 border p-4 rounded-md">
-            <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-green-500" />
-              <h3 className="font-medium">SEO Settings</h3>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Search className="h-4 w-4 text-green-500" />
+                <h3 className="font-medium">SEO Settings</h3>
+              </div>
+              <Popover
+                open={aiPopoverOpen === "seoDescription"}
+                onOpenChange={(open) => !open && setAiPopoverOpen(null)}
+              >
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleAIGeneration("seoDescription")}
+                    className="text-xs h-auto p-1 text-primary hover:text-primary/80 hover:bg-transparent"
+                  >
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    Generate with AI
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-48 p-3">
+                  <div className="text-center">
+                    <Sparkles className="h-6 w-6 mx-auto mb-2 text-primary" />
+                    <p className="text-sm font-medium">Coming Soon!</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      AI-powered content generation will be available soon.
+                    </p>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
             <FormDescription>
               Optimize your job listing for search engines
@@ -219,6 +275,7 @@ export function VisibilityForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>SEO Title</FormLabel>
+
                   <FormControl>
                     <Input
                       placeholder="Custom title for search engines (leave empty to use job title)"
@@ -241,6 +298,7 @@ export function VisibilityForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>SEO Description</FormLabel>
+
                   <FormControl>
                     <div className="relative">
                       <Textarea
@@ -305,41 +363,6 @@ export function VisibilityForm({
             </FormItem>
           )}
         />
-
-        {/* Best Practices */}
-        <Card className="bg-muted/50">
-          <CardContent className="p-4">
-            <div className="flex gap-2">
-              <Info className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" />
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium">
-                  Visibility best practices:
-                </h4>
-                <ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1">
-                  <li>
-                    Set featured status for high-priority or hard-to-fill
-                    positions
-                  </li>
-                  <li>
-                    Use private visibility for internal positions or sensitive
-                    roles
-                  </li>
-                  <li>
-                    Customize SEO settings for better discoverability on search
-                    engines
-                  </li>
-                  <li>
-                    Include location keywords in the SEO description for local
-                    searches
-                  </li>
-                  <li>
-                    Consider offering a referral bonus for high-value positions
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </form>
     </Form>
   );

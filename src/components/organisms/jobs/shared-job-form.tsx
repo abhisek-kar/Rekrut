@@ -17,6 +17,13 @@ import {
   PreviewForm,
 } from "@/components/organisms/jobs/job-form";
 import { ConfirmationDialog } from "@/components/molecules/ConfirmationDialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shadcn-ui/select";
 
 // SubAdmin interface for assignment
 interface SubAdmin {
@@ -77,10 +84,10 @@ export default function SharedJobForm({
     return [
       ...baseSteps,
       step5,
-      {
-        title: "Custom Fields",
-        description: "Add any additional fields specific to your organization",
-      },
+      // {
+      //   title: "Custom Fields",
+      //   description: "Add any additional fields specific to your organization",
+      // },
       {
         title: "Preview & Publish",
         description: "Review the job posting before publishing",
@@ -126,8 +133,8 @@ export default function SharedJobForm({
     step3: true,
     step4: true,
     step5: true,
-    step6: true,
-    step7: true,
+    // step6: true, // Custom Fields commented out
+    step6: true, // Preview step (was step7)
   });
   const [formDirty, setFormDirty] = useState(false);
   const [subAdmins, setSubAdmins] = useState<SubAdmin[]>([]);
@@ -332,28 +339,33 @@ export default function SharedJobForm({
             <label className="text-sm font-medium">
               Select SubAdmin (Optional)
             </label>
-            {loadingSubAdmins ? (
-              <div className="text-sm text-muted-foreground">
-                Loading SubAdmins...
-              </div>
-            ) : (
-              <select
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-                value={jobData.assignedTo || ""}
-                onChange={(e) =>
-                  handleChange("assignment", {
-                    assignedTo: e.target.value || undefined,
-                  })
-                }
-              >
-                <option value="">Unassigned</option>
+            <Select
+              onValueChange={(value) => {
+                handleChange("assignment", {
+                  assignedTo: value || undefined,
+                });
+              }}
+              value={jobData.assignedTo || ""}
+              disabled={loadingSubAdmins}
+            >
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={
+                    loadingSubAdmins
+                      ? "Loading SubAdmins..."
+                      : "Select SubAdmin"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Unassigned</SelectItem>
                 {subAdmins.map((subAdmin) => (
-                  <option key={subAdmin.id} value={subAdmin.id}>
+                  <SelectItem key={subAdmin.id} value={subAdmin.id}>
                     {subAdmin.firstName} {subAdmin.lastName} ({subAdmin.email})
-                  </option>
+                  </SelectItem>
                 ))}
-              </select>
-            )}
+              </SelectContent>
+            </Select>
             <p className="text-sm text-muted-foreground">
               Assign this job to a specific recruiter or leave unassigned for
               manual assignment later.
@@ -361,68 +373,12 @@ export default function SharedJobForm({
           </div>
         </div>
 
-        {/* Visibility Section */}
-        <div className="space-y-4 border p-4 rounded-lg">
-          <h4 className="font-medium">Job Visibility</h4>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <input
-                type="radio"
-                id="public"
-                name="visibility"
-                value="public"
-                checked={jobData.visibility === "public"}
-                onChange={(e) =>
-                  handleChange("visibility", { visibility: e.target.value })
-                }
-                className="focus:ring-primary"
-              />
-              <label
-                htmlFor="public"
-                className="text-sm font-medium cursor-pointer"
-              >
-                Public - Visible on job board
-              </label>
-            </div>
-            <div className="flex items-center space-x-3">
-              <input
-                type="radio"
-                id="private"
-                name="visibility"
-                value="private"
-                checked={jobData.visibility === "private"}
-                onChange={(e) =>
-                  handleChange("visibility", { visibility: e.target.value })
-                }
-                className="focus:ring-primary"
-              />
-              <label
-                htmlFor="private"
-                className="text-sm font-medium cursor-pointer"
-              >
-                Private - Internal use only
-              </label>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-3 mt-4 pt-3 border-t">
-            <input
-              type="checkbox"
-              id="featured"
-              checked={jobData.featured || false}
-              onChange={(e) =>
-                handleChange("visibility", { featured: e.target.checked })
-              }
-              className="focus:ring-primary"
-            />
-            <label
-              htmlFor="featured"
-              className="text-sm font-medium cursor-pointer"
-            >
-              Featured Job - Highlight in job listings
-            </label>
-          </div>
-        </div>
+        {/* Visibility Section - Now included for admin */}
+        <VisibilityForm
+          data={jobData}
+          onChange={(data) => handleChange("visibility", data)}
+          onValidityChange={(isValid) => handleValidityChange(5, isValid)}
+        />
       </div>
     );
   };
@@ -463,29 +419,31 @@ export default function SharedJobForm({
           />
         );
       case 5:
-        return userRole === "admin" ? (
-          <AdminAssignmentForm />
-        ) : (
+        // return userRole === "admin" ? (
+        //   <AdminAssignmentForm />
+        // ) : (
+        return (
           <VisibilityForm
             data={jobData}
             onChange={(data) => handleChange("visibility", data)}
             onValidityChange={(isValid) => handleValidityChange(5, isValid)}
           />
         );
+      // );
+      // case 6:
+      //   return (
+      //     <CustomFieldsForm
+      //       data={jobData}
+      //       onChange={(data) => handleChange("customFields", data)}
+      //       onValidityChange={(isValid) => handleValidityChange(6, isValid)}
+      //     />
+      //   );
       case 6:
-        return (
-          <CustomFieldsForm
-            data={jobData}
-            onChange={(data) => handleChange("customFields", data)}
-            onValidityChange={(isValid) => handleValidityChange(6, isValid)}
-          />
-        );
-      case 7:
         return (
           <PreviewForm
             data={jobData}
             onChange={(data) => handleChange("preview", data)}
-            onValidityChange={(isValid) => handleValidityChange(7, isValid)}
+            onValidityChange={(isValid) => handleValidityChange(6, isValid)}
           />
         );
       default:

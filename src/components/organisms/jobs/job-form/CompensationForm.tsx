@@ -146,7 +146,8 @@ export function CompensationForm({
     const updatedBenefits =
       form
         .getValues()
-        .benefits?.filter((benefit) => benefit !== benefitToRemove) || [];
+        .benefits?.filter((benefit: string) => benefit !== benefitToRemove) ||
+      [];
     form.setValue("benefits", updatedBenefits);
   };
 
@@ -163,7 +164,8 @@ export function CompensationForm({
   // Remove a perk
   const handleRemovePerk = (perkToRemove: string) => {
     const updatedPerks =
-      form.getValues().perks?.filter((perk) => perk !== perkToRemove) || [];
+      form.getValues().perks?.filter((perk: string) => perk !== perkToRemove) ||
+      [];
     form.setValue("perks", updatedPerks);
   };
 

@@ -46,26 +46,19 @@ export default function SharedJobEdit({ jobId, userRole }: SharedJobEditProps) {
         title: "Application Settings",
         description: "Set up the application process and requirements",
       },
+      {
+        title: "Visibility & Promotion",
+        description: "Configure how the job will be promoted",
+      },
+      // {
+      //   title: "Custom Fields",
+      //   description: "Add any additional fields specific to your organization",
+      // },
+      {
+        title: "Preview & Update",
+        description: "Review the changes before updating the job posting",
+      },
     ];
-
-    if (userRole === "admin") {
-      baseSteps.push(
-        {
-          title: "Visibility & Promotion",
-          description: "Configure how the job will be promoted",
-        },
-        {
-          title: "Custom Fields",
-          description:
-            "Add any additional fields specific to your organization",
-        }
-      );
-    }
-
-    baseSteps.push({
-      title: "Preview & Update",
-      description: "Review the changes before updating the job posting",
-    });
 
     return baseSteps;
   };
@@ -338,48 +331,29 @@ export default function SharedJobEdit({ jobId, userRole }: SharedJobEditProps) {
           />
         );
       case 5:
-        // For admin: Visibility & Promotion, for subadmin: Preview
-        if (userRole === "admin") {
-          return (
-            <VisibilityForm
-              data={jobData}
-              onChange={(data) => handleChange("visibility", data)}
-              onValidityChange={(isValid) => handleValidityChange(5, isValid)}
-            />
-          );
-        } else {
-          return (
-            <PreviewForm
-              data={jobData}
-              onChange={(data) => handleChange("preview", data)}
-              onValidityChange={(isValid) => handleValidityChange(5, isValid)}
-            />
-          );
-        }
+        return (
+          <VisibilityForm
+            data={jobData}
+            onChange={(data) => handleChange("visibility", data)}
+            onValidityChange={(isValid) => handleValidityChange(5, isValid)}
+          />
+        );
+      // case 6:
+      //   return (
+      //     <CustomFieldsForm
+      //       data={jobData}
+      //       onChange={(data) => handleChange("customFields", data)}
+      //       onValidityChange={(isValid) => handleValidityChange(6, isValid)}
+      //     />
+      //   );
       case 6:
-        // For admin: Custom Fields, for subadmin: not applicable
-        if (userRole === "admin") {
-          return (
-            <CustomFieldsForm
-              data={jobData}
-              onChange={(data) => handleChange("customFields", data)}
-              onValidityChange={(isValid) => handleValidityChange(6, isValid)}
-            />
-          );
-        }
-        return null;
-      case 7:
-        // For admin: Preview (step 7)
-        if (userRole === "admin") {
-          return (
-            <PreviewForm
-              data={jobData}
-              onChange={(data) => handleChange("preview", data)}
-              onValidityChange={(isValid) => handleValidityChange(7, isValid)}
-            />
-          );
-        }
-        return null;
+        return (
+          <PreviewForm
+            data={jobData}
+            onChange={(data) => handleChange("preview", data)}
+            onValidityChange={(isValid) => handleValidityChange(6, isValid)}
+          />
+        );
       default:
         return null;
     }
