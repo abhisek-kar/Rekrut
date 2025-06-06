@@ -51,7 +51,7 @@ const envSchema = z.object({
   EMAIL_SECURE: z.string().optional(),
   EMAIL_USER: z.string().optional(),
   EMAIL_PASSWORD: z.string().optional(),
-  // EMAIL_FROM: z.string().email("EMAIL_FROM must be a valid email").optional(),
+  EMAIL_FROM: z.string().email("EMAIL_FROM must be a valid email").optional(),
 
   // AWS S3 settings (optional)
   AWS_ACCESS_KEY_ID: z.string().optional(),

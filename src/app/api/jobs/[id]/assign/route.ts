@@ -8,7 +8,7 @@ import { canAssignJob } from '@/lib/permissions';
 import Job from '@/models/Job';
 import User from '@/models/User';
 import Activity from '@/models/Activity';
-import Notification from '@/models/Notification';
+import { notifyJobAssignment } from '@/lib/email/notifications';
 import { ZodError } from 'zod';
 
 // PUT: Assign job to a SubAdmin
@@ -114,17 +114,21 @@ export async function PUT(
       userAgent: request.headers.get('user-agent') || 'unknown',
     });
 
-    // Create notification for the subadmin if requested
+    // Send notification to the subadmin if requested
     if (notifySubadmin) {
-      await Notification.create({
-        userId: subadminId,
-        type: 'assignment',
-        title: 'New Job Assignment',
-        message: `You have been assigned to manage the "${job.title}" job`,
-        read: false,
-        link: `/jobs/${job._id}`,
-        relatedId: job._id
-      });
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      
+      try {
+        await notifyJobAssignment(
+          job._id.toString(),
+          subadminId,
+          session.user.id,
+          appUrl
+        );
+      } catch (notificationError) {
+        console.error('Failed to send assignment notification:', notificationError);
+        // Don't fail the assignment if notification fails
+      }
     }
 
     return NextResponse.json(

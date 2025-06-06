@@ -5,6 +5,7 @@ import dbConnect from '@/lib/db/connect';
 import { authOptions } from '@/lib/auth/nextauth';
 import Job from '@/models/Job';
 import Activity from '@/models/Activity';
+import { notifyJobStatusChange } from '@/lib/email/notifications';
 
 // PUT: Update job status
 export async function PUT(
@@ -34,6 +35,17 @@ export async function PUT(
 
     // Parse status data from request
     const { status, reason } = await request.json();
+    
+    // Get current job to compare status
+    const currentJob = await Job.findById(params.id);
+    if (!currentJob) {
+      return NextResponse.json(
+        { error: 'Job not found' },
+        { status: 404 }
+      );
+    }
+    
+    const oldStatus = currentJob.status;
 
     // Validate status
     const validStatuses = ['draft', 'active', 'closed', 'archived'];
@@ -75,6 +87,25 @@ export async function PUT(
       ipAddress: request.headers.get('x-forwarded-for') || request.ip,
       userAgent: request.headers.get('user-agent') || 'unknown',
     });
+    
+    // Send notification about status change if status actually changed
+    if (oldStatus !== status) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      
+      try {
+        await notifyJobStatusChange(
+          job._id.toString(),
+          oldStatus,
+          status,
+          session.user.id,
+          reason,
+          appUrl
+        );
+      } catch (notificationError) {
+        console.error('Failed to send status change notification:', notificationError);
+        // Don't fail the status update if notification fails
+      }
+    }
 
     return NextResponse.json(
       { job, message: `Job status updated to ${status}` },
