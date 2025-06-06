@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/nextauth';
 import dbConnect from '@/lib/db/connect';
 import Activity from '@/models/Activity';
+import User from '@/models/User';
 import { formatDistanceToNow } from 'date-fns';
 
 export async function GET(req: NextRequest) {

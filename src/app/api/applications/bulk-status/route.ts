@@ -5,6 +5,8 @@ import dbConnect from '@/lib/db/connect';
 import { authOptions } from '@/lib/auth/nextauth';
 import { bulkStatusUpdateSchema } from '@/lib/validators/application';
 import Application from '@/models/Application';
+import Candidate from '@/models/Candidate';
+import Job from '@/models/Job';
 import Notification from '@/models/Notification';
 import Activity from '@/models/Activity';
 import { ZodError } from 'zod';

@@ -99,6 +99,10 @@ export default function JobApplicationPage() {
     return locationStr;
   };
 
+  const handleBackToJob = () => {
+    router.push(`/jobs/${jobId}`);
+  };
+
   const handleApplicationSubmit = async (data: ApplicationData, files: FormData) => {
     try {
       // Add job ID to form data
@@ -175,13 +179,6 @@ export default function JobApplicationPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <Link href={`/jobs/${jobId}`}>
-            <Button variant="ghost" className="mb-6">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Job Details
-            </Button>
-          </Link>
-          
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Apply for {job.title}</h1>
             <p className="text-gray-600">
@@ -191,7 +188,11 @@ export default function JobApplicationPage() {
         </div>
 
         {/* Multi-Step Application Form */}
-        <MultiStepApplicationForm job={job} onSubmit={handleApplicationSubmit} />
+        <MultiStepApplicationForm 
+          job={job} 
+          onSubmit={handleApplicationSubmit}
+          onBack={handleBackToJob}
+        />
       </div>
     </div>
   );

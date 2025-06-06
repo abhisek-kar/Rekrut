@@ -1,6 +1,8 @@
 import { Session } from "next-auth";
 import Job from "@/models/Job";
 import Application from "@/models/Application";
+import User from "@/models/User";
+import Candidate from "@/models/Candidate";
 
 /**
  * Check if the current user has permission to access a job

@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Check, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/shadcn-ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
 import { toast } from 'sonner';
+import { ConfirmationDialog } from '@/components/molecules/ConfirmationDialog';
 
 // Step component imports
 import PersonalInfoStep from './steps/PersonalInfoStep';
@@ -63,6 +64,7 @@ export interface ApplicationData {
 interface MultiStepApplicationFormProps {
   job: Job;
   onSubmit: (data: ApplicationData, files: FormData) => Promise<void>;
+  onBack?: () => void;
 }
 
 const STEPS = [
@@ -73,9 +75,11 @@ const STEPS = [
   { id: 5, title: 'Review', description: 'Review & submit' },
 ];
 
-export default function MultiStepApplicationForm({ job, onSubmit }: MultiStepApplicationFormProps) {
+export default function MultiStepApplicationForm({ job, onSubmit, onBack }: MultiStepApplicationFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formDirty, setFormDirty] = useState(false);
+  const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
   
   const [applicationData, setApplicationData] = useState<ApplicationData>({
     firstName: '',
@@ -87,11 +91,46 @@ export default function MultiStepApplicationForm({ job, onSubmit }: MultiStepApp
     skills: [],
   });
 
+  // Track initial form state to detect changes
+  const [initialApplicationData] = useState<ApplicationData>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    location: '',
+    experienceLevel: '',
+    skills: [],
+  });
+
+  // Check for form changes whenever applicationData updates
+  useEffect(() => {
+    const hasChanges = JSON.stringify(applicationData) !== JSON.stringify(initialApplicationData);
+    setFormDirty(hasChanges);
+  }, [applicationData, initialApplicationData]);
+
   const updateApplicationData = (stepData: Partial<ApplicationData>) => {
     setApplicationData(prev => ({
       ...prev,
       ...stepData
     }));
+  };
+
+  // Confirmation dialog handlers
+  const handleBackToJobDetails = () => {
+    if (formDirty) {
+      setShowUnsavedChangesModal(true);
+    } else {
+      onBack?.();
+    }
+  };
+
+  const handleConfirmLeave = () => {
+    setShowUnsavedChangesModal(false);
+    onBack?.();
+  };
+
+  const handleCancelLeave = () => {
+    setShowUnsavedChangesModal(false);
   };
 
   const nextStep = () => {
@@ -207,6 +246,20 @@ export default function MultiStepApplicationForm({ job, onSubmit }: MultiStepApp
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Back to Job Details Button */}
+      {onBack && (
+        <div className="flex justify-start p-4 border-b">
+          <Button 
+            variant="ghost" 
+            onClick={handleBackToJobDetails}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Job Details
+          </Button>
+        </div>
+      )}
+
       {/* Form Steps Stepper */}
       <div className="flex flex-wrap gap-2 mb-6 py-4 px-2 mx-auto select-none">
         {STEPS.map((step, index) => {
@@ -305,6 +358,18 @@ export default function MultiStepApplicationForm({ job, onSubmit }: MultiStepApp
           </div>
         </div>
       </main>
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        open={showUnsavedChangesModal}
+        title="Leave Application?"
+        description="You have unsaved changes to your job application. If you leave now, your progress will be lost."
+        actionLabel="Leave Application"
+        actionVariant="destructive"
+        cancelLabel="Continue Application"
+        onAction={handleConfirmLeave}
+        onCancel={handleCancelLeave}
+      />
     </div>
   );
 }

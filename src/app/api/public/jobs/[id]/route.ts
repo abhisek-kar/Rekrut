@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/db/connect';
 import Job from '@/models/Job';
+import User from '@/models/User';
 
 export async function GET(
   request: NextRequest,

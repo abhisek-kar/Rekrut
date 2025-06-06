@@ -5,6 +5,7 @@ import dbConnect from '@/lib/db/connect';
 import { authOptions } from '@/lib/auth/nextauth';
 import Job from '@/models/Job';
 import Activity from '@/models/Activity';
+import User from '@/models/User';
 
 export async function GET(request: NextRequest) {
   try {

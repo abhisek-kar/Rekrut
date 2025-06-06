@@ -7,6 +7,7 @@ import { createJobSchema, createDraftJobSchema } from '@/lib/validators/job';
 import Job from '@/models/Job';
 import { ZodError } from 'zod';
 import Activity from '@/models/Activity';
+import User from '@/models/User';
 
 export async function GET(request: NextRequest) {
   try {

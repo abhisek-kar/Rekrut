@@ -7,6 +7,7 @@ import { authOptions } from '@/lib/auth/nextauth';
 import { uploadFile, getFileUrl } from '@/lib/aws/s3';
 import Job from '@/models/Job';
 import Activity from '@/models/Activity';
+import User from '@/models/User';
 
 // Define document model schema (can be moved to models directory)
 const DocumentSchema = new mongoose.Schema({
