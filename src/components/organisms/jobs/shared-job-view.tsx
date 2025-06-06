@@ -36,6 +36,7 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { SectionLoader } from "@/components/atoms/loader";
 import { useJobActions } from "@/hooks/useJobActions";
 import { JobActionDialogs } from "./dialogs/JobActionDialogs";
+import { JobPreviewDialog } from "./dialogs/JobPreviewDialog";
 import { JobActionsDropdown } from "./JobActionsDropdown";
 
 interface SharedJobViewProps {
@@ -49,6 +50,7 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
   const [job, setJob] = useState<JobType | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
 
   // Initialize unified job actions
   const jobActions = useJobActions({
@@ -217,7 +219,7 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
             </Badge>
             <Button
               variant="outline"
-              onClick={() => router.push(routes.publicView)}
+              onClick={() => setShowPreviewDialog(true)}
             >
               <Eye className="w-4 h-4 mr-2" />
               Preview
@@ -305,6 +307,13 @@ export default function SharedJobView({ jobId, userRole }: SharedJobViewProps) {
         users={jobActions.users}
         loadingUsers={jobActions.loadingUsers}
         userRole={userRole}
+      />
+
+      {/* Job Preview Dialog */}
+      <JobPreviewDialog
+        job={job}
+        isOpen={showPreviewDialog}
+        onClose={() => setShowPreviewDialog(false)}
       />
     </div>
   );
