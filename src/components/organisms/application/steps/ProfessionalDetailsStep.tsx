@@ -37,7 +37,7 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
     updateData({ skills: skillsArray });
   };
 
-  const isValid = data.currentRole && data.experienceLevel;
+  const isValid = data.currentRole && data.experienceLevel && data.expectedCTC;
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -103,21 +103,45 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="expectedSalary">
-                  Expected Salary (Optional)
+                <Label htmlFor="currentCTC">
+                  Current CTC (Optional)
                 </Label>
                 <Input
-                  id="expectedSalary"
+                  id="currentCTC"
                   type="number"
-                  value={data.expectedSalary || ""}
+                  value={data.currentCTC || ""}
                   onChange={(e) =>
                     updateData({
-                      expectedSalary: parseInt(e.target.value) || undefined,
+                      currentCTC: parseInt(e.target.value) || undefined,
                     })
                   }
-                  placeholder="80000"
+                  placeholder="800000"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Enter your current Cost to Company in INR per annum
+                </p>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="expectedCTC">
+                Expected CTC <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="expectedCTC"
+                type="number"
+                value={data.expectedCTC || ""}
+                onChange={(e) =>
+                  updateData({
+                    expectedCTC: parseInt(e.target.value) || undefined,
+                  })
+                }
+                placeholder="1200000"
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                Enter your expected Cost to Company in INR per annum
+              </p>
             </div>
 
             <div className="space-y-2">

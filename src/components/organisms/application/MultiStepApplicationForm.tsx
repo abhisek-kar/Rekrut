@@ -8,6 +8,7 @@ import { ConfirmationDialog } from "@/components/molecules/ConfirmationDialog";
 
 // Step component imports
 import PersonalInfoStep from "./steps/PersonalInfoStep";
+import AddressInfoStep from "./steps/AddressInfoStep";
 import ProfessionalDetailsStep from "./steps/ProfessionalDetailsStep";
 import DocumentUploadStep from "./steps/DocumentUploadStep";
 import ApplicationSettingsStep from "./steps/ApplicationSettingsStep";
@@ -40,12 +41,31 @@ export interface ApplicationData {
   linkedinProfile?: string;
   portfolioWebsite?: string;
 
+  // Address Information
+  currentAddress?: {
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  permanentAddress?: {
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  isSameAsPermanent?: boolean;
+  preferredLocation?: string;
+
   // Professional Details
   currentRole?: string;
   currentCompany?: string;
   experienceLevel: string;
   skills: string[];
-  expectedSalary?: number;
+  currentCTC?: number;
+  expectedCTC?: number;
   noticePeriod?: string;
 
   // Documents
@@ -68,10 +88,11 @@ interface MultiStepApplicationFormProps {
 
 const STEPS = [
   { id: 1, title: "Personal Info", description: "Basic information" },
-  { id: 2, title: "Professional", description: "Work experience & skills" },
-  { id: 3, title: "Documents", description: "Resume & portfolio" },
-  { id: 4, title: "Preferences", description: "Work preferences" },
-  { id: 5, title: "Review", description: "Review & submit" },
+  { id: 2, title: "Address", description: "Address & location details" },
+  { id: 3, title: "Professional", description: "Work experience & skills" },
+  { id: 4, title: "Documents", description: "Resume & portfolio" },
+  { id: 5, title: "Preferences", description: "Work preferences" },
+  { id: 6, title: "Review", description: "Review & submit" },
 ];
 
 export default function MultiStepApplicationForm({
@@ -192,12 +213,19 @@ export default function MultiStepApplicationForm({
         );
       case 2:
         return (
-          <ProfessionalDetailsStep
+          <AddressInfoStep
             data={applicationData}
             updateData={updateApplicationData}
           />
         );
       case 3:
+        return (
+          <ProfessionalDetailsStep
+            data={applicationData}
+            updateData={updateApplicationData}
+          />
+        );
+      case 4:
         return (
           <DocumentUploadStep
             data={applicationData}
@@ -205,14 +233,14 @@ export default function MultiStepApplicationForm({
             job={job}
           />
         );
-      case 4:
+      case 5:
         return (
           <ApplicationSettingsStep
             data={applicationData}
             updateData={updateApplicationData}
           />
         );
-      case 5:
+      case 6:
         return (
           <ReviewSubmitStep
             data={applicationData}
@@ -240,14 +268,19 @@ export default function MultiStepApplicationForm({
           applicationData.email
         );
       case 2:
-        return (
-          applicationData.experienceLevel && applicationData.skills.length > 0
-        );
+        // Address step - require at least current address or mark as optional
+        return true; // Making address step optional for now
       case 3:
-        return applicationData.resume;
+        return (
+          applicationData.experienceLevel && 
+          applicationData.skills.length > 0 &&
+          applicationData.expectedCTC // Required field as per our changes
+        );
       case 4:
-        return true; // Optional step
+        return applicationData.resume;
       case 5:
+        return true; // Optional step
+      case 6:
         return true;
       default:
         return false;

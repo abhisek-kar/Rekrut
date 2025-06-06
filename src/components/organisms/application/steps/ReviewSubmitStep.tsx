@@ -51,6 +51,7 @@ export function ReviewSubmitStep({
   const getCompletionStatus = () => {
     const sections = [
       { name: 'Personal Information', completed: !!(data.firstName && data.lastName && data.email) },
+      { name: 'Address Information', completed: !!(data.currentAddress?.street || data.permanentAddress?.street || data.preferredLocation) },
       { name: 'Professional Details', completed: !!(data.currentRole || data.experienceLevel) },
       { name: 'Documents', completed: !!data.resume },
       { name: 'Application Settings', completed: true }
@@ -157,6 +158,55 @@ export function ReviewSubmitStep({
         </CardContent>
       </Card>
 
+      {/* Address Information Review */}
+      {(data.currentAddress || data.permanentAddress || data.preferredLocation) && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2">
+              <MapPin className="h-5 w-5" />
+              <span>Address Information</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {data.currentAddress && (
+              <div>
+                <p className="text-sm font-medium text-foreground mb-2">Current Address</p>
+                <p className="text-sm text-muted-foreground">
+                  {data.currentAddress.street}<br />
+                  {data.currentAddress.city}, {data.currentAddress.state} {data.currentAddress.postalCode}<br />
+                  {data.currentAddress.country}
+                </p>
+              </div>
+            )}
+            {data.permanentAddress && !data.isSameAsPermanent && (
+              <div>
+                <p className="text-sm font-medium text-foreground mb-2">Permanent Address</p>
+                <p className="text-sm text-muted-foreground">
+                  {data.permanentAddress.street}<br />
+                  {data.permanentAddress.city}, {data.permanentAddress.state} {data.permanentAddress.postalCode}<br />
+                  {data.permanentAddress.country}
+                </p>
+              </div>
+            )}
+            {data.isSameAsPermanent && (
+              <div>
+                <p className="text-sm font-medium text-foreground">Permanent Address</p>
+                <p className="text-sm text-muted-foreground">Same as current address</p>
+              </div>
+            )}
+            {data.preferredLocation && (
+              <div>
+                <p className="text-sm font-medium text-foreground">Preferred Location</p>
+                <div className="flex items-center space-x-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">{data.preferredLocation}</p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Professional Details Review */}
       <Card>
         <CardHeader className="pb-3">
@@ -185,12 +235,21 @@ export function ReviewSubmitStep({
                 <p className="text-sm text-muted-foreground">{data.experienceLevel}</p>
               </div>
             )}
-            {data.expectedSalary && (
+            {data.currentCTC && (
               <div>
-                <p className="text-sm font-medium text-foreground">Expected Salary</p>
+                <p className="text-sm font-medium text-foreground">Current CTC</p>
                 <div className="flex items-center space-x-2">
                   <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">${data.expectedSalary.toLocaleString()}</p>
+                  <p className="text-sm text-muted-foreground">₹{data.currentCTC.toLocaleString()}</p>
+                </div>
+              </div>
+            )}
+            {data.expectedCTC && (
+              <div>
+                <p className="text-sm font-medium text-foreground">Expected CTC</p>
+                <div className="flex items-center space-x-2">
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">₹{data.expectedCTC.toLocaleString()}</p>
                 </div>
               </div>
             )}

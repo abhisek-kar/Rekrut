@@ -5,7 +5,6 @@ import { Badge } from '@/components/shadcn-ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuHeader,
   DropdownMenuTrigger,
 } from '@/components/shadcn-ui/dropdown-menu';
 import { ScrollArea } from '@/components/shadcn-ui/scroll-area';
