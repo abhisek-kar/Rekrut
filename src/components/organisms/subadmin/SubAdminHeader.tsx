@@ -12,9 +12,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/shadcn-ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn-ui/avatar";
-import { BellIcon, LogOutIcon, SettingsIcon, UserIcon } from "lucide-react";
+import { LogOutIcon, SettingsIcon, UserIcon } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import { NotificationCenter } from "@/components/organisms/notifications/NotificationCenter";
 
 interface User {
   id: string;
@@ -57,12 +58,7 @@ export function SubAdminHeader({ user }: SubAdminHeaderProps) {
         <div></div>
         
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/subadmin/notifications">
-              <BellIcon className="w-5 h-5" />
-              <span className="sr-only">Notifications</span>
-            </Link>
-          </Button>
+          <NotificationCenter variant="dropdown" />
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

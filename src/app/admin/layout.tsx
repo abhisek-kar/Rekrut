@@ -2,16 +2,18 @@
 
 import React from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { 
-  Users, LayoutGrid, Briefcase, FileText, ContactRound, Box
+import {
+  Users,
+  LayoutGrid,
+  Briefcase,
+  FileText,
+  ContactRound,
+  Box,
 } from "lucide-react";
 import { PageLoader } from "@/components/atoms/loader";
 
 import { AppSidebar } from "@/components/shadcn-components/app-sidebar";
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/shadcn-ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/shadcn-ui/sidebar";
 import { useAuth } from "@/context/AuthContext";
 
 export default function AdminLayout({
@@ -40,35 +42,35 @@ export default function AdminLayout({
     {
       title: "Dashboard",
       href: "/admin/dashboard",
-      icon: LayoutGrid
+      icon: LayoutGrid,
     },
     {
       title: "Users",
       href: "/admin/users",
-      icon: Users
+      icon: Users,
     },
     {
       title: "Jobs",
       href: "/admin/jobs",
-      icon: Briefcase
+      icon: Briefcase,
     },
-    {
-      title: "Candidates",
-      href: "/admin/candidates",
-      icon: ContactRound
-    },
+    // {
+    //   title: "Candidates",
+    //   href: "/admin/candidates",
+    //   icon: ContactRound
+    // },
     {
       title: "Applications",
       href: "/admin/applications",
-      icon: FileText
+      icon: FileText,
     },
-  
   ];
 
   const userData = {
     name: user ? `${user.firstName} ${user.lastName}` : "Admin User",
     email: user?.email || "",
-    avatar: user?.profilePhoto || "https://docs.material-tailwind.com/img/face-2.jpg",
+    avatar:
+      user?.profilePhoto || "https://docs.material-tailwind.com/img/face-2.jpg",
   };
 
   return (

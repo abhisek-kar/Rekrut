@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/db/connect';
 import Application from '@/models/Application';
-import { sendApplicationConfirmation, notifyNewJobApplication } from '@/lib/email/notifications';
 import Candidate from '@/models/Candidate';
 import Job from '@/models/Job';
 import { randomBytes } from 'crypto';
@@ -313,31 +312,6 @@ export async function POST(request: NextRequest) {
     
     // Generate a tracking token for the application
     const trackingToken = randomBytes(32).toString('hex');
-    
-    // Send application confirmation email to candidate
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    
-    try {
-      await sendApplicationConfirmation(
-        application._id.toString(),
-        trackingToken,
-        appUrl
-      );
-    } catch (emailError) {
-      console.error('Failed to send application confirmation:', emailError);
-      // Don't fail the application if email fails
-    }
-    
-    // Notify recruiters about new application
-    try {
-      await notifyNewJobApplication(
-        application._id.toString(),
-        appUrl
-      );
-    } catch (notificationError) {
-      console.error('Failed to send application notification:', notificationError);
-      // Don't fail the application if notification fails
-    }
     
     // TODO: In a real implementation, you would:
     // 1. Upload files to AWS S3 or similar storage

@@ -7,8 +7,8 @@ import { bulkStatusUpdateSchema } from '@/lib/validators/application';
 import Application from '@/models/Application';
 import Candidate from '@/models/Candidate';
 import Job from '@/models/Job';
+import Notification from '@/models/Notification';
 import Activity from '@/models/Activity';
-import { notifyApplicationStatusChange } from '@/lib/email/notifications';
 import { ZodError } from 'zod';
 
 export async function POST(request: NextRequest) {
@@ -125,22 +125,21 @@ export async function POST(request: NextRequest) {
     
     await Promise.all(activityPromises);
     
-    // Send notifications to candidates if requested
+    // Create notifications for candidates if requested
     if (notify) {
-      const notificationPromises = applications.map(async (app) => {
-        try {
-          await notifyApplicationStatusChange(
-            app._id.toString(),
-            app.status, // old status (current before update)
-            status, // new status
-            reason,
-            `We'll update you on next steps soon.` // default next steps message
-          );
-        } catch (notificationError) {
-          console.error(`Failed to send notification for application ${app._id}:`, notificationError);
-          // Don't fail the bulk operation if individual notifications fail
-        }
-      });
+      // This would typically involve sending emails
+      // For now, we'll just create in-app notifications for demo purposes
+      const notificationPromises = applications.map(app => 
+        Notification.create({
+          userId: app.candidateId._id,
+          type: 'application_status',
+          title: 'Application Status Update',
+          message: `Your application for ${app.jobId.title} at ${app.jobId.company} has been updated to: ${status}`,
+          read: false,
+          link: `/candidate-portal/applications/${app._id}`,
+          relatedId: app._id
+        })
+      );
       
       await Promise.all(notificationPromises);
     }

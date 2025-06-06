@@ -167,11 +167,6 @@ export function NotificationCenter({ className, variant = 'dropdown' }: Notifica
 
   useEffect(() => {
     fetchNotifications();
-    
-    // Set up polling for new notifications
-    const interval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
-    
-    return () => clearInterval(interval);
   }, []);
 
   const NotificationItem = ({ notification }: { notification: Notification }) => (

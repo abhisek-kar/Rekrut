@@ -19,6 +19,7 @@ import { SidebarTrigger } from "@/components/shadcn-ui/sidebar";
 import { Separator } from "@/components/shadcn-ui/separator";
 import { Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { NotificationCenter } from "@/components/organisms/notifications/NotificationCenter";
 
 interface PageHeaderProps {
   title?: React.ReactNode;
@@ -49,16 +50,6 @@ export function PageHeader({
         )
       : generateBreadcrumbs(pathname, user?.role || "admin"));
 
-  const handleNotificationClick = () => {
-    if (user?.role === "admin") {
-      // route to admin notifications
-      router.push("/admin/notifications");
-    } else if (user?.role === "subadmin") {
-      // route to subadmin notifications
-      router.push("/subadmin/notifications");
-    }
-  };
-
   return (
     <>
       {/* Navigation Header */}
@@ -84,15 +75,8 @@ export function PageHeader({
             </BreadcrumbList>
           </Breadcrumb>
         </div>
-        <div
-          className="flex items-center gap-2 cursor-pointer relative"
-          onClick={handleNotificationClick}
-        >
-          <Bell className="h-6 w-6 text-muted-foreground" />
-          {/* <Badge
-          className="h-2 min-w-2 aspect-square rounded-full  tabular-nums "
-          variant="destructive"
-       /> */}
+        <div className="flex items-center gap-2">
+          <NotificationCenter className="h-auto" />
         </div>
       </header>
 
