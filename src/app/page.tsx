@@ -157,6 +157,7 @@ export default function Home() {
     <div className="min-h-screen p-4 bg-gray-50">
       <div className="flex items-center justify-between">
         <Logo size="xl" />
+        div
         <Button asChild>
           <Link href="/login">Go to Login</Link>
         </Button>

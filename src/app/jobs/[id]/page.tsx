@@ -72,7 +72,6 @@ export default function JobDetailPage() {
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     if (jobId) {
@@ -160,11 +159,6 @@ export default function JobDetailPage() {
       navigator.clipboard.writeText(window.location.href);
       toast.success('Job link copied to clipboard!');
     }
-  };
-
-  const handleSaveJob = () => {
-    setIsSaved(!isSaved);
-    toast.success(isSaved ? 'Job removed from saved jobs' : 'Job saved successfully!');
   };
 
   const formatDate = (dateString: string) => {
@@ -281,7 +275,7 @@ export default function JobDetailPage() {
                         
                         <div className="flex items-center">
                           <Briefcase className="h-4 w-4 mr-1" />
-                          {job.employmentType?.charAt(0).toUpperCase() + job.employmentType?.slice(1)}
+                          {job.employmentType ? job.employmentType.charAt(0).toUpperCase() + job.employmentType.slice(1) : 'Not specified'}
                         </div>
                         
                         {job.experienceLevel && (
@@ -300,9 +294,6 @@ export default function JobDetailPage() {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={handleSaveJob}>
-                      <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-500 text-red-500' : ''}`} />
-                    </Button>
                     <Button variant="outline" size="sm" onClick={handleShare}>
                       <Share2 className="h-4 w-4" />
                     </Button>
@@ -473,12 +464,32 @@ export default function JobDetailPage() {
                   )}
                 </div>
                 
+                {/* Required Documents */}
+                {job.requiredDocuments && job.requiredDocuments.length > 0 && (
+                  <>
+                    <Separator />
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-3">Required Documents</h4>
+                      <ul className="space-y-2">
+                        {job.requiredDocuments.map((doc, index) => (
+                          <li key={index} className="flex items-center text-sm text-gray-700">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 flex-shrink-0" />
+                            {doc}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
+                )}
+                
                 <Separator />
                 
                 <div className="space-y-3">
-                  <Button className="w-full" size="lg">
-                    Apply Now
-                  </Button>
+                  <Link href={`/apply/${job._id}`}>
+                    <Button className="w-full" size="lg">
+                      Apply Now
+                    </Button>
+                  </Link>
                   
                   <div className="text-xs text-gray-500 text-center">
                     By applying, you agree to our terms of service and privacy policy
@@ -486,59 +497,6 @@ export default function JobDetailPage() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Company Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">About {job.company}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Company</span>
-                    <span className="font-medium">{job.company}</span>
-                  </div>
-                  
-                  {job.department && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Department</span>
-                      <span className="font-medium">{job.department}</span>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">Work Type</span>
-                    <span className="font-medium capitalize">{job.location.type}</span>
-                  </div>
-                  
-                  {job.employmentType && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">Employment</span>
-                      <span className="font-medium capitalize">{job.employmentType}</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Required Documents */}
-            {job.requiredDocuments && job.requiredDocuments.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Required Documents</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {job.requiredDocuments.map((doc, index) => (
-                      <li key={index} className="flex items-center text-sm text-gray-700">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-3 flex-shrink-0" />
-                        {doc}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
           </div>
         </div>
       </div>
