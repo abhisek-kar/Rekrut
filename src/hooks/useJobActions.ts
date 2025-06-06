@@ -36,6 +36,13 @@ export function useJobActions({ userRole, onSuccess }: JobActionsProps) {
   // Generic action handler - works for both single and multiple jobs
   const handleJobAction = useCallback((actionType: string, jobIds: string | string[]) => {
     const jobArray = Array.isArray(jobIds) ? jobIds : [jobIds];
+    
+    // Edge case: Prevent subadmins from using bulk assign action
+    if (actionType === 'assign' && jobArray.length > 1 && userRole === 'subadmin') {
+      toast.error('Bulk assignment is not available for SubAdmins. Please assign jobs individually.');
+      return;
+    }
+    
     setTargetJobs(jobArray);
     setCurrentAction(actionType);
     setActionData(null);
@@ -60,7 +67,7 @@ export function useJobActions({ userRole, onSuccess }: JobActionsProps) {
         setShowDeleteDialog(true);
         break;
     }
-  }, []);
+  }, [userRole]);
 
   // Execute action - adapts between single and bulk APIs
   const executeAction = useCallback(async () => {
