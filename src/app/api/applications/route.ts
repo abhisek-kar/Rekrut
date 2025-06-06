@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/db/connect';
 import Application from '@/models/Application';
+import Candidate from '@/models/Candidate';
+import Job from '@/models/Job';
+import { randomBytes } from 'crypto';
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,19 +23,19 @@ export async function GET(request: NextRequest) {
     
     // Build query
     const query: { 
-      jobId?: mongoose.Types.ObjectId; 
-      candidateId?: mongoose.Types.ObjectId; 
+      job?: mongoose.Types.ObjectId; 
+      candidate?: mongoose.Types.ObjectId | { $in: mongoose.Types.ObjectId[] }; 
       status?: string;
     } = {};
     
     // Job filter
     if (jobId) {
-      query.jobId = new mongoose.Types.ObjectId(jobId);
+      query.job = new mongoose.Types.ObjectId(jobId);
     }
     
     // Candidate filter
     if (candidateId) {
-      query.candidateId = new mongoose.Types.ObjectId(candidateId);
+      query.candidate = new mongoose.Types.ObjectId(candidateId);
     }
     
     // Status filter
@@ -52,7 +55,7 @@ export async function GET(request: NextRequest) {
       }).select('_id');
       
       if (candidates.length > 0) {
-        query.candidateId = { $in: candidates.map(c => c._id) };
+        query.candidate = { $in: candidates.map(c => c._id) };
       } else {
         // No candidates match, return empty result
         return NextResponse.json({
@@ -84,28 +87,28 @@ export async function GET(request: NextRequest) {
       .sort({ [sortField]: sortOrder === 'asc' ? 1 : -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate('candidateId', 'firstName lastName email profilePhoto')
-      .populate('jobId', 'title company')
+      .populate('candidate', 'firstName lastName email profilePhoto')
+      .populate('job', 'title company')
       .lean();
       
     // Transform to expected format
     applications = applications.map(app => ({
       _id: app._id.toString(),
-      applicationDate: app.applicationDate,
+      applicationDate: app.createdAt 
       status: app.status,
       source: app.source,
-      matchingScore: app.matchingScore,
+      matchingScore: app.matchScore,
       job: {
-        _id: app.jobId._id.toString(),
-        title: app.jobId.title,
-        company: app.jobId.company
+        _id: (app.job as any)._id.toString(),
+        title: (app.job as any).title,
+        company: (app.job as any).company
       },
       candidate: {
-        _id: app.candidateId._id.toString(),
-        firstName: app.candidateId.firstName,
-        lastName: app.candidateId.lastName,
-        email: app.candidateId.email,
-        profilePhoto: app.candidateId.profilePhoto
+        _id: (app.candidate as any)._id.toString(),
+        firstName: (app.candidate as any).firstName,
+        lastName: (app.candidate as any).lastName,
+        email: (app.candidate as any).email,
+        profilePhoto: (app.candidate as any).profilePhoto
       }
     }));
     
@@ -136,6 +139,205 @@ export async function GET(request: NextRequest) {
     console.error('Error fetching applications:', error);
     return NextResponse.json(
       { error: 'Failed to fetch applications' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    await dbConnect();
+    
+    const formData = await request.formData();
+    const jobId = formData.get('jobId') as string;
+    const applicationDataStr = formData.get('applicationData') as string;
+    
+    if (!jobId || !applicationDataStr) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+    
+    const applicationData = JSON.parse(applicationDataStr);
+    
+    // Validate required fields
+    if (!applicationData.firstName || !applicationData.lastName || !applicationData.email) {
+      return NextResponse.json(
+        { error: 'Missing required personal information' },
+        { status: 400 }
+      );
+    }
+    
+    // Check if job exists and is active
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return NextResponse.json(
+        { error: 'Job not found' },
+        { status: 404 }
+      );
+    }
+    
+    // Create or find candidate
+    let candidate = await Candidate.findOne({ email: applicationData.email });
+    
+    if (!candidate) {
+      // Create new candidate
+      candidate = new Candidate({
+        firstName: applicationData.firstName,
+        lastName: applicationData.lastName,
+        email: applicationData.email,
+        phone: applicationData.phone,
+        linkedinProfile: applicationData.linkedinProfile,
+        portfolioWebsite: applicationData.portfolioWebsite,
+        currentJobTitle: applicationData.currentRole,
+        currentCompany: applicationData.currentCompany,
+        expectedSalary: applicationData.expectedSalary,
+        noticePeriod: applicationData.noticePeriod,
+        skills: applicationData.skills?.map((skill: string) => ({ name: skill })) || [],
+        currentAddress: {
+          city: applicationData.location
+        },
+        preferences: {
+          workLocation: applicationData.preferredWorkType,
+          willingToRelocate: applicationData.willingToRelocate,
+          availableStartDate: applicationData.availableStartDate
+        },
+        source: 'website',
+        notes: applicationData.additionalMessage
+      });
+      
+      await candidate.save();
+    } else {
+      // Update existing candidate with new information
+      candidate.phone = applicationData.phone || candidate.phone;
+      candidate.linkedinProfile = applicationData.linkedinProfile || candidate.linkedinProfile;
+      candidate.portfolioWebsite = applicationData.portfolioWebsite || candidate.portfolioWebsite;
+      candidate.currentJobTitle = applicationData.currentRole || candidate.currentJobTitle;
+      candidate.currentCompany = applicationData.currentCompany || candidate.currentCompany;
+      candidate.expectedSalary = applicationData.expectedSalary || candidate.expectedSalary;
+      candidate.noticePeriod = applicationData.noticePeriod || candidate.noticePeriod;
+      
+      // Merge skills
+      if (applicationData.skills?.length > 0) {
+        const existingSkills = candidate.skills?.map(s => s.name) || [];
+        const newSkills = applicationData.skills.filter((skill: string) => !existingSkills.includes(skill));
+        candidate.skills = [
+          ...(candidate.skills || []),
+          ...newSkills.map((skill: string) => ({ name: skill }))
+        ];
+      }
+      
+      if (applicationData.location && !candidate.currentAddress?.city) {
+        candidate.currentAddress = {
+          ...candidate.currentAddress,
+          city: applicationData.location
+        };
+      }
+      
+      await candidate.save();
+    }
+    
+    // Check if application already exists
+    const existingApplication = await Application.findOne({
+      job: jobId,
+      candidate: candidate._id
+    });
+    
+    if (existingApplication) {
+      return NextResponse.json(
+        { error: 'You have already applied for this position' },
+        { status: 409 }
+      );
+    }
+    
+    // Handle file uploads (for simplicity, we'll store file info without actual upload)
+    const documents: any = {};
+    
+    // Get resume file
+    const resumeFile = formData.get('resume') as File;
+    if (resumeFile) {
+      documents.resume = {
+        filename: resumeFile.name,
+        url: `/uploads/resumes/${candidate._id}_${Date.now()}_${resumeFile.name}`, // Placeholder URL
+      };
+    }
+    
+    // Get cover letter file
+    const coverLetterFile = formData.get('coverLetter') as File;
+    if (coverLetterFile) {
+      documents.coverLetter = {
+        filename: coverLetterFile.name,
+        url: `/uploads/cover-letters/${candidate._id}_${Date.now()}_${coverLetterFile.name}`, // Placeholder URL
+      };
+    }
+    
+    // Get portfolio files
+    const additionalDocuments: any[] = [];
+    let fileIndex = 0;
+    while (formData.get(`portfolioFile_${fileIndex}`)) {
+      const file = formData.get(`portfolioFile_${fileIndex}`) as File;
+      additionalDocuments.push({
+        filename: file.name,
+        url: `/uploads/portfolio/${candidate._id}_${Date.now()}_${file.name}`, // Placeholder URL
+        documentType: 'portfolio'
+      });
+      fileIndex++;
+    }
+    
+    // Create application
+    const application = new Application({
+      job: jobId,
+      candidate: candidate._id,
+      status: 'applied',
+      statusHistory: [{
+        status: 'applied',
+        date: new Date(),
+        reason: 'Application submitted via website'
+      }],
+      resume: documents.resume,
+      coverLetter: documents.coverLetter,
+      additionalDocuments: additionalDocuments.length > 0 ? additionalDocuments : undefined,
+      source: 'website',
+      answers: {
+        experienceLevel: applicationData.experienceLevel,
+        additionalMessage: applicationData.additionalMessage,
+        availableStartDate: applicationData.availableStartDate,
+        willingToRelocate: applicationData.willingToRelocate,
+        preferredWorkType: applicationData.preferredWorkType
+      }
+    });
+    
+    await application.save();
+    
+    // Generate a tracking token for the application
+    const trackingToken = randomBytes(32).toString('hex');
+    
+    // TODO: In a real implementation, you would:
+    // 1. Upload files to AWS S3 or similar storage
+    // 2. Send confirmation email to candidate
+    // 3. Send notification to hiring team
+    // 4. Store tracking token in database for application status tracking
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Application submitted successfully',
+      applicationId: application._id,
+      token: trackingToken
+    }, { status: 201 });
+    
+  } catch (error) {
+    console.error('Error creating application:', error);
+    
+    if (error instanceof mongoose.Error.ValidationError) {
+      return NextResponse.json(
+        { error: 'Invalid application data', details: error.message },
+        { status: 400 }
+      );
+    }
+    
+    return NextResponse.json(
+      { error: 'Failed to submit application' },
       { status: 500 }
     );
   }
