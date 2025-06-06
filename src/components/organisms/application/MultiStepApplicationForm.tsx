@@ -1,18 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Check, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/shadcn-ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
-import { toast } from 'sonner';
-import { ConfirmationDialog } from '@/components/molecules/ConfirmationDialog';
+import React, { useState, useEffect } from "react";
+import { Check, ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/shadcn-ui/button";
+import { toast } from "sonner";
+import { ConfirmationDialog } from "@/components/molecules/ConfirmationDialog";
 
 // Step component imports
-import PersonalInfoStep from './steps/PersonalInfoStep';
-import ProfessionalDetailsStep from './steps/ProfessionalDetailsStep';
-import DocumentUploadStep from './steps/DocumentUploadStep';
-import ApplicationSettingsStep from './steps/ApplicationSettingsStep';
-import ReviewSubmitStep from './steps/ReviewSubmitStep';
+import PersonalInfoStep from "./steps/PersonalInfoStep";
+import ProfessionalDetailsStep from "./steps/ProfessionalDetailsStep";
+import DocumentUploadStep from "./steps/DocumentUploadStep";
+import ApplicationSettingsStep from "./steps/ApplicationSettingsStep";
+import ReviewSubmitStep from "./steps/ReviewSubmitStep";
 
 interface Job {
   _id: string;
@@ -68,50 +67,56 @@ interface MultiStepApplicationFormProps {
 }
 
 const STEPS = [
-  { id: 1, title: 'Personal Info', description: 'Basic information' },
-  { id: 2, title: 'Professional', description: 'Work experience & skills' },
-  { id: 3, title: 'Documents', description: 'Resume & portfolio' },
-  { id: 4, title: 'Preferences', description: 'Work preferences' },
-  { id: 5, title: 'Review', description: 'Review & submit' },
+  { id: 1, title: "Personal Info", description: "Basic information" },
+  { id: 2, title: "Professional", description: "Work experience & skills" },
+  { id: 3, title: "Documents", description: "Resume & portfolio" },
+  { id: 4, title: "Preferences", description: "Work preferences" },
+  { id: 5, title: "Review", description: "Review & submit" },
 ];
 
-export default function MultiStepApplicationForm({ job, onSubmit, onBack }: MultiStepApplicationFormProps) {
+export default function MultiStepApplicationForm({
+  job,
+  onSubmit,
+  onBack,
+}: MultiStepApplicationFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formDirty, setFormDirty] = useState(false);
   const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
-  
+
   const [applicationData, setApplicationData] = useState<ApplicationData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    location: '',
-    experienceLevel: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    location: "",
+    experienceLevel: "",
     skills: [],
   });
 
   // Track initial form state to detect changes
   const [initialApplicationData] = useState<ApplicationData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    location: '',
-    experienceLevel: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    location: "",
+    experienceLevel: "",
     skills: [],
   });
 
   // Check for form changes whenever applicationData updates
   useEffect(() => {
-    const hasChanges = JSON.stringify(applicationData) !== JSON.stringify(initialApplicationData);
+    const hasChanges =
+      JSON.stringify(applicationData) !==
+      JSON.stringify(initialApplicationData);
     setFormDirty(hasChanges);
   }, [applicationData, initialApplicationData]);
 
   const updateApplicationData = (stepData: Partial<ApplicationData>) => {
-    setApplicationData(prev => ({
+    setApplicationData((prev) => ({
       ...prev,
-      ...stepData
+      ...stepData,
     }));
   };
 
@@ -148,19 +153,19 @@ export default function MultiStepApplicationForm({ job, onSubmit, onBack }: Mult
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
-      
+
       const formData = new FormData();
-      formData.append('jobId', job._id);
-      formData.append('applicationData', JSON.stringify(applicationData));
-      
+      formData.append("jobId", job._id);
+      formData.append("applicationData", JSON.stringify(applicationData));
+
       if (applicationData.resume) {
-        formData.append('resume', applicationData.resume);
+        formData.append("resume", applicationData.resume);
       }
-      
+
       if (applicationData.coverLetter) {
-        formData.append('coverLetter', applicationData.coverLetter);
+        formData.append("coverLetter", applicationData.coverLetter);
       }
-      
+
       if (applicationData.portfolioFiles) {
         applicationData.portfolioFiles.forEach((file, index) => {
           formData.append(`portfolioFile_${index}`, file);
@@ -168,10 +173,9 @@ export default function MultiStepApplicationForm({ job, onSubmit, onBack }: Mult
       }
 
       await onSubmit(applicationData, formData);
-      
     } catch (error) {
-      console.error('Error submitting application:', error);
-      toast.error('Failed to submit application. Please try again.');
+      console.error("Error submitting application:", error);
+      toast.error("Failed to submit application. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -181,21 +185,21 @@ export default function MultiStepApplicationForm({ job, onSubmit, onBack }: Mult
     switch (currentStep) {
       case 1:
         return (
-          <PersonalInfoStep 
+          <PersonalInfoStep
             data={applicationData}
             updateData={updateApplicationData}
           />
         );
       case 2:
         return (
-          <ProfessionalDetailsStep 
+          <ProfessionalDetailsStep
             data={applicationData}
             updateData={updateApplicationData}
           />
         );
       case 3:
         return (
-          <DocumentUploadStep 
+          <DocumentUploadStep
             data={applicationData}
             updateData={updateApplicationData}
             job={job}
@@ -203,14 +207,14 @@ export default function MultiStepApplicationForm({ job, onSubmit, onBack }: Mult
         );
       case 4:
         return (
-          <ApplicationSettingsStep 
+          <ApplicationSettingsStep
             data={applicationData}
             updateData={updateApplicationData}
           />
         );
       case 5:
         return (
-          <ReviewSubmitStep 
+          <ReviewSubmitStep
             data={applicationData}
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
@@ -230,9 +234,15 @@ export default function MultiStepApplicationForm({ job, onSubmit, onBack }: Mult
   const validateCurrentStep = () => {
     switch (currentStep) {
       case 1:
-        return applicationData.firstName && applicationData.lastName && applicationData.email;
+        return (
+          applicationData.firstName &&
+          applicationData.lastName &&
+          applicationData.email
+        );
       case 2:
-        return applicationData.experienceLevel && applicationData.skills.length > 0;
+        return (
+          applicationData.experienceLevel && applicationData.skills.length > 0
+        );
       case 3:
         return applicationData.resume;
       case 4:
@@ -249,8 +259,8 @@ export default function MultiStepApplicationForm({ job, onSubmit, onBack }: Mult
       {/* Back to Job Details Button */}
       {onBack && (
         <div className="flex justify-start p-4 border-b">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={handleBackToJobDetails}
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
           >
@@ -310,33 +320,30 @@ export default function MultiStepApplicationForm({ job, onSubmit, onBack }: Mult
         <div className="flex flex-col gap-6 max-w-4xl mx-auto">
           {/* Step Content */}
           {renderStep()}
-          
+
           {/* Navigation */}
           <div className="flex justify-between pt-6 border-t">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={prevStep}
               disabled={currentStep === 1}
             >
               <ChevronLeft className="h-4 w-4 mr-2" />
               Previous
             </Button>
-            
+
             {currentStep < STEPS.length ? (
-              <Button 
-                onClick={nextStep}
-                disabled={!validateCurrentStep()}
-              >
+              <Button onClick={nextStep} disabled={!validateCurrentStep()}>
                 Next
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             ) : (
-              <Button 
+              <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting || !validateCurrentStep()}
                 className="bg-primary hover:bg-primary/90"
               >
-                {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                {isSubmitting ? "Submitting..." : "Submit Application"}
               </Button>
             )}
           </div>
@@ -352,9 +359,7 @@ export default function MultiStepApplicationForm({ job, onSubmit, onBack }: Mult
                 style={{ width: `${getStepProgress()}%` }}
               ></div>
             </div>
-            <span>
-              {Math.round(getStepProgress())}% Complete
-            </span>
+            <span>{Math.round(getStepProgress())}% Complete</span>
           </div>
         </div>
       </main>

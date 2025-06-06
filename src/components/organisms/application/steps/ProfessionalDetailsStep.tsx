@@ -1,24 +1,39 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
-import { Button } from '@/components/shadcn-ui/button';
-import { Input } from '@/components/shadcn-ui/input';
-import { Label } from '@/components/shadcn-ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn-ui/select';
-import { Textarea } from '@/components/shadcn-ui/textarea';
-import { ApplicationData } from '../MultiStepApplicationForm';
-import { ChevronRight, ChevronLeft, Briefcase } from 'lucide-react';
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn-ui/card";
+import { Button } from "@/components/shadcn-ui/button";
+import { Input } from "@/components/shadcn-ui/input";
+import { Label } from "@/components/shadcn-ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shadcn-ui/select";
+import { Textarea } from "@/components/shadcn-ui/textarea";
+import { ApplicationData } from "../MultiStepApplicationForm";
+import { ChevronRight, ChevronLeft, Briefcase } from "lucide-react";
 
 interface ProfessionalDetailsStepProps {
   data: ApplicationData;
   updateData: (updates: Partial<ApplicationData>) => void;
 }
 
-const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({ 
-  data, 
-  updateData
+const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
+  data,
+  updateData,
 }) => {
   const handleSkillsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const skillsArray = e.target.value.split(',').map(skill => skill.trim()).filter(skill => skill.length > 0);
+    const skillsArray = e.target.value
+      .split(",")
+      .map((skill) => skill.trim())
+      .filter((skill) => skill.length > 0);
     updateData({ skills: skillsArray });
   };
 
@@ -39,10 +54,12 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
         <CardContent>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="currentRole">Current Role *</Label>
+              <Label htmlFor="currentRole">
+                Current Role <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="currentRole"
-                value={data.currentRole || ''}
+                value={data.currentRole || ""}
                 onChange={(e) => updateData({ currentRole: e.target.value })}
                 placeholder="e.g., Senior Software Engineer"
                 required
@@ -53,7 +70,7 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
               <Label htmlFor="currentCompany">Current Company</Label>
               <Input
                 id="currentCompany"
-                value={data.currentCompany || ''}
+                value={data.currentCompany || ""}
                 onChange={(e) => updateData({ currentCompany: e.target.value })}
                 placeholder="e.g., Tech Corp Inc."
               />
@@ -64,26 +81,40 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
                 <Label htmlFor="experienceLevel">Experience Level *</Label>
                 <Select
                   value={data.experienceLevel}
-                  onValueChange={(value) => updateData({ experienceLevel: value })}
+                  onValueChange={(value) =>
+                    updateData({ experienceLevel: value })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select experience level" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="entry">Entry Level (0-2 years)</SelectItem>
+                    <SelectItem value="entry">
+                      Entry Level (0-2 years)
+                    </SelectItem>
                     <SelectItem value="mid">Mid Level (3-5 years)</SelectItem>
-                    <SelectItem value="senior">Senior Level (6-10 years)</SelectItem>
-                    <SelectItem value="lead">Lead/Principal (10+ years)</SelectItem>
+                    <SelectItem value="senior">
+                      Senior Level (6-10 years)
+                    </SelectItem>
+                    <SelectItem value="lead">
+                      Lead/Principal (10+ years)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="expectedSalary">Expected Salary (Optional)</Label>
+                <Label htmlFor="expectedSalary">
+                  Expected Salary (Optional)
+                </Label>
                 <Input
                   id="expectedSalary"
                   type="number"
-                  value={data.expectedSalary || ''}
-                  onChange={(e) => updateData({ expectedSalary: parseInt(e.target.value) || undefined })}
+                  value={data.expectedSalary || ""}
+                  onChange={(e) =>
+                    updateData({
+                      expectedSalary: parseInt(e.target.value) || undefined,
+                    })
+                  }
                   placeholder="80000"
                 />
               </div>
@@ -93,7 +124,7 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
               <Label htmlFor="skills">Skills & Technologies *</Label>
               <Textarea
                 id="skills"
-                value={data.skills.join(', ')}
+                value={data.skills.join(", ")}
                 onChange={handleSkillsChange}
                 placeholder="List your key skills, technologies, and tools (e.g., React, Node.js, Python, AWS, etc.)"
                 rows={3}
@@ -107,7 +138,7 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
             <div className="space-y-2">
               <Label htmlFor="noticePeriod">Notice Period</Label>
               <Select
-                value={data.noticePeriod || ''}
+                value={data.noticePeriod || ""}
                 onValueChange={(value) => updateData({ noticePeriod: value })}
               >
                 <SelectTrigger>
@@ -129,8 +160,10 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
               <Input
                 id="linkedinProfile"
                 type="url"
-                value={data.linkedinProfile || ''}
-                onChange={(e) => updateData({ linkedinProfile: e.target.value })}
+                value={data.linkedinProfile || ""}
+                onChange={(e) =>
+                  updateData({ linkedinProfile: e.target.value })
+                }
                 placeholder="https://linkedin.com/in/yourprofile"
               />
             </div>
@@ -140,8 +173,10 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
               <Input
                 id="portfolioWebsite"
                 type="url"
-                value={data.portfolioWebsite || ''}
-                onChange={(e) => updateData({ portfolioWebsite: e.target.value })}
+                value={data.portfolioWebsite || ""}
+                onChange={(e) =>
+                  updateData({ portfolioWebsite: e.target.value })
+                }
                 placeholder="https://yourportfolio.com"
               />
             </div>

@@ -32,7 +32,9 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, updateData })
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name *</Label>
+                <Label htmlFor="firstName">
+                  First Name <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="firstName"
                   value={data.firstName}
@@ -42,7 +44,9 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, updateData })
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name *</Label>
+                <Label htmlFor="lastName">
+                  Last Name <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="lastName"
                   value={data.lastName}
@@ -54,7 +58,9 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, updateData })
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address *</Label>
+              <Label htmlFor="email">
+                Email Address <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -66,7 +72,9 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, updateData })
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number *</Label>
+              <Label htmlFor="phone">
+                Phone Number <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="phone"
                 type="tel"
