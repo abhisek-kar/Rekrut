@@ -25,7 +25,7 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, updateData })
             Personal Information
           </CardTitle>
           <CardDescription>
-            Please provide your basic personal information to get started.
+            Please provide your basic contact information and professional links.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -85,47 +85,25 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, updateData })
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="country">Country</Label>
-                <Select
-                  value={data.country}
-                  onValueChange={(value) => updateData({ country: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your country" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="US">United States</SelectItem>
-                    <SelectItem value="CA">Canada</SelectItem>
-                    <SelectItem value="UK">United Kingdom</SelectItem>
-                    <SelectItem value="AU">Australia</SelectItem>
-                    <SelectItem value="DE">Germany</SelectItem>
-                    <SelectItem value="FR">France</SelectItem>
-                    <SelectItem value="IN">India</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  value={data.city}
-                  onChange={(e) => updateData({ city: e.target.value })}
-                  placeholder="Enter your city"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="linkedinProfile">LinkedIn Profile (Optional)</Label>
+              <Input
+                id="linkedinProfile"
+                type="url"
+                value={data.linkedinProfile || ''}
+                onChange={(e) => updateData({ linkedinProfile: e.target.value })}
+                placeholder="https://linkedin.com/in/yourprofile"
+              />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
-              <Textarea
-                id="address"
-                value={data.address}
-                onChange={(e) => updateData({ address: e.target.value })}
-                placeholder="Enter your full address"
-                rows={3}
+              <Label htmlFor="portfolioWebsite">Portfolio Website (Optional)</Label>
+              <Input
+                id="portfolioWebsite"
+                type="url"
+                value={data.portfolioWebsite || ''}
+                onChange={(e) => updateData({ portfolioWebsite: e.target.value })}
+                placeholder="https://yourportfolio.com"
               />
             </div>
           </div>

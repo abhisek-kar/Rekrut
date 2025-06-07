@@ -34,10 +34,6 @@ export interface ApplicationData {
   lastName: string;
   email: string;
   phone: string;
-  location: string;
-  country?: string;
-  city?: string;
-  address?: string;
   linkedinProfile?: string;
   portfolioWebsite?: string;
 
@@ -100,7 +96,7 @@ export default function MultiStepApplicationForm({
   onSubmit,
   onBack,
 }: MultiStepApplicationFormProps) {
-  const [currentStep, setCurrentStep] = useState(2);
+  const [currentStep, setCurrentStep] = useState(3);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formDirty, setFormDirty] = useState(false);
   const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
@@ -110,7 +106,6 @@ export default function MultiStepApplicationForm({
     lastName: "",
     email: "",
     phone: "",
-    location: "",
     experienceLevel: "",
     skills: [],
   });
@@ -121,7 +116,6 @@ export default function MultiStepApplicationForm({
     lastName: "",
     email: "",
     phone: "",
-    location: "",
     experienceLevel: "",
     skills: [],
   });
@@ -272,7 +266,7 @@ export default function MultiStepApplicationForm({
         return true; // Making address step optional for now
       case 3:
         return (
-          applicationData.experienceLevel && 
+          applicationData.experienceLevel &&
           applicationData.skills.length > 0 &&
           applicationData.expectedCTC // Required field as per our changes
         );

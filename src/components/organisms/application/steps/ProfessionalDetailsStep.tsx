@@ -37,7 +37,7 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
     updateData({ skills: skillsArray });
   };
 
-  const isValid = data.currentRole && data.experienceLevel && data.expectedCTC;
+  const isValid = data.currentRole && data.experienceLevel && data.expectedCTC && data.skills.length > 0;
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -78,7 +78,9 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="experienceLevel">Experience Level *</Label>
+                <Label htmlFor="experienceLevel">
+                  Experience Level <span className="text-destructive">*</span>
+                </Label>
                 <Select
                   value={data.experienceLevel}
                   onValueChange={(value) =>
@@ -103,26 +105,43 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="currentCTC">
-                  Current CTC (Optional)
-                </Label>
-                <Input
-                  id="currentCTC"
-                  type="number"
-                  value={data.currentCTC || ""}
-                  onChange={(e) =>
-                    updateData({
-                      currentCTC: parseInt(e.target.value) || undefined,
-                    })
-                  }
-                  placeholder="800000"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Enter your current Cost to Company in INR per annum
-                </p>
+                <Label htmlFor="noticePeriod">Notice Period</Label>
+                <Select
+                  value={data.noticePeriod || ""}
+                  onValueChange={(value) => updateData({ noticePeriod: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select notice period" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="immediate">Immediate</SelectItem>
+                    <SelectItem value="1-week">1 Week</SelectItem>
+                    <SelectItem value="2-weeks">2 Weeks</SelectItem>
+                    <SelectItem value="1-month">1 Month</SelectItem>
+                    <SelectItem value="2-months">2 Months</SelectItem>
+                    <SelectItem value="3-months">3 Months</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="currentCTC">Current CTC (Optional)</Label>
+              <Input
+                id="currentCTC"
+                type="number"
+                value={data.currentCTC || ""}
+                onChange={(e) =>
+                  updateData({
+                    currentCTC: parseInt(e.target.value) || undefined,
+                  })
+                }
+                placeholder="800000"
+              />
+              <p className="text-xs text-muted-foreground">
+                Enter your current Cost to Company in INR per annum
+              </p>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="expectedCTC">
                 Expected CTC <span className="text-destructive">*</span>
@@ -145,7 +164,10 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="skills">Skills & Technologies *</Label>
+              <Label htmlFor="skills">
+                Skills & Technologies{" "}
+                <span className="text-destructive">*</span>
+              </Label>
               <Textarea
                 id="skills"
                 value={data.skills.join(", ")}
@@ -157,52 +179,6 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
               <p className="text-xs text-muted-foreground">
                 Separate skills with commas for better organization
               </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="noticePeriod">Notice Period</Label>
-              <Select
-                value={data.noticePeriod || ""}
-                onValueChange={(value) => updateData({ noticePeriod: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select notice period" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="immediate">Immediate</SelectItem>
-                  <SelectItem value="1-week">1 Week</SelectItem>
-                  <SelectItem value="2-weeks">2 Weeks</SelectItem>
-                  <SelectItem value="1-month">1 Month</SelectItem>
-                  <SelectItem value="2-months">2 Months</SelectItem>
-                  <SelectItem value="3-months">3 Months</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="linkedinProfile">LinkedIn Profile</Label>
-              <Input
-                id="linkedinProfile"
-                type="url"
-                value={data.linkedinProfile || ""}
-                onChange={(e) =>
-                  updateData({ linkedinProfile: e.target.value })
-                }
-                placeholder="https://linkedin.com/in/yourprofile"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="portfolioWebsite">Portfolio/Website</Label>
-              <Input
-                id="portfolioWebsite"
-                type="url"
-                value={data.portfolioWebsite || ""}
-                onChange={(e) =>
-                  updateData({ portfolioWebsite: e.target.value })
-                }
-                placeholder="https://yourportfolio.com"
-              />
             </div>
           </div>
         </CardContent>
