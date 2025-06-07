@@ -4,7 +4,7 @@ import { Button } from '@/components/shadcn-ui/button';
 import { Input } from '@/components/shadcn-ui/input';
 import { Label } from '@/components/shadcn-ui/label';
 import { Checkbox } from '@/components/shadcn-ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn-ui/select';
+import { CountryDropdown, Country } from '@/components/shadcn-ui/country-dropdown';
 import { ApplicationData } from '../MultiStepApplicationForm';
 import { MapPin } from 'lucide-react';
 
@@ -12,20 +12,6 @@ interface AddressInfoStepProps {
   data: ApplicationData;
   updateData: (updates: Partial<ApplicationData>) => void;
 }
-
-const countries = [
-  'United States',
-  'Canada',
-  'United Kingdom',
-  'Australia',
-  'Germany',
-  'France',
-  'India',
-  'Singapore',
-  'Netherlands',
-  'Sweden',
-  'Other'
-];
 
 const AddressInfoStep: React.FC<AddressInfoStepProps> = ({ data, updateData }) => {
   const handleCurrentAddressChange = (field: string, value: string) => {
@@ -128,21 +114,11 @@ const AddressInfoStep: React.FC<AddressInfoStepProps> = ({ data, updateData }) =
                   <Label htmlFor="currentCountry">
                     Country <span className="text-destructive">*</span>
                   </Label>
-                  <Select
-                    value={data.currentAddress?.country || ''}
-                    onValueChange={(value) => handleCurrentAddressChange('country', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countries.map((country) => (
-                        <SelectItem key={country} value={country}>
-                          {country}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <CountryDropdown
+                    defaultValue={data.currentAddress?.country || ''}
+                    onChange={(country: Country) => handleCurrentAddressChange('country', country.name)}
+                    placeholder="Select your country"
+                  />
                 </div>
               </div>
             </div>
@@ -207,21 +183,11 @@ const AddressInfoStep: React.FC<AddressInfoStepProps> = ({ data, updateData }) =
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="permanentCountry">Country</Label>
-                    <Select
-                      value={data.permanentAddress?.country || ''}
-                      onValueChange={(value) => handlePermanentAddressChange('country', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your country" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {countries.map((country) => (
-                          <SelectItem key={country} value={country}>
-                            {country}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <CountryDropdown
+                      defaultValue={data.permanentAddress?.country || ''}
+                      onChange={(country: Country) => handlePermanentAddressChange('country', country.name)}
+                      placeholder="Select your country"
+                    />
                   </div>
                 </div>
               </div>

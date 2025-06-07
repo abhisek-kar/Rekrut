@@ -114,11 +114,16 @@ export function isPublicRoute(pathname: string): boolean {
     API_ROUTES.SYSTEM.STATUS, // Status endpoint
     "/api/auth",
     "/api/public",
+    "/api/applications", // Job application submission endpoint
   ];
 
-  return publicPaths.some(path => 
-    pathname === path || pathname.startsWith(`${path}/`)
-  ) || pathname.startsWith("/jobs/") || pathname.startsWith("/apply/");
+  return (
+    publicPaths.some(
+      (path) => pathname === path || pathname.startsWith(`${path}/`)
+    ) ||
+    pathname.startsWith("/jobs/") ||
+    pathname.startsWith("/apply/")
+  );
 }
 
 /**

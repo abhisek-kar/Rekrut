@@ -100,7 +100,7 @@ export default function MultiStepApplicationForm({
   onSubmit,
   onBack,
 }: MultiStepApplicationFormProps) {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(2);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formDirty, setFormDirty] = useState(false);
   const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
@@ -293,7 +293,7 @@ export default function MultiStepApplicationForm({
       {onBack && (
         <div className="flex justify-start p-4 border-b">
           <Button
-            variant="ghost"
+            variant={"ghost"}
             onClick={handleBackToJobDetails}
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
           >

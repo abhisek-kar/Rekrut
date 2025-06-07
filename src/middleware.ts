@@ -5,7 +5,7 @@ import { isPublicRoute, isAdminRoute, isSubadminRoute, AUTH_ROUTES } from "@/lib
 import { log } from "@/lib/logger";
 
 // Define API routes patterns that still need regex matching
-const apiRoutes = [/^\/api\/(admin|subadmin|users|jobs|candidates|applications)(\/.*)?$/]; // Protected API routes
+const apiRoutes = [/^\/api\/(admin|subadmin|users|jobs|candidates)(\/.*)?$/]; // Protected API routes (applications excluded as it's public)
 const authRoutes = [/^\/api\/auth\/(session|logout)(\/.*)?$/]; // Auth API routes that need token validation
 
 export async function middleware(request: NextRequest) {
