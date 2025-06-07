@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
     // Transform to expected format
     applications = applications.map(app => ({
       _id: app._id.toString(),
-      applicationDate: app.createdAt 
+      applicationDate: app.createdAt ,
       status: app.status,
       source: app.source,
       matchingScore: app.matchScore,
