@@ -170,7 +170,7 @@ export default function Home() {
             Streamline your recruitment process with our modern applicant tracking system.
           </p>
           <Button asChild size="lg">
-            <Link href="/login">Get Started</Link>
+            <Link href="/jobs">Get Started</Link>
           </Button>
         </div>
       </div>

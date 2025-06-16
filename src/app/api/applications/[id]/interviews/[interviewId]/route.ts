@@ -52,6 +52,7 @@ export async function PUT(
           "interviews.$.videoLink": data.videoLink,
           "interviews.$.notes": data.notes,
           "interviews.$.status": data.status,
+          "interviews.$.timezone": data.timezone || "UTC",
           updatedAt: new Date(),
         },
       },

@@ -63,6 +63,7 @@ export const InterviewDialog: React.FC<InterviewDialogProps> = ({
     notes: interview?.notes || "",
     status: interview?.status || "scheduled",
     interviewers: interview?.interviewers || [],
+    timezone: interview?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
   const [interviewerEmail, setInterviewerEmail] = useState("");
 
@@ -138,69 +139,76 @@ export const InterviewDialog: React.FC<InterviewDialogProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div>
-              <Label htmlFor="dateTime">Date & Time</Label>
+              <Label htmlFor="dateTime">Interview Date & Time</Label>
               <DateTimePicker
                 value={formData.dateTime}
                 onChange={(date: Date) =>
                   setFormData((prev) => ({ ...prev, dateTime: date }))
                 }
+                showTimezone={true}
+                timezone={formData.timezone}
+                onTimezoneChange={(timezone) =>
+                  setFormData((prev) => ({ ...prev, timezone }))
+                }
+                format12Hour={true}
                 className="w-full"
               />
             </div>
-            <div>
-              <Label htmlFor="duration">Duration (minutes)</Label>
-              <Input
-                id="duration"
-                type="number"
-                value={formData.duration}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    duration: parseInt(e.target.value),
-                  }))
-                }
-                min="15"
-                step="15"
-              />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="duration">Duration (minutes)</Label>
+                <Input
+                  id="duration"
+                  type="number"
+                  value={formData.duration}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      duration: parseInt(e.target.value),
+                    }))
+                  }
+                  min="15"
+                  step="15"
+                />
+              </div>
+              <div>
+                <Label htmlFor="type">Interview Type</Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, type: value }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="video">
+                      <div className="flex items-center">
+                        <Video className="w-4 h-4 mr-2" />
+                        Video Call
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="phone">
+                      <div className="flex items-center">
+                        <Phone className="w-4 h-4 mr-2" />
+                        Phone Call
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="onsite">
+                      <div className="flex items-center">
+                        <MapPin className="w-4 h-4 mr-2" />
+                        On-site
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="type">Interview Type</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, type: value }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="video">
-                    <div className="flex items-center">
-                      <Video className="w-4 h-4 mr-2" />
-                      Video Call
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="phone">
-                    <div className="flex items-center">
-                      <Phone className="w-4 h-4 mr-2" />
-                      Phone Call
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="onsite">
-                    <div className="flex items-center">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      On-site
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
             <div>
               <Label htmlFor="status">Status</Label>
               <Select

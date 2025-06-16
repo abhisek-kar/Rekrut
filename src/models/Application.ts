@@ -49,6 +49,7 @@ export interface IApplication extends Document {
     videoLink?: string;
     notes?: string;
     status: string; // 'scheduled', 'completed', 'cancelled', 'no_show'
+    timezone?: string;
   }>;
   review?: {
     rating?: number;
@@ -168,6 +169,7 @@ const ApplicationSchema = new Schema<IApplication>(
           default: "scheduled",
           enum: ["scheduled", "completed", "cancelled", "no_show"],
         },
+        timezone: { type: String, default: "UTC" },
       },
     ],
     review: {

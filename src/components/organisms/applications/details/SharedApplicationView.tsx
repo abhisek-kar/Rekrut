@@ -46,6 +46,27 @@ import { format, formatDistanceToNow } from "date-fns";
 import { InterviewDialog, NoteDialog, ReviewDialog } from "./EditDialogs";
 import { toast } from "sonner";
 
+// Utility function to format timezone display
+const getTimezoneDisplay = (timezone?: string) => {
+  if (!timezone) return null;
+  
+  const timezoneLabels: { [key: string]: string } = {
+    "America/New_York": "ET",
+    "America/Chicago": "CT", 
+    "America/Denver": "MT",
+    "America/Los_Angeles": "PT",
+    "UTC": "UTC",
+    "Europe/London": "GMT",
+    "Europe/Paris": "CET",
+    "Asia/Tokyo": "JST",
+    "Asia/Shanghai": "CST",
+    "Asia/Kolkata": "IST",
+    "Australia/Sydney": "AEST",
+  };
+  
+  return timezoneLabels[timezone] || timezone;
+};
+
 interface ApplicationDetailsProps {
   application: any;
   loading: boolean;
@@ -371,6 +392,11 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                                   {format(
                                     new Date(interview.dateTime),
                                     "PPP 'at' p"
+                                  )}
+                                  {interview.timezone && (
+                                    <span className="ml-2 text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                                      {getTimezoneDisplay(interview.timezone)}
+                                    </span>
                                   )}
                                 </div>
                               </div>

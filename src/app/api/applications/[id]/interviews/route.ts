@@ -80,6 +80,7 @@ export async function POST(
       videoLink: data.videoLink || "",
       notes: data.notes || "",
       status: data.status || "scheduled",
+      timezone: data.timezone || "UTC",
     };
 
     // Add interview to application
