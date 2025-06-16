@@ -18,6 +18,7 @@ import {
 } from "@/components/shadcn-ui/select";
 import { DateTimePicker } from "@/components/shadcn-ui/date-time-picker";
 import { Badge } from "@/components/shadcn-ui/badge";
+import { Checkbox } from "@/components/shadcn-ui/checkbox";
 import { X, Plus, User, Video, Phone, MapPin } from "lucide-react";
 import { toast } from "sonner";
 
@@ -63,7 +64,9 @@ export const InterviewDialog: React.FC<InterviewDialogProps> = ({
     notes: interview?.notes || "",
     status: interview?.status || "scheduled",
     interviewers: interview?.interviewers || [],
-    timezone: interview?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timezone:
+      interview?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+    sendEmailNotification: true,
   });
   const [interviewerEmail, setInterviewerEmail] = useState("");
 
@@ -100,24 +103,27 @@ export const InterviewDialog: React.FC<InterviewDialogProps> = ({
     }
   };
 
-  const addInterviewer = async () => {
+  const addInterviewer = () => {
     if (!interviewerEmail.trim()) return;
 
-    try {
-      const response = await fetch(
-        `/api/users/search?email=${interviewerEmail}`
-      );
-      if (!response.ok) throw new Error("User not found");
-
-      const user = await response.json();
-      setFormData((prev) => ({
-        ...prev,
-        interviewers: [...prev.interviewers, user],
-      }));
-      setInterviewerEmail("");
-    } catch (error) {
-      toast.error("Failed to add interviewer");
+    // Simple email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(interviewerEmail.trim())) {
+      toast.error("Please enter a valid email address");
+      return;
     }
+
+    // Check if email already exists
+    if (formData.interviewers.includes(interviewerEmail.trim())) {
+      toast.error("This interviewer is already added");
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      interviewers: [...prev.interviewers, interviewerEmail.trim()],
+    }));
+    setInterviewerEmail("");
   };
 
   const removeInterviewer = (index: number) => {
@@ -156,7 +162,7 @@ export const InterviewDialog: React.FC<InterviewDialogProps> = ({
                 className="w-full"
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="duration">Duration (minutes)</Label>
@@ -277,14 +283,14 @@ export const InterviewDialog: React.FC<InterviewDialogProps> = ({
               </Button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {formData.interviewers.map((interviewer: any, index: number) => (
+              {formData.interviewers.map((email: string, index: number) => (
                 <Badge
                   key={index}
                   variant="outline"
                   className="flex items-center gap-1"
                 >
                   <User className="w-3 h-3" />
-                  {interviewer.firstName} {interviewer.lastName}
+                  {email}
                   <button
                     type="button"
                     onClick={() => removeInterviewer(index)}
@@ -309,6 +315,28 @@ export const InterviewDialog: React.FC<InterviewDialogProps> = ({
               rows={3}
             />
           </div>
+
+          {/* Email Notification Checkbox */}
+          {formData.interviewers.length > 0 && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="sendEmailNotification"
+                checked={formData.sendEmailNotification}
+                onCheckedChange={(checked) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    sendEmailNotification: checked as boolean,
+                  }))
+                }
+              />
+              <Label
+                htmlFor="sendEmailNotification"
+                className="text-sm font-normal cursor-pointer"
+              >
+                Send email notifications to interviewers
+              </Label>
+            </div>
+          )}
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>

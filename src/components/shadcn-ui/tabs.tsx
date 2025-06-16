@@ -14,7 +14,7 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground",
+      "inline-flex h-11 items-center justify-center bg-transparent text-muted-foreground border-b border-border/20 relative backdrop-blur-sm",
       className
     )}
     {...props}
@@ -29,7 +29,7 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow",
+      "inline-flex items-center justify-center whitespace-nowrap px-6 py-3 text-sm font-semibold ring-offset-background transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:text-foreground hover:bg-muted/20 rounded-t-lg data-[state=active]:text-foreground data-[state=active]:bg-gradient-to-b data-[state=active]:from-background/80 data-[state=active]:to-transparent relative after:absolute after:bottom-0 after:left-1/2 after:right-1/2 after:h-1 after:bg-gradient-to-r after:from-primary/80 after:via-primary after:to-primary/80 after:transition-all after:duration-300 after:ease-out after:rounded-t-md after:shadow-lg after:shadow-primary/20 data-[state=active]:after:left-0 data-[state=active]:after:right-0 hover:after:left-2 hover:after:right-2",
       className
     )}
     {...props}
@@ -44,7 +44,7 @@ const TabsContent = React.forwardRef<
   <TabsPrimitive.Content
     ref={ref}
     className={cn(
-      "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      "mt-6 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 animate-in fade-in-0 slide-in-from-bottom-2 duration-300",
       className
     )}
     {...props}

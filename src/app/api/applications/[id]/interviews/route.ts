@@ -6,6 +6,9 @@ import { authOptions } from "@/lib/auth/nextauth";
 import Application from "@/models/Application";
 import User from "@/models/User";
 import Activity from "@/models/Activity";
+import { sendEmail } from "@/lib/email";
+import { getEmailTemplate } from "@/lib/email/templates";
+import { format } from "date-fns";
 
 // POST: Add a new interview to an application
 export async function POST(
@@ -49,25 +52,21 @@ export async function POST(
       );
     }
 
-    // Validate interviewers if provided
+    // Validate interviewers (now just email addresses)
     let validInterviewers = [];
     if (data.interviewers && data.interviewers.length > 0) {
-      const interviewerIds = data.interviewers.map((interviewer: any) =>
-        typeof interviewer === "string" ? interviewer : interviewer._id
+      // Since we're now using email addresses directly, just validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      validInterviewers = data.interviewers.filter((email: string) =>
+        emailRegex.test(email)
       );
 
-      const users = await User.find({
-        _id: { $in: interviewerIds },
-      });
-
-      if (users.length !== interviewerIds.length) {
+      if (validInterviewers.length !== data.interviewers.length) {
         return NextResponse.json(
-          { error: "One or more interviewers not found" },
+          { error: "One or more invalid email addresses" },
           { status: 400 }
         );
       }
-
-      validInterviewers = interviewerIds;
     }
 
     // Create interview object
@@ -91,10 +90,56 @@ export async function POST(
         $set: { updatedAt: new Date() },
       },
       { new: true }
-    ).populate({
-      path: "interviews.interviewers",
-      select: "firstName lastName email",
-    });
+    ).populate([
+      { path: "candidate", select: "firstName lastName email" },
+      { path: "job", select: "title company" },
+    ]);
+
+    // Send email notifications if requested
+    if (data.sendEmailNotification && validInterviewers.length > 0) {
+      try {
+        const candidate = updatedApplication?.candidate as any;
+        const job = updatedApplication?.job as any;
+
+        if (candidate && job) {
+          const interviewDateTime = format(
+            new Date(data.dateTime),
+            "PPP 'at' p"
+          );
+          const interviewType =
+            data.type.charAt(0).toUpperCase() + data.type.slice(1);
+
+          // Send notification to each interviewer
+          for (const email of validInterviewers) {
+            const template = getEmailTemplate("interview_notification", {
+              interviewerEmail: email,
+              candidateName: `${candidate.firstName} ${candidate.lastName}`,
+              jobTitle: job.title,
+              interviewDateTime,
+              interviewType,
+              duration: data.duration,
+              location: data.location,
+              videoLink: data.videoLink,
+              timezone: data.timezone || "UTC",
+              notes: data.notes,
+              companyName: job.company,
+            });
+
+            if (template) {
+              await sendEmail({
+                to: email,
+                subject: template.subject,
+                html: template.html,
+                text: template.text,
+              });
+            }
+          }
+        }
+      } catch (emailError) {
+        console.error("Error sending interview notifications:", emailError);
+        // Don't fail the interview creation if email fails
+      }
+    }
 
     // Log activity
     await Activity.create({

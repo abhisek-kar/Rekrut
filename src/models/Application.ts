@@ -44,7 +44,7 @@ export interface IApplication extends Document {
     dateTime: Date;
     duration: number; // in minutes
     type: string; // 'phone', 'video', 'onsite'
-    interviewers: mongoose.Types.ObjectId[];
+    interviewers: string[]; // Email addresses instead of ObjectIds
     location?: string;
     videoLink?: string;
     notes?: string;
@@ -159,7 +159,7 @@ const ApplicationSchema = new Schema<IApplication>(
           required: true,
           enum: ["phone", "video", "onsite"],
         },
-        interviewers: [{ type: Schema.Types.ObjectId, ref: "User" }],
+        interviewers: [{ type: String }], // Email addresses
         location: { type: String },
         videoLink: { type: String },
         notes: { type: String },

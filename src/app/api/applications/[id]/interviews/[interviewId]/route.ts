@@ -44,10 +44,7 @@ export async function PUT(
             : undefined,
           "interviews.$.duration": data.duration,
           "interviews.$.type": data.type,
-          "interviews.$.interviewers": data.interviewers?.map(
-            (interviewer: any) =>
-              typeof interviewer === "string" ? interviewer : interviewer._id
-          ),
+          "interviews.$.interviewers": data.interviewers || [],
           "interviews.$.location": data.location,
           "interviews.$.videoLink": data.videoLink,
           "interviews.$.notes": data.notes,
@@ -57,10 +54,7 @@ export async function PUT(
         },
       },
       { new: true }
-    ).populate({
-      path: "interviews.interviewers",
-      select: "firstName lastName email",
-    });
+    );
 
     if (!application) {
       return NextResponse.json(
