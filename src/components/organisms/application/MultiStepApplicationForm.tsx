@@ -61,7 +61,9 @@ export interface ApplicationData {
   experienceLevel: string;
   skills: string[];
   currentCTC?: number;
+  currentCTCCurrency?: string;
   expectedCTC?: number;
+  expectedCTCCurrency?: string;
   noticePeriod?: string;
 
   // Documents

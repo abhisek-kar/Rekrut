@@ -14,9 +14,12 @@ export interface ApplicationType {
     currentJobTitle?: string;
     currentCompany?: string;
     employmentStatus?: string;
+    experienceLevel?: string;
     yearsOfExperience?: number;
     currentSalary?: number;
+    currentSalaryCurrency?: string;
     expectedSalary?: number;
+    expectedSalaryCurrency?: string;
     noticePeriod?: string;
     availabilityToStart?: string;
     preferredWorkArrangement?: string;
@@ -33,6 +36,13 @@ export interface ApplicationType {
     }>;
     certifications?: string[];
     currentAddress?: {
+      street?: string;
+      city?: string;
+      state?: string;
+      postalCode?: string;
+      country?: string;
+    };
+    permanentAddress?: {
       street?: string;
       city?: string;
       state?: string;

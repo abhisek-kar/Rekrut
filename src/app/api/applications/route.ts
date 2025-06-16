@@ -4,7 +4,15 @@ import dbConnect from "@/lib/db/connect";
 import Application from "@/models/Application";
 import Job from "@/models/Job";
 import { randomBytes } from "crypto";
-import { uploadToS3, generateS3Key } from "@/lib/aws/s3/";
+import { uploadToS3 } from "@/lib/aws/s3/index";
+
+// Helper function to generate S3 keys
+function generateS3Key(directory: string, fileName: string): string {
+  const timestamp = Date.now();
+  const uniqueId = Math.random().toString(36).substring(2, 10);
+  const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, "_");
+  return `${directory}/${timestamp}-${uniqueId}-${sanitizedFileName}`;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -252,6 +260,26 @@ export async function POST(request: NextRequest) {
       "Received application data:",
       JSON.stringify(applicationData, null, 2)
     );
+    console.log("Current Address:", applicationData.currentAddress);
+    console.log("Permanent Address:", applicationData.permanentAddress);
+    console.log("Is Same as Permanent:", applicationData.isSameAsPermanent);
+    console.log("Professional Details:", {
+      currentRole: applicationData.currentRole,
+      currentCompany: applicationData.currentCompany,
+      experienceLevel: applicationData.experienceLevel,
+      currentCTC: applicationData.currentCTC,
+      currentCTCCurrency: applicationData.currentCTCCurrency,
+      expectedCTC: applicationData.expectedCTC,
+      expectedCTCCurrency: applicationData.expectedCTCCurrency,
+      noticePeriod: applicationData.noticePeriod,
+      skills: applicationData.skills,
+    });
+    console.log("Preferences:", {
+      availableStartDate: applicationData.availableStartDate,
+      willingToRelocate: applicationData.willingToRelocate,
+      preferredWorkType: applicationData.preferredWorkType,
+      additionalMessage: applicationData.additionalMessage,
+    });
 
     // Validate required fields
     if (
@@ -378,8 +406,11 @@ export async function POST(request: NextRequest) {
         currentJobTitle: applicationData.currentRole,
         currentCompany: applicationData.currentCompany,
         employmentStatus: "employed", // Default value
+        experienceLevel: applicationData.experienceLevel,
         currentSalary: applicationData.currentCTC,
+        currentSalaryCurrency: applicationData.currentCTCCurrency || "INR",
         expectedSalary: applicationData.expectedCTC,
+        expectedSalaryCurrency: applicationData.expectedCTCCurrency || "INR",
         noticePeriod: applicationData.noticePeriod,
         availabilityToStart: applicationData.availableStartDate,
         preferredWorkArrangement: applicationData.preferredWorkType,
@@ -387,6 +418,9 @@ export async function POST(request: NextRequest) {
           applicationData.skills?.map((skill: string) => ({ name: skill })) ||
           [],
         currentAddress: applicationData.currentAddress,
+        permanentAddress: applicationData.isSameAsPermanent
+          ? applicationData.currentAddress
+          : applicationData.permanentAddress,
         willingToRelocate: applicationData.willingToRelocate,
         additionalComments: applicationData.additionalMessage,
       },

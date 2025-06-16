@@ -15,9 +15,12 @@ export interface IApplication extends Document {
     currentJobTitle?: string;
     currentCompany?: string;
     employmentStatus?: string;
+    experienceLevel?: string; // e.g., 'entry', 'mid', 'senior', 'lead'
     yearsOfExperience?: number;
     currentSalary?: number;
+    currentSalaryCurrency?: string; // e.g., 'INR', 'USD', 'EUR'
     expectedSalary?: number;
+    expectedSalaryCurrency?: string; // e.g., 'INR', 'USD', 'EUR'
     noticePeriod?: string;
     availabilityToStart?: Date;
     preferredWorkArrangement?: string;
@@ -38,6 +41,13 @@ export interface IApplication extends Document {
 
     // Address
     currentAddress?: {
+      street?: string;
+      city?: string;
+      state?: string;
+      postalCode?: string;
+      country?: string;
+    };
+    permanentAddress?: {
       street?: string;
       city?: string;
       state?: string;
@@ -141,9 +151,12 @@ const ApplicationSchema = new Schema<IApplication>(
       currentJobTitle: { type: String },
       currentCompany: { type: String },
       employmentStatus: { type: String },
+      experienceLevel: { type: String },
       yearsOfExperience: { type: Number },
       currentSalary: { type: Number },
+      currentSalaryCurrency: { type: String, default: 'INR' },
       expectedSalary: { type: Number },
+      expectedSalaryCurrency: { type: String, default: 'INR' },
       noticePeriod: { type: String },
       availabilityToStart: { type: Date },
       preferredWorkArrangement: { type: String },
@@ -168,6 +181,13 @@ const ApplicationSchema = new Schema<IApplication>(
 
       // Address
       currentAddress: {
+        street: { type: String },
+        city: { type: String },
+        state: { type: String },
+        postalCode: { type: String },
+        country: { type: String },
+      },
+      permanentAddress: {
         street: { type: String },
         city: { type: String },
         state: { type: String },
