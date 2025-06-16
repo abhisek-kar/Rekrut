@@ -7,7 +7,7 @@ import { Button } from "@/components/shadcn-ui/button";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function SubadminApplicationDetailsPage({
+export default function AdminApplicationDetailsPage({
   params,
 }: {
   params: { id: string };
@@ -80,7 +80,7 @@ export default function SubadminApplicationDetailsPage({
         <SharedApplicationView
           application={application?.application || null}
           loading={loading}
-          userRole="subadmin"
+          userRole="admin"
           onRefresh={fetchApplication}
         />
       </main>

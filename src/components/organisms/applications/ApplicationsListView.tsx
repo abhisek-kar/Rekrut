@@ -45,7 +45,6 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { SectionLoader } from "@/components/atoms/loader";
-import { PageHeader } from "@/components/shared/PageHeader";
 import { ApplicationsPagination } from "./ApplicationsPagination";
 import { ApplicationFilters } from "./filters/ApplicationFilters";
 import {
@@ -391,42 +390,11 @@ export function ApplicationsListView({
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <PageHeader
-        title="Applications Management"
-        description={`Manage all job applications ${
-          userRole === "admin" ? "across the platform" : "for your jobs"
-        }`}
-        actions={
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Users className="w-4 h-4" />
-              <span>Total: {pagination.total} applications</span>
-            </div>
-            {selectedApplications.length > 0 && (
-              <div className="flex items-center gap-2">
-                <Badge variant="secondary">
-                  {selectedApplications.length} selected
-                </Badge>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedApplications([])}
-                >
-                  Clear selection
-                </Button>
-              </div>
-            )}
-          </div>
-        }
-      />
-
-      <main className="flex-1 p-4 md:p-6">
-        <div className="flex flex-col space-y-6">
-          {/* Top Controls Bar */}
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between bg-background rounded-lg">
-            {/* Left section - Search and Quick Actions */}
-            <div className="flex flex-col sm:flex-row gap-3 flex-1 w-full lg:w-auto">
+    <div className="flex flex-col space-y-6">
+      {/* Top Controls Bar */}
+      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between bg-background rounded-lg">
+        {/* Left section - Search and Quick Actions */}
+        <div className="flex flex-col sm:flex-row gap-3 flex-1 w-full lg:w-auto">
               {/* Search */}
               <div className="relative w-full sm:w-80">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -663,28 +631,26 @@ export function ApplicationsListView({
               />
             )}
           </div>
-        </div>
 
-        {/* Application Action Dialogs */}
-        <ApplicationActionDialogs
-          showStatusDialog={applicationActions.showStatusDialog}
-          setShowStatusDialog={applicationActions.setShowStatusDialog}
-          showAssignDialog={applicationActions.showAssignDialog}
-          setShowAssignDialog={applicationActions.setShowAssignDialog}
-          showNoteDialog={applicationActions.showNoteDialog}
-          setShowNoteDialog={applicationActions.setShowNoteDialog}
-          showArchiveDialog={applicationActions.showArchiveDialog}
-          setShowArchiveDialog={applicationActions.setShowArchiveDialog}
-          showDeleteDialog={applicationActions.showDeleteDialog}
-          setShowDeleteDialog={applicationActions.setShowDeleteDialog}
-          applicationCount={selectedApplications.length}
-          isBulkAction={selectedApplications.length > 1}
-          actionData={applicationActions.actionData}
-          setActionData={applicationActions.setActionData}
-          onExecute={applicationActions.executeAction}
-          users={applicationActions.users}
-        />
-      </main>
-    </div>
+          {/* Application Action Dialogs */}
+          <ApplicationActionDialogs
+            showStatusDialog={applicationActions.showStatusDialog}
+            setShowStatusDialog={applicationActions.setShowStatusDialog}
+            showAssignDialog={applicationActions.showAssignDialog}
+            setShowAssignDialog={applicationActions.setShowAssignDialog}
+            showNoteDialog={applicationActions.showNoteDialog}
+            setShowNoteDialog={applicationActions.setShowNoteDialog}
+            showArchiveDialog={applicationActions.showArchiveDialog}
+            setShowArchiveDialog={applicationActions.setShowArchiveDialog}
+            showDeleteDialog={applicationActions.showDeleteDialog}
+            setShowDeleteDialog={applicationActions.setShowDeleteDialog}
+            applicationCount={selectedApplications.length}
+            isBulkAction={selectedApplications.length > 1}
+            actionData={applicationActions.actionData}
+            setActionData={applicationActions.setActionData}
+            onExecute={applicationActions.executeAction}
+            users={applicationActions.users}
+          />
+        </div>
   );
 }
