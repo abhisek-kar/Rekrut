@@ -30,10 +30,7 @@ export interface ApplicationType {
       graduationYear?: number;
       description?: string;
     }>;
-    skills?: Array<{
-      name: string;
-      proficiency?: string;
-    }>;
+    skills?: string[];
     certifications?: string[];
     currentAddress?: {
       street?: string;

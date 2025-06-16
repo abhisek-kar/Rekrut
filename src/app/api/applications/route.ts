@@ -414,9 +414,7 @@ export async function POST(request: NextRequest) {
         noticePeriod: applicationData.noticePeriod,
         availabilityToStart: applicationData.availableStartDate,
         preferredWorkArrangement: applicationData.preferredWorkType,
-        skills:
-          applicationData.skills?.map((skill: string) => ({ name: skill })) ||
-          [],
+        skills: applicationData.skills || [],
         currentAddress: applicationData.currentAddress,
         permanentAddress: applicationData.isSameAsPermanent
           ? applicationData.currentAddress
@@ -437,13 +435,8 @@ export async function POST(request: NextRequest) {
       additionalDocuments:
         additionalDocuments.length > 0 ? additionalDocuments : undefined,
       source: "website",
-      answers: {
-        experienceLevel: applicationData.experienceLevel,
-        additionalMessage: applicationData.additionalMessage,
-        availableStartDate: applicationData.availableStartDate,
-        willingToRelocate: applicationData.willingToRelocate,
-        preferredWorkType: applicationData.preferredWorkType,
-      },
+      // Only store custom screening question answers here, not standard form fields
+      answers: {},
     });
 
     // Debug: Log the application object before saving

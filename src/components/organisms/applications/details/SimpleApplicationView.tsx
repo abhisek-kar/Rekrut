@@ -43,7 +43,7 @@ interface ApplicationDetailsProps {
   onRefresh?: () => void;
 }
 
-export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
+export const SimpleApplicationView: React.FC<ApplicationDetailsProps> = ({
   application,
   loading,
   userRole,

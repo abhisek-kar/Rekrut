@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import dbConnect from "@/lib/db/connect";
 import Application from "@/models/Application";
-import Candidate from "@/models/Candidate";
 import Job from "@/models/Job";
 import User from "@/models/User";
 
@@ -12,6 +11,10 @@ export async function GET(
 ) {
   try {
     await dbConnect();
+    
+    // Ensure all models are registered
+    const JobModel = Job;
+    const UserModel = User;
 
     const { id } = params;
 
@@ -23,34 +26,8 @@ export async function GET(
       );
     }
 
-    // Find application with all related data
-    const application = await Application.findById(id)
-      .populate({
-        path: "candidate",
-        select:
-          "firstName lastName email phone profilePhoto address currentPosition employmentHistory education skills",
-      })
-      .populate({
-        path: "job",
-        select: "title company department location",
-      })
-      .populate({
-        path: "notes.createdBy",
-        select: "firstName lastName",
-      })
-      .populate({
-        path: "interviews.interviewers",
-        select: "firstName lastName email",
-      })
-      .populate({
-        path: "review.reviewedBy",
-        select: "firstName lastName",
-      })
-      .populate({
-        path: "statusHistory.updatedBy",
-        select: "firstName lastName",
-      })
-      .lean();
+    // Find application without population first to debug
+    const application = await Application.findById(id).lean();
 
     if (!application) {
       return NextResponse.json(
@@ -62,39 +39,17 @@ export async function GET(
     // Transform the data for frontend consumption
     const transformedApplication = {
       _id: application._id.toString(),
-      applicationDate: application.createdAt,
+      createdAt: application.createdAt,
+      updatedAt: application.updatedAt,
       status: application.status,
       source: application.source,
-      matchingScore: application.matchScore,
+      matchScore: application.matchScore,
 
-      // Candidate details
-      candidate: {
-        _id: (application.candidate as any)._id.toString(),
-        firstName: (application.candidate as any).firstName,
-        lastName: (application.candidate as any).lastName,
-        email: (application.candidate as any).email,
-        phone: (application.candidate as any).phone,
-        profilePhoto: (application.candidate as any).profilePhoto,
-        address: (application.candidate as any).address,
-        currentPosition: (application.candidate as any).currentPosition,
-        employmentHistory: (application.candidate as any).employmentHistory,
-        education: (application.candidate as any).education,
-        skills: (application.candidate as any).skills,
-      },
+      // Candidate details (embedded data, no separate _id)
+      candidate: application.candidate,
 
       // Job details
-      job: {
-        _id: (application.job as any)._id.toString(),
-        title: (application.job as any).title,
-        company: (application.job as any).company,
-        department: (application.job as any).department,
-        location: (application.job as any).location,
-      },
-
-      // Documents
-      resume: application.resume,
-      coverLetter: application.coverLetter,
-      additionalDocuments: application.additionalDocuments,
+      job: application.job,
 
       // Status history
       statusHistory: application.statusHistory?.map((history: any) => ({
@@ -159,6 +114,11 @@ export async function GET(
 
       // Match details
       matchDetails: application.matchDetails,
+
+      // File attachments
+      resume: application.resume,
+      coverLetter: application.coverLetter,
+      additionalDocuments: application.additionalDocuments,
 
       // Custom fields and answers
       customFields: application.customFields,

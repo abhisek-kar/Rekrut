@@ -33,10 +33,7 @@ export interface IApplication extends Document {
       graduationYear?: number;
       description?: string;
     }>;
-    skills?: Array<{
-      name: string;
-      proficiency?: string;
-    }>;
+    skills?: string[];
     certifications?: string[];
 
     // Address
@@ -171,12 +168,7 @@ const ApplicationSchema = new Schema<IApplication>(
           description: { type: String },
         },
       ],
-      skills: [
-        {
-          name: { type: String },
-          proficiency: { type: String },
-        },
-      ],
+      skills: [{ type: String }],
       certifications: [{ type: String }],
 
       // Address
