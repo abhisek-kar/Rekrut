@@ -424,6 +424,271 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
               </CardContent>
             </Card>
           )}
+
+          {/* Interviews */}
+          {application.interviews && application.interviews.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Interviews ({application.interviews.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {application.interviews.map((interview: any, index: number) => (
+                  <div key={interview._id || index} className="border rounded-lg p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h4 className="font-semibold text-lg">{interview.title || "Interview"}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {interview.type && (
+                            <Badge variant="outline" className="mr-2">
+                              {interview.type.replace('_', ' ').toUpperCase()}
+                            </Badge>
+                          )}
+                          {interview.status && (
+                            <Badge variant={interview.status === 'completed' ? 'default' : interview.status === 'cancelled' ? 'destructive' : 'secondary'}>
+                              {interview.status.toUpperCase()}
+                            </Badge>
+                          )}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingItem(interview);
+                            setShowInterviewDialog(true);
+                          }}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => deleteInterview(interview._id)}
+                          disabled={actionLoading}
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      {interview.scheduledDate && (
+                        <div>
+                          <p className="text-muted-foreground">Date & Time</p>
+                          <p className="font-medium">
+                            {format(new Date(interview.scheduledDate), "MMM d, yyyy 'at' h:mm a")}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {interview.duration && (
+                        <div>
+                          <p className="text-muted-foreground">Duration</p>
+                          <p className="font-medium">{interview.duration} minutes</p>
+                        </div>
+                      )}
+                      
+                      {interview.interviewers && interview.interviewers.length > 0 && (
+                        <div className="md:col-span-2">
+                          <p className="text-muted-foreground">Interviewers</p>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {interview.interviewers.map((interviewer: any, idx: number) => (
+                              <Badge key={idx} variant="secondary">
+                                {interviewer.name || interviewer.email}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {interview.meetingLink && (
+                        <div className="md:col-span-2">
+                          <p className="text-muted-foreground">Meeting Link</p>
+                          <Button variant="link" size="sm" className="h-auto p-0" asChild>
+                            <a href={interview.meetingLink} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="w-4 h-4 mr-1" />
+                              Join Meeting
+                            </a>
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {interview.notes && (
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="text-muted-foreground text-sm mb-1">Notes</p>
+                        <p className="text-sm">{interview.notes}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Notes */}
+          {application.notes && application.notes.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" />
+                  Notes ({application.notes.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {application.notes.map((note: any, index: number) => (
+                  <div key={note._id || index} className="border rounded-lg p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm text-muted-foreground">
+                          {note.author?.name || note.author?.email || "Anonymous"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {note.createdAt ? format(new Date(note.createdAt), "MMM d, yyyy 'at' h:mm a") : ""}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingItem(note);
+                            setShowNoteDialog(true);
+                          }}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => deleteNote(note._id)}
+                          disabled={actionLoading}
+                        >
+                          ×
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-2">
+                      <p className="text-sm whitespace-pre-wrap">{note.content}</p>
+                    </div>
+                    
+                    {note.isPrivate && (
+                      <Badge variant="outline" className="mt-2">
+                        Private Note
+                      </Badge>
+                    )}
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Review */}
+          {application.review && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Star className="w-5 h-5" />
+                  Review
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-5 h-5 ${
+                              star <= (application.review.rating || 0)
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="font-semibold text-lg">
+                        {application.review.rating || 0}/5
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowReviewDialog(true)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={deleteReview}
+                        disabled={actionLoading}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Reviewer</p>
+                      <p className="font-medium">
+                        {application.review.reviewer?.name || application.review.reviewer?.email || "Anonymous"}
+                      </p>
+                    </div>
+                    
+                    {application.review.summary && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Summary</p>
+                        <p className="text-sm">{application.review.summary}</p>
+                      </div>
+                    )}
+                    
+                    {application.review.strengths && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Strengths</p>
+                        <p className="text-sm">{application.review.strengths}</p>
+                      </div>
+                    )}
+                    
+                    {application.review.weaknesses && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Areas for Improvement</p>
+                        <p className="text-sm">{application.review.weaknesses}</p>
+                      </div>
+                    )}
+                    
+                    {application.review.recommendation && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Recommendation</p>
+                        <Badge variant={
+                          application.review.recommendation === 'hire' ? 'default' :
+                          application.review.recommendation === 'reject' ? 'destructive' : 'secondary'
+                        }>
+                          {application.review.recommendation.toUpperCase()}
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    {application.review.createdAt && (
+                      <div className="pt-2 border-t">
+                        <p className="text-xs text-muted-foreground">
+                          Reviewed on {format(new Date(application.review.createdAt), "MMM d, yyyy 'at' h:mm a")}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Sidebar */}
