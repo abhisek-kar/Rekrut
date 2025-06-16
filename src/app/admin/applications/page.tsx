@@ -6,10 +6,5 @@ import { ApplicationsListView } from "@/components/organisms/applications/Applic
 export default function AdminApplicationsPage() {
   const { user } = useAuth();
 
-  return (
-    <ApplicationsListView 
-      userRole="admin"
-      userId={user?.id}
-    />
-  );
+  return <ApplicationsListView userRole="admin" userId={user?.id} />;
 }

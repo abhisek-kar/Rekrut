@@ -21,10 +21,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/shadcn-ui/dropdown-menu";
-import { 
-  Search, 
-  SlidersHorizontal, 
-  Download, 
+import {
+  Search,
+  SlidersHorizontal,
+  Download,
   MoreHorizontal,
   AlignJustify,
   TableIcon,
@@ -48,7 +48,10 @@ import { SectionLoader } from "@/components/atoms/loader";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { ApplicationsPagination } from "./ApplicationsPagination";
 import { ApplicationFilters } from "./filters/ApplicationFilters";
-import { ApplicationsTableView, ApplicationsGridView } from "./ApplicationViewComponents";
+import {
+  ApplicationsTableView,
+  ApplicationsGridView,
+} from "./ApplicationViewComponents";
 import { ApplicationActionDialogs } from "./dialogs/ApplicationActionDialogs";
 import { useApplicationActions } from "@/hooks/useApplicationActions";
 
@@ -126,7 +129,10 @@ interface FilterOptions {
   source: string;
   dateRange: string;
   assignedTo: string;
-  score: string;
+  matchScore: string;
+  interviewStatus: string;
+  rating: string;
+  hasReview: string;
 }
 
 interface ApplicationsListViewProps {
@@ -143,15 +149,19 @@ export function ApplicationsListView({
   jobId,
 }: ApplicationsListViewProps) {
   const router = useRouter();
-  
+
   // Derive API endpoint and view base URL from user role
-  const apiEndpoint = userRole === "admin" ? "/api/applications" : "/api/subadmin/applications";
-  const viewBaseUrl = userRole === "admin" ? "/admin/applications" : "/subadmin/applications";
+  const apiEndpoint =
+    userRole === "admin" ? "/api/applications" : "/api/subadmin/applications";
+  const viewBaseUrl =
+    userRole === "admin" ? "/admin/applications" : "/subadmin/applications";
 
   // State management
   const [applications, setApplications] = useState<ApplicationItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedApplications, setSelectedApplications] = useState<string[]>([]);
+  const [selectedApplications, setSelectedApplications] = useState<string[]>(
+    []
+  );
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
 
   // Filter and search state
@@ -179,7 +189,10 @@ export function ApplicationsListView({
     source: "all",
     dateRange: "all",
     assignedTo: "all",
-    score: "all",
+    matchScore: "all",
+    interviewStatus: "all",
+    rating: "all",
+    hasReview: "all",
   });
 
   // Pagination
@@ -202,15 +215,17 @@ export function ApplicationsListView({
   // Selection handlers
   const handleSelectApplication = (applicationId: string, checked: boolean) => {
     if (checked) {
-      setSelectedApplications(prev => [...prev, applicationId]);
+      setSelectedApplications((prev) => [...prev, applicationId]);
     } else {
-      setSelectedApplications(prev => prev.filter(id => id !== applicationId));
+      setSelectedApplications((prev) =>
+        prev.filter((id) => id !== applicationId)
+      );
     }
   };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedApplications(applications.map(app => app._id));
+      setSelectedApplications(applications.map((app) => app._id));
     } else {
       setSelectedApplications([]);
     }
@@ -302,29 +317,35 @@ export function ApplicationsListView({
   const getStatusColor = (status: string) => {
     const statusColors = {
       applied: "bg-blue-100 text-blue-800",
-      screening: "bg-yellow-100 text-yellow-800", 
+      screening: "bg-yellow-100 text-yellow-800",
       interview_scheduled: "bg-purple-100 text-purple-800",
       interviewed: "bg-orange-100 text-orange-800",
       offered: "bg-green-100 text-green-800",
       hired: "bg-emerald-100 text-emerald-800",
       rejected: "bg-red-100 text-red-800",
     };
-    return statusColors[status as keyof typeof statusColors] || "bg-gray-100 text-gray-800";
+    return (
+      statusColors[status as keyof typeof statusColors] ||
+      "bg-gray-100 text-gray-800"
+    );
   };
 
   const getStatusLabel = (status: string) => {
-    return status.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase());
+    return status.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   // Reset filters
   const resetFilters = () => {
     setFilters({
       status: "all",
-      job: "all", 
+      job: "all",
       source: "all",
       dateRange: "all",
       assignedTo: "all",
-      score: "all",
+      matchScore: "all",
+      interviewStatus: "all",
+      rating: "all",
+      hasReview: "all",
     });
     setSearchTerm("");
     setCurrentPage(1);
@@ -373,7 +394,9 @@ export function ApplicationsListView({
     <div className="flex flex-col min-h-screen">
       <PageHeader
         title="Applications Management"
-        description={`Manage all job applications ${userRole === 'admin' ? 'across the platform' : 'for your jobs'}`}
+        description={`Manage all job applications ${
+          userRole === "admin" ? "across the platform" : "for your jobs"
+        }`}
         actions={
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -400,215 +423,267 @@ export function ApplicationsListView({
 
       <main className="flex-1 p-4 md:p-6">
         <div className="flex flex-col space-y-6">
-      {/* Top Controls Bar */}
-      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between bg-background rounded-lg">
-        {/* Left section - Search and Quick Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 flex-1 w-full lg:w-auto">
-          {/* Search */}
-          <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search by candidate name or email..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+          {/* Top Controls Bar */}
+          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between bg-background rounded-lg">
+            {/* Left section - Search and Quick Actions */}
+            <div className="flex flex-col sm:flex-row gap-3 flex-1 w-full lg:w-auto">
+              {/* Search */}
+              <div className="relative w-full sm:w-80">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search by candidate name or email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
 
-          {/* Sort dropdown */}
-          <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
-            const [field, order] = value.split("-");
-            setSortBy(field);
-            setSortOrder(order);
-            setCurrentPage(1);
-          }}>
-            <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Sort by..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="applicationDate-desc">Newest First</SelectItem>
-              <SelectItem value="applicationDate-asc">Oldest First</SelectItem>
-              <SelectItem value="candidate.lastName-asc">Candidate A-Z</SelectItem>
-              <SelectItem value="candidate.lastName-desc">Candidate Z-A</SelectItem>
-              <SelectItem value="status-asc">Status A-Z</SelectItem>
-              <SelectItem value="job.title-asc">Job Title A-Z</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Right section - View Controls and Actions */}
-        <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-end">
-          {/* Selection indicator */}
-          {selectedApplications.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="px-3 py-1">
-                {selectedApplications.length} selected
-              </Badge>
-            </div>
-          )}
-
-          {/* Filter toggle */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-            className={cn(
-              "transition-colors p-2 relative",
-              showFilters && "bg-muted border-primary text-primary"
-            )}
-          >
-            <SlidersHorizontal className="h-4 w-4 mr-2" />
-            Filters
-            {getAppliedFiltersCount() > 0 && (
-              <Badge
-                variant="secondary"
-                className="ml-2 h-5 w-5 p-0 text-xs flex items-center justify-center bg-foreground text-background rounded-full"
+              {/* Sort dropdown */}
+              <Select
+                value={`${sortBy}-${sortOrder}`}
+                onValueChange={(value) => {
+                  const [field, order] = value.split("-");
+                  setSortBy(field);
+                  setSortOrder(order);
+                  setCurrentPage(1);
+                }}
               >
-                {getAppliedFiltersCount()}
-              </Badge>
-            )}
-          </Button>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="Sort by..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="applicationDate-desc">
+                    Newest First
+                  </SelectItem>
+                  <SelectItem value="applicationDate-asc">
+                    Oldest First
+                  </SelectItem>
+                  <SelectItem value="candidate.lastName-asc">
+                    Candidate A-Z
+                  </SelectItem>
+                  <SelectItem value="candidate.lastName-desc">
+                    Candidate Z-A
+                  </SelectItem>
+                  <SelectItem value="status-asc">Status A-Z</SelectItem>
+                  <SelectItem value="job.title-asc">Job Title A-Z</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Enhanced View mode toggle */}
-          <div className="flex items-center gap-2 p-1 border rounded-lg bg-muted">
-            {[
-              { mode: "grid" as ViewMode, label: "Grid", Icon: TableIcon },
-              { mode: "table" as ViewMode, label: "List", Icon: AlignJustify },
-            ].map(({ mode, label, Icon }) => {
-              const isActive = viewMode === mode;
-              return (
-                <Button
-                  key={mode}
-                  size="sm"
-                  onClick={() => setViewMode(mode)}
-                  className={cn(
-                    "flex items-center gap-1 px-3 py-2 rounded-md transition-colors",
-                    isActive
-                      ? "bg-foreground text-background"
-                      : "bg-background text-foreground hover:bg-muted"
-                  )}
-                >
-                  <Icon className="w-4 h-4 mr-2" />
-                  {label}
-                </Button>
-              );
-            })}
+            {/* Right section - View Controls and Actions */}
+            <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-end">
+              {/* Selection indicator */}
+              {selectedApplications.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="px-3 py-1">
+                    {selectedApplications.length} selected
+                  </Badge>
+                </div>
+              )}
+
+              {/* Filter toggle */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className={cn(
+                  "transition-colors p-2 relative",
+                  showFilters && "bg-muted border-primary text-primary"
+                )}
+              >
+                <SlidersHorizontal className="h-4 w-4 mr-2" />
+                Filters
+                {getAppliedFiltersCount() > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-2 h-5 w-5 p-0 text-xs flex items-center justify-center bg-foreground text-background rounded-full"
+                  >
+                    {getAppliedFiltersCount()}
+                  </Badge>
+                )}
+              </Button>
+
+              {/* Enhanced View mode toggle */}
+              <div className="flex items-center gap-2 p-1 border rounded-lg bg-muted">
+                {[
+                  { mode: "grid" as ViewMode, label: "Grid", Icon: TableIcon },
+                  {
+                    mode: "table" as ViewMode,
+                    label: "List",
+                    Icon: AlignJustify,
+                  },
+                ].map(({ mode, label, Icon }) => {
+                  const isActive = viewMode === mode;
+                  return (
+                    <Button
+                      key={mode}
+                      size="sm"
+                      onClick={() => setViewMode(mode)}
+                      className={cn(
+                        "flex items-center gap-1 px-3 py-2 rounded-md transition-colors",
+                        isActive
+                          ? "bg-foreground text-background"
+                          : "bg-background text-foreground hover:bg-muted"
+                      )}
+                    >
+                      <Icon className="w-4 h-4 mr-2" />
+                      {label}
+                    </Button>
+                  );
+                })}
+              </div>
+
+              {/* Export dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hidden sm:flex"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>Export as CSV</DropdownMenuItem>
+                  <DropdownMenuItem>Export as Excel</DropdownMenuItem>
+                  <DropdownMenuItem>Export as PDF</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Bulk actions dropdown */}
+              {selectedApplications.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <MoreHorizontal className="h-4 w-4 mr-2" />
+                      Actions
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuLabel>Bulk Actions</DropdownMenuLabel>
+
+                    <DropdownMenuItem
+                      onClick={() =>
+                        applicationActions.handleApplicationAction(
+                          "status",
+                          selectedApplications
+                        )
+                      }
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Change Status
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() =>
+                        applicationActions.handleApplicationAction(
+                          "assign",
+                          selectedApplications
+                        )
+                      }
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Assign Recruiter
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() =>
+                        applicationActions.handleApplicationAction(
+                          "note",
+                          selectedApplications
+                        )
+                      }
+                    >
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Add Note
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem
+                      onClick={() =>
+                        applicationActions.handleApplicationAction(
+                          "archive",
+                          selectedApplications
+                        )
+                      }
+                    >
+                      <Archive className="h-4 w-4 mr-2" />
+                      Archive
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() =>
+                        applicationActions.handleApplicationAction(
+                          "delete",
+                          selectedApplications
+                        )
+                      }
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </div>
 
-          {/* Export dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="hidden sm:flex">
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>Export as CSV</DropdownMenuItem>
-              <DropdownMenuItem>Export as Excel</DropdownMenuItem>
-              <DropdownMenuItem>Export as PDF</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Bulk actions dropdown */}
-          {selectedApplications.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <MoreHorizontal className="h-4 w-4 mr-2" />
-                  Actions
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel>Bulk Actions</DropdownMenuLabel>
-                
-                <DropdownMenuItem onClick={() => applicationActions.handleApplicationAction("status", selectedApplications)}>
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Change Status
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => applicationActions.handleApplicationAction("assign", selectedApplications)}>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Assign Recruiter
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => applicationActions.handleApplicationAction("note", selectedApplications)}>
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Add Note
-                </DropdownMenuItem>
-                
-                <DropdownMenuSeparator />
-                
-                <DropdownMenuItem onClick={() => applicationActions.handleApplicationAction("archive", selectedApplications)}>
-                  <Archive className="h-4 w-4 mr-2" />
-                  Archive
-                </DropdownMenuItem>
-                
-                <DropdownMenuItem
-                  onClick={() => applicationActions.handleApplicationAction("delete", selectedApplications)}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          {/* Advanced Filters Section */}
+          {showFilters && (
+            <ApplicationFilters
+              filters={filters}
+              setFilters={setFilters}
+              resetFilters={resetFilters}
+              getAppliedFiltersCount={getAppliedFiltersCount}
+              userRole={userRole}
+              jobId={jobId}
+            />
           )}
-        </div>
-      </div>
 
-      {/* Advanced Filters Section */}
-      {showFilters && (
-        <ApplicationFilters
-          filters={filters}
-          setFilters={setFilters}
-          resetFilters={resetFilters}
-          getAppliedFiltersCount={getAppliedFiltersCount}
-          userRole={userRole}
-          jobId={jobId}
+          {/* Main Content */}
+          <div className="space-y-6">
+            <ApplicationContentRenderer />
+
+            {/* Pagination */}
+            {!loading && applications.length > 0 && (
+              <ApplicationsPagination
+                currentPage={currentPage}
+                totalPages={pagination.pages}
+                totalItems={pagination.total}
+                itemsPerPage={itemsPerPage}
+                onPageChange={goToPage}
+                onItemsPerPageChange={(newItemsPerPage) => {
+                  setItemsPerPage(newItemsPerPage);
+                  setCurrentPage(1);
+                }}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Application Action Dialogs */}
+        <ApplicationActionDialogs
+          showStatusDialog={applicationActions.showStatusDialog}
+          setShowStatusDialog={applicationActions.setShowStatusDialog}
+          showAssignDialog={applicationActions.showAssignDialog}
+          setShowAssignDialog={applicationActions.setShowAssignDialog}
+          showNoteDialog={applicationActions.showNoteDialog}
+          setShowNoteDialog={applicationActions.setShowNoteDialog}
+          showArchiveDialog={applicationActions.showArchiveDialog}
+          setShowArchiveDialog={applicationActions.setShowArchiveDialog}
+          showDeleteDialog={applicationActions.showDeleteDialog}
+          setShowDeleteDialog={applicationActions.setShowDeleteDialog}
+          applicationCount={selectedApplications.length}
+          isBulkAction={selectedApplications.length > 1}
+          actionData={applicationActions.actionData}
+          setActionData={applicationActions.setActionData}
+          onExecute={applicationActions.executeAction}
+          users={applicationActions.users}
         />
-      )}
-
-      {/* Main Content */}
-      <div className="space-y-6">
-        <ApplicationContentRenderer />
-
-        {/* Pagination */}
-        {!loading && applications.length > 0 && (
-          <ApplicationsPagination
-            currentPage={currentPage}
-            totalPages={pagination.pages}
-            totalItems={pagination.total}
-            itemsPerPage={itemsPerPage}
-            onPageChange={goToPage}
-            onItemsPerPageChange={(newItemsPerPage) => {
-              setItemsPerPage(newItemsPerPage);
-              setCurrentPage(1);
-            }}
-          />
-        )}
-        </div>
-      </div>
-
-      {/* Application Action Dialogs */}
-      <ApplicationActionDialogs
-        showStatusDialog={applicationActions.showStatusDialog}
-        setShowStatusDialog={applicationActions.setShowStatusDialog}
-        showAssignDialog={applicationActions.showAssignDialog}
-        setShowAssignDialog={applicationActions.setShowAssignDialog}
-        showNoteDialog={applicationActions.showNoteDialog}
-        setShowNoteDialog={applicationActions.setShowNoteDialog}
-        showArchiveDialog={applicationActions.showArchiveDialog}
-        setShowArchiveDialog={applicationActions.setShowArchiveDialog}
-        showDeleteDialog={applicationActions.showDeleteDialog}
-        setShowDeleteDialog={applicationActions.setShowDeleteDialog}
-        applicationCount={selectedApplications.length}
-        isBulkAction={selectedApplications.length > 1}
-        actionData={applicationActions.actionData}
-        setActionData={applicationActions.setActionData}
-        onExecute={applicationActions.executeAction}
-        users={applicationActions.users}
-      />
       </main>
     </div>
   );

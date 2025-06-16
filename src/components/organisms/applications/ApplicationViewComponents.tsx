@@ -6,7 +6,11 @@ import { Card, CardContent } from "@/components/shadcn-ui/card";
 import { Badge } from "@/components/shadcn-ui/badge";
 import { Button } from "@/components/shadcn-ui/button";
 import { Checkbox } from "@/components/shadcn-ui/checkbox";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn-ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/shadcn-ui/avatar";
 import {
   Table,
   TableBody,
@@ -143,7 +147,10 @@ export function ApplicationsGridView({
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {applications.map((application) => (
-        <Card key={application._id} className="hover:shadow-md transition-shadow">
+        <Card
+          key={application._id}
+          className="hover:shadow-md transition-shadow"
+        >
           <CardContent className="p-6">
             {/* Header with checkbox and status */}
             <div className="flex items-start justify-between mb-4">
@@ -174,7 +181,8 @@ export function ApplicationsGridView({
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-lg text-gray-900 truncate">
-                    {application.candidate.firstName} {application.candidate.lastName}
+                    {application.candidate.firstName}{" "}
+                    {application.candidate.lastName}
                   </h3>
                   <p className="text-sm text-muted-foreground truncate">
                     {application.candidate.email}
@@ -186,7 +194,9 @@ export function ApplicationsGridView({
               <div className="flex items-center text-sm text-gray-600">
                 <Briefcase className="w-4 h-4 mr-2 flex-shrink-0" />
                 <div className="truncate">
-                  <div className="font-medium truncate">{application.job.title}</div>
+                  <div className="font-medium truncate">
+                    {application.job.title}
+                  </div>
                   <div className="text-xs text-muted-foreground">
                     {application.job.company}
                   </div>
@@ -241,14 +251,18 @@ export function ApplicationsGridView({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => router.push(`${viewBaseUrl}/${application._id}`)}
+                    onClick={() =>
+                      router.push(`${viewBaseUrl}/${application._id}`)
+                    }
                   >
                     <Eye className="w-3 h-3" />
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => window.open(application.resume.url, "_blank")}
+                    onClick={() =>
+                      window.open(application.resume.url, "_blank")
+                    }
                   >
                     <FileText className="w-3 h-3" />
                   </Button>
@@ -260,27 +274,38 @@ export function ApplicationsGridView({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        onClick={() => router.push(`${viewBaseUrl}/${application._id}`)}
+                        onClick={() =>
+                          router.push(`${viewBaseUrl}/${application._id}`)
+                        }
                       >
                         <Eye className="w-4 h-4 mr-2" />
                         View Details
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => window.open(application.resume.url, "_blank")}
+                        onClick={() =>
+                          window.open(application.resume.url, "_blank")
+                        }
                       >
                         <Download className="w-4 h-4 mr-2" />
                         Download Resume
                       </DropdownMenuItem>
                       {application.coverLetter && (
                         <DropdownMenuItem
-                          onClick={() => window.open(application.coverLetter!.url, "_blank")}
+                          onClick={() =>
+                            window.open(application.coverLetter!.url, "_blank")
+                          }
                         >
                           <Download className="w-4 h-4 mr-2" />
                           Download Cover Letter
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuItem
-                        onClick={() => window.open(`mailto:${application.candidate.email}`, "_blank")}
+                        onClick={() =>
+                          window.open(
+                            `mailto:${application.candidate.email}`,
+                            "_blank"
+                          )
+                        }
                       >
                         <Mail className="w-4 h-4 mr-2" />
                         Send Email
@@ -377,7 +402,8 @@ export function ApplicationsTableView({
                   </Avatar>
                   <div>
                     <div className="font-medium">
-                      {application.candidate.firstName} {application.candidate.lastName}
+                      {application.candidate.firstName}{" "}
+                      {application.candidate.lastName}
                     </div>
                     <div className="text-sm text-muted-foreground">
                       {application.candidate.email}
@@ -423,7 +449,8 @@ export function ApplicationsTableView({
                 <TableCell>
                   {application.assignedTo ? (
                     <div className="text-sm">
-                      {application.assignedTo.firstName} {application.assignedTo.lastName}
+                      {application.assignedTo.firstName}{" "}
+                      {application.assignedTo.lastName}
                     </div>
                   ) : (
                     <span className="text-muted-foreground">Unassigned</span>
@@ -440,14 +467,18 @@ export function ApplicationsTableView({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => router.push(`${viewBaseUrl}/${application._id}`)}
+                    onClick={() =>
+                      router.push(`${viewBaseUrl}/${application._id}`)
+                    }
                   >
                     <Eye className="w-4 h-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => window.open(application.resume.url, "_blank")}
+                    onClick={() =>
+                      window.open(application.resume.url, "_blank")
+                    }
                   >
                     <FileText className="w-4 h-4" />
                   </Button>
@@ -459,34 +490,50 @@ export function ApplicationsTableView({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem
-                        onClick={() => router.push(`${viewBaseUrl}/${application._id}`)}
+                        onClick={() =>
+                          router.push(`${viewBaseUrl}/${application._id}`)
+                        }
                       >
                         <Eye className="w-4 h-4 mr-2" />
                         View Details
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => window.open(application.resume.url, "_blank")}
+                        onClick={() =>
+                          window.open(application.resume.url, "_blank")
+                        }
                       >
                         <Download className="w-4 h-4 mr-2" />
                         Download Resume
                       </DropdownMenuItem>
                       {application.coverLetter && (
                         <DropdownMenuItem
-                          onClick={() => window.open(application.coverLetter!.url, "_blank")}
+                          onClick={() =>
+                            window.open(application.coverLetter!.url, "_blank")
+                          }
                         >
                           <Download className="w-4 h-4 mr-2" />
                           Download Cover Letter
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuItem
-                        onClick={() => window.open(`mailto:${application.candidate.email}`, "_blank")}
+                        onClick={() =>
+                          window.open(
+                            `mailto:${application.candidate.email}`,
+                            "_blank"
+                          )
+                        }
                       >
                         <Mail className="w-4 h-4 mr-2" />
                         Send Email
                       </DropdownMenuItem>
                       {application.candidate.phone && (
                         <DropdownMenuItem
-                          onClick={() => window.open(`tel:${application.candidate.phone}`, "_blank")}
+                          onClick={() =>
+                            window.open(
+                              `tel:${application.candidate.phone}`,
+                              "_blank"
+                            )
+                          }
                         >
                           <Phone className="w-4 h-4 mr-2" />
                           Call

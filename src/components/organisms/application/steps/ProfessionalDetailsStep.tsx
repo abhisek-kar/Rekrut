@@ -37,7 +37,11 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
     updateData({ skills: skillsArray });
   };
 
-  const isValid = data.currentRole && data.experienceLevel && data.expectedCTC && data.skills.length > 0;
+  const isValid =
+    data.currentRole &&
+    data.experienceLevel &&
+    data.expectedCTC &&
+    data.skills.length > 0;
 
   return (
     <div className="w-full max-w-2xl mx-auto">

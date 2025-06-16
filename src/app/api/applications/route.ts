@@ -21,12 +21,17 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'applicationDate';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
     
+    // Advanced filter parameters
+    const source = searchParams.get('source') || '';
+    const assignedTo = searchParams.get('assignedTo') || '';
+    const matchScore = searchParams.get('matchScore') || '';
+    const interviewStatus = searchParams.get('interviewStatus') || '';
+    const hasReview = searchParams.get('hasReview') || '';
+    const rating = searchParams.get('rating') || '';
+    const dateRange = searchParams.get('dateRange') || '';
+    
     // Build query
-    const query: { 
-      job?: mongoose.Types.ObjectId; 
-      candidate?: mongoose.Types.ObjectId | { $in: mongoose.Types.ObjectId[] }; 
-      status?: string;
-    } = {};
+    const query: Record<string, unknown> = {};
     
     // Job filter
     if (jobId) {
@@ -41,6 +46,96 @@ export async function GET(request: NextRequest) {
     // Status filter
     if (status) {
       query.status = status;
+    }
+    
+    // Advanced filters
+    
+    // Source filter
+    if (source && source !== 'all') {
+      query.source = source;
+    }
+    
+    // Match score filter
+    if (matchScore && matchScore !== 'all') {
+      switch (matchScore) {
+        case 'high':
+          query.matchScore = { $gte: 80 };
+          break;
+        case 'medium':
+          query.matchScore = { $gte: 60, $lt: 80 };
+          break;
+        case 'low':
+          query.matchScore = { $lt: 60 };
+          break;
+      }
+    }
+    
+    // Interview status filter
+    if (interviewStatus && interviewStatus !== 'all') {
+      if (interviewStatus === 'no_interview') {
+        query.interviews = { $size: 0 };
+      } else {
+        query['interviews.status'] = interviewStatus;
+      }
+    }
+    
+    // Review status filter
+    if (hasReview && hasReview !== 'all') {
+      if (hasReview === 'reviewed') {
+        query.review = { $exists: true };
+      } else {
+        query.review = { $exists: false };
+      }
+    }
+    
+    // Rating filter (only if reviewed)
+    if (rating && rating !== 'all' && hasReview === 'reviewed') {
+      query['review.rating'] = parseInt(rating);
+    }
+    
+    // Date range filter
+    if (dateRange && dateRange !== 'all') {
+      const now = new Date();
+      let startDate: Date;
+      
+      switch (dateRange) {
+        case 'today':
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          query.createdAt = { $gte: startDate };
+          break;
+        case 'week':
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          query.createdAt = { $gte: startDate };
+          break;
+        case 'month':
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          query.createdAt = { $gte: startDate };
+          break;
+        case 'quarter':
+          const quarter = Math.floor(now.getMonth() / 3);
+          startDate = new Date(now.getFullYear(), quarter * 3, 1);
+          query.createdAt = { $gte: startDate };
+          break;
+      }
+    }
+    
+    // Review status filter
+    if (hasReview) {
+      query.hasReview = hasReview === 'true';
+    }
+    
+    // Rating filter
+    if (rating) {
+      query.rating = { $gte: parseFloat(rating) };
+    }
+    
+    // Date range filter (for application date)
+    if (dateRange) {
+      const [startDate, endDate] = dateRange.split(',').map(dateStr => new Date(dateStr.trim()));
+      query.applicationDate = {
+        $gte: startDate,
+        $lte: endDate
+      };
     }
     
     // Search filter (on related candidate's name or email)
@@ -83,7 +178,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Get applications with pagination
-    let applications = await Application.find(query)
+    const rawApplications = await Application.find(query)
       .sort({ [sortField]: sortOrder === 'asc' ? 1 : -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -92,23 +187,23 @@ export async function GET(request: NextRequest) {
       .lean();
       
     // Transform to expected format
-    applications = applications.map(app => ({
+    let applications = rawApplications.map((app: any) => ({
       _id: app._id.toString(),
-      applicationDate: app.createdAt ,
+      applicationDate: app.createdAt,
       status: app.status,
       source: app.source,
       matchingScore: app.matchScore,
       job: {
-        _id: (app.job as any)._id.toString(),
-        title: (app.job as any).title,
-        company: (app.job as any).company
+        _id: app.job._id.toString(),
+        title: app.job.title,
+        company: app.job.company
       },
       candidate: {
-        _id: (app.candidate as any)._id.toString(),
-        firstName: (app.candidate as any).firstName,
-        lastName: (app.candidate as any).lastName,
-        email: (app.candidate as any).email,
-        profilePhoto: (app.candidate as any).profilePhoto
+        _id: app.candidate._id.toString(),
+        firstName: app.candidate.firstName,
+        lastName: app.candidate.lastName,
+        email: app.candidate.email,
+        profilePhoto: app.candidate.profilePhoto
       }
     }));
     

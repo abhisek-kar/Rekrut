@@ -122,7 +122,10 @@ export function ApplicationsPagination({
         {pages.map((page, index) => {
           if (page === "...") {
             return (
-              <div key={`ellipsis-${index}`} className="flex items-center justify-center h-8 w-8">
+              <div
+                key={`ellipsis-${index}`}
+                className="flex items-center justify-center h-8 w-8"
+              >
                 <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
               </div>
             );

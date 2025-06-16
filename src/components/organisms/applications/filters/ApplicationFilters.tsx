@@ -19,7 +19,10 @@ interface FilterOptions {
   source: string;
   dateRange: string;
   assignedTo: string;
-  score: string;
+  matchScore: string;
+  interviewStatus: string;
+  rating: string;
+  hasReview: string;
 }
 
 interface FiltersProps {
@@ -59,7 +62,8 @@ export function ApplicationFilters({
 
   // Fetch available jobs for filtering
   useEffect(() => {
-    if (!jobId) { // Only fetch jobs if not filtering by specific job
+    if (!jobId) {
+      // Only fetch jobs if not filtering by specific job
       fetchJobs();
     }
   }, [jobId]);
@@ -74,12 +78,15 @@ export function ApplicationFilters({
   const fetchJobs = async () => {
     try {
       setLoadingJobs(true);
-      const endpoint = userRole === "admin" ? "/api/jobs" : "/api/subadmin/jobs";
-      const response = await fetch(`${endpoint}?limit=100&status=published`);
-      
+      const endpoint =
+        userRole === "admin" ? "/api/jobs" : "/api/subadmin/jobs";
+      const response = await fetch(`${endpoint}?limit=100&status=active`);
+
       if (response.ok) {
         const data = await response.json();
         setJobs(data.jobs || []);
+      } else {
+        console.error("Failed to fetch jobs:", response.status);
       }
     } catch (error) {
       console.error("Error fetching jobs:", error);
@@ -91,11 +98,15 @@ export function ApplicationFilters({
   const fetchUsers = async () => {
     try {
       setLoadingUsers(true);
-      const response = await fetch("/api/users/subadmins?status=active&limit=100");
-      
+      const response = await fetch(
+        "/api/users/subadmins?status=active&limit=100"
+      );
+
       if (response.ok) {
         const data = await response.json();
         setUsers(data.users || []);
+      } else {
+        console.error("Failed to fetch users:", response.status);
       }
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -105,14 +116,14 @@ export function ApplicationFilters({
   };
 
   const handleFilterChange = (key: keyof FilterOptions, value: string) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [key]: value,
     }));
   };
 
   const removeFilter = (key: keyof FilterOptions) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       [key]: "all",
     }));
@@ -121,9 +132,9 @@ export function ApplicationFilters({
   const getFilterLabel = (key: keyof FilterOptions, value: string) => {
     switch (key) {
       case "status":
-        return value.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase());
+        return value.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase());
       case "job":
-        const job = jobs.find(j => j._id === value);
+        const job = jobs.find((j) => j._id === value);
         return job ? `${job.title} - ${job.company}` : value;
       case "source":
         return value.charAt(0).toUpperCase() + value.slice(1);
@@ -137,22 +148,41 @@ export function ApplicationFilters({
         };
         return dateLabels[value as keyof typeof dateLabels] || value;
       case "assignedTo":
-        const user = users.find(u => u._id === value);
+        const user = users.find((u) => u._id === value);
         return user ? `${user.firstName} ${user.lastName}` : value;
-      case "score":
+      case "matchScore":
         const scoreLabels = {
           high: "High Score (80%+)",
           medium: "Medium Score (60-79%)",
           low: "Low Score (<60%)",
         };
         return scoreLabels[value as keyof typeof scoreLabels] || value;
+      case "interviewStatus":
+        const interviewLabels = {
+          no_interview: "No Interview Scheduled",
+          scheduled: "Interview Scheduled",
+          completed: "Interview Completed",
+          cancelled: "Interview Cancelled",
+          no_show: "No Show",
+        };
+        return interviewLabels[value as keyof typeof interviewLabels] || value;
+      case "hasReview":
+        const reviewLabels = {
+          reviewed: "Reviewed",
+          not_reviewed: "Not Reviewed",
+        };
+        return reviewLabels[value as keyof typeof reviewLabels] || value;
+      case "rating":
+        return `${value} Star${value !== "1" ? "s" : ""}`;
       default:
         return value;
     }
   };
 
   // Get active filters for display
-  const activeFilters = Object.entries(filters).filter(([key, value]) => value !== "all");
+  const activeFilters = Object.entries(filters).filter(
+    ([key, value]) => value !== "all"
+  );
 
   return (
     <div className="bg-card rounded-lg border p-6 space-y-6">
@@ -175,7 +205,9 @@ export function ApplicationFilters({
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="applied">Applied</SelectItem>
               <SelectItem value="screening">Screening</SelectItem>
-              <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
+              <SelectItem value="interview_scheduled">
+                Interview Scheduled
+              </SelectItem>
               <SelectItem value="interviewed">Interviewed</SelectItem>
               <SelectItem value="offered">Offered</SelectItem>
               <SelectItem value="hired">Hired</SelectItem>
@@ -259,7 +291,8 @@ export function ApplicationFilters({
         </div>
 
         {/* Assigned To Filter - Admin only */}
-        {userRole === "admin" && (
+        {/* TODO: Add assignedTo field to Application model first */}
+        {false && userRole === "admin" && (
           <div className="space-y-2">
             <Label className="text-xs font-medium text-muted-foreground flex items-center">
               <User className="w-3 h-3 mr-1" />
@@ -293,8 +326,8 @@ export function ApplicationFilters({
             Match Score
           </Label>
           <Select
-            value={filters.score}
-            onValueChange={(value) => handleFilterChange("score", value)}
+            value={filters.matchScore}
+            onValueChange={(value) => handleFilterChange("matchScore", value)}
           >
             <SelectTrigger className="bg-background">
               <SelectValue placeholder="All Scores" />
@@ -307,13 +340,90 @@ export function ApplicationFilters({
             </SelectContent>
           </Select>
         </div>
+
+        {/* Interview Status Filter */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium flex items-center">
+            <Clock className="w-3 h-3 mr-1" />
+            Interview Status
+          </Label>
+          <Select
+            value={filters.interviewStatus}
+            onValueChange={(value) =>
+              handleFilterChange("interviewStatus", value)
+            }
+          >
+            <SelectTrigger className="bg-background">
+              <SelectValue placeholder="All Interview Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Interview Statuses</SelectItem>
+              <SelectItem value="no_interview">
+                No Interview Scheduled
+              </SelectItem>
+              <SelectItem value="scheduled">Interview Scheduled</SelectItem>
+              <SelectItem value="completed">Interview Completed</SelectItem>
+              <SelectItem value="cancelled">Interview Cancelled</SelectItem>
+              <SelectItem value="no_show">No Show</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Review Status Filter */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium flex items-center">
+            <Star className="w-3 h-3 mr-1" />
+            Review Status
+          </Label>
+          <Select
+            value={filters.hasReview}
+            onValueChange={(value) => handleFilterChange("hasReview", value)}
+          >
+            <SelectTrigger className="bg-background">
+              <SelectValue placeholder="All Review Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Review Statuses</SelectItem>
+              <SelectItem value="reviewed">Reviewed</SelectItem>
+              <SelectItem value="not_reviewed">Not Reviewed</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Rating Filter (only show if reviewed) */}
+        {filters.hasReview === "reviewed" && (
+          <div className="space-y-2">
+            <Label className="text-sm font-medium flex items-center">
+              <Star className="w-3 h-3 mr-1" />
+              Rating
+            </Label>
+            <Select
+              value={filters.rating}
+              onValueChange={(value) => handleFilterChange("rating", value)}
+            >
+              <SelectTrigger className="bg-background">
+                <SelectValue placeholder="All Ratings" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Ratings</SelectItem>
+                <SelectItem value="5">⭐⭐⭐⭐⭐ (5 stars)</SelectItem>
+                <SelectItem value="4">⭐⭐⭐⭐ (4 stars)</SelectItem>
+                <SelectItem value="3">⭐⭐⭐ (3 stars)</SelectItem>
+                <SelectItem value="2">⭐⭐ (2 stars)</SelectItem>
+                <SelectItem value="1">⭐ (1 star)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       {/* Applied Filters */}
       {activeFilters.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium">Applied Filters ({getAppliedFiltersCount()})</Label>
+            <Label className="text-sm font-medium">
+              Applied Filters ({getAppliedFiltersCount()})
+            </Label>
             <Button
               variant="ghost"
               size="sm"
@@ -324,7 +434,7 @@ export function ApplicationFilters({
               Clear All
             </Button>
           </div>
-          
+
           <div className="flex flex-wrap gap-2">
             {activeFilters.map(([key, value]) => (
               <Badge

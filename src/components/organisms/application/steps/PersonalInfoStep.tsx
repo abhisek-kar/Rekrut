@@ -1,19 +1,34 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
-import { Button } from '@/components/shadcn-ui/button';
-import { Input } from '@/components/shadcn-ui/input';
-import { Label } from '@/components/shadcn-ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn-ui/select';
-import { Textarea } from '@/components/shadcn-ui/textarea';
-import { ApplicationData } from '../MultiStepApplicationForm';
-import { ChevronRight, User } from 'lucide-react';
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn-ui/card";
+import { Button } from "@/components/shadcn-ui/button";
+import { Input } from "@/components/shadcn-ui/input";
+import { Label } from "@/components/shadcn-ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/shadcn-ui/select";
+import { Textarea } from "@/components/shadcn-ui/textarea";
+import { ApplicationData } from "../MultiStepApplicationForm";
+import { ChevronRight, User } from "lucide-react";
 
 interface PersonalInfoStepProps {
   data: ApplicationData;
   updateData: (updates: Partial<ApplicationData>) => void;
 }
 
-const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, updateData }) => {
+const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
+  data,
+  updateData,
+}) => {
   const isValid = data.firstName && data.lastName && data.email && data.phone;
 
   return (
@@ -25,7 +40,8 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, updateData })
             Personal Information
           </CardTitle>
           <CardDescription>
-            Please provide your basic contact information and professional links.
+            Please provide your basic contact information and professional
+            links.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -86,23 +102,31 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({ data, updateData })
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="linkedinProfile">LinkedIn Profile (Optional)</Label>
+              <Label htmlFor="linkedinProfile">
+                LinkedIn Profile (Optional)
+              </Label>
               <Input
                 id="linkedinProfile"
                 type="url"
-                value={data.linkedinProfile || ''}
-                onChange={(e) => updateData({ linkedinProfile: e.target.value })}
+                value={data.linkedinProfile || ""}
+                onChange={(e) =>
+                  updateData({ linkedinProfile: e.target.value })
+                }
                 placeholder="https://linkedin.com/in/yourprofile"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="portfolioWebsite">Portfolio Website (Optional)</Label>
+              <Label htmlFor="portfolioWebsite">
+                Portfolio Website (Optional)
+              </Label>
               <Input
                 id="portfolioWebsite"
                 type="url"
-                value={data.portfolioWebsite || ''}
-                onChange={(e) => updateData({ portfolioWebsite: e.target.value })}
+                value={data.portfolioWebsite || ""}
+                onChange={(e) =>
+                  updateData({ portfolioWebsite: e.target.value })
+                }
                 placeholder="https://yourportfolio.com"
               />
             </div>
