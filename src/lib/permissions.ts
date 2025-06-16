@@ -68,9 +68,9 @@ export async function canAccessApplication(
       );
     }
 
-    // Candidate can access their own applications
+    // Candidate can access their own applications (MVP: by email)
     if (session.user.role === "candidate") {
-      return application.candidateId.toString() === session.user.id;
+      return application.candidate.email === session.user.email;
     }
 
     return false;

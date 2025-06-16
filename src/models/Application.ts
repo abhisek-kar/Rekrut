@@ -2,7 +2,62 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IApplication extends Document {
   job: mongoose.Types.ObjectId;
-  candidate: mongoose.Types.ObjectId;
+  candidate: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+    location?: string;
+    linkedinProfile?: string;
+    portfolioWebsite?: string;
+
+    // Professional Information
+    currentJobTitle?: string;
+    currentCompany?: string;
+    employmentStatus?: string;
+    yearsOfExperience?: number;
+    currentSalary?: number;
+    expectedSalary?: number;
+    noticePeriod?: string;
+    availabilityToStart?: Date;
+    preferredWorkArrangement?: string;
+
+    // Education & Skills
+    education?: Array<{
+      level: string;
+      degree?: string;
+      institution: string;
+      graduationYear?: number;
+      description?: string;
+    }>;
+    skills?: Array<{
+      name: string;
+      proficiency?: string;
+    }>;
+    certifications?: string[];
+
+    // Address
+    currentAddress?: {
+      street?: string;
+      city?: string;
+      state?: string;
+      postalCode?: string;
+      country?: string;
+    };
+    willingToRelocate?: boolean;
+
+    // Additional
+    additionalComments?: string;
+    accommodationNeeds?: string;
+    dateOfBirth?: Date;
+    previousEmployment?: Array<{
+      company: string;
+      jobTitle: string;
+      startDate: Date;
+      endDate?: Date;
+      description?: string;
+    }>;
+  };
   status: string; // 'applied', 'screened', 'interview_scheduled', 'interviewed', 'offered', 'hired', 'rejected'
   statusHistory: Array<{
     status: string;
@@ -74,9 +129,66 @@ const ApplicationSchema = new Schema<IApplication>(
   {
     job: { type: Schema.Types.ObjectId, ref: "Job", required: true },
     candidate: {
-      type: Schema.Types.ObjectId,
-      ref: "Candidate",
-      required: true,
+      firstName: { type: String, required: true },
+      lastName: { type: String, required: true },
+      email: { type: String, required: true },
+      phone: { type: String },
+      location: { type: String },
+      linkedinProfile: { type: String },
+      portfolioWebsite: { type: String },
+
+      // Professional Information
+      currentJobTitle: { type: String },
+      currentCompany: { type: String },
+      employmentStatus: { type: String },
+      yearsOfExperience: { type: Number },
+      currentSalary: { type: Number },
+      expectedSalary: { type: Number },
+      noticePeriod: { type: String },
+      availabilityToStart: { type: Date },
+      preferredWorkArrangement: { type: String },
+
+      // Education & Skills
+      education: [
+        {
+          level: { type: String },
+          degree: { type: String },
+          institution: { type: String },
+          graduationYear: { type: Number },
+          description: { type: String },
+        },
+      ],
+      skills: [
+        {
+          name: { type: String },
+          proficiency: { type: String },
+        },
+      ],
+      certifications: [{ type: String }],
+
+      // Address
+      currentAddress: {
+        street: { type: String },
+        city: { type: String },
+        state: { type: String },
+        postalCode: { type: String },
+        country: { type: String },
+      },
+      willingToRelocate: { type: Boolean },
+
+      // Additional
+      additionalComments: { type: String },
+      accommodationNeeds: { type: String },
+      dateOfBirth: { type: Date },
+      previousEmployment: [
+        {
+          company: { type: String },
+          jobTitle: { type: String },
+          startDate: { type: Date },
+          endDate: { type: Date },
+          description: { type: String },
+        },
+      ],
     },
     status: {
       type: String,
@@ -193,11 +305,11 @@ const ApplicationSchema = new Schema<IApplication>(
 
 // Create indexes for common queries
 ApplicationSchema.index({ job: 1, status: 1 });
-ApplicationSchema.index({ candidate: 1 });
+ApplicationSchema.index({ "candidate.email": 1 });
 ApplicationSchema.index({ matchScore: -1 });
 ApplicationSchema.index({ status: 1 });
 ApplicationSchema.index({ createdAt: -1 });
-ApplicationSchema.index({ job: 1, candidate: 1 }, { unique: true });
+ApplicationSchema.index({ job: 1, "candidate.email": 1 }, { unique: true });
 
 export default (mongoose.models.Application as Model<IApplication>) ||
   mongoose.model<IApplication>("Application", ApplicationSchema);

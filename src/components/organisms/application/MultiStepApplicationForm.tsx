@@ -96,7 +96,7 @@ export default function MultiStepApplicationForm({
   onSubmit,
   onBack,
 }: MultiStepApplicationFormProps) {
-  const [currentStep, setCurrentStep] = useState(3);
+  const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formDirty, setFormDirty] = useState(false);
   const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);

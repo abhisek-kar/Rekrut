@@ -2,24 +2,72 @@
 
 export interface ApplicationType {
   _id: string;
-  jobId?: string;
-  candidateId?: string;
+  job: string; // ObjectId reference to Job
+  candidate: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+    location?: string;
+    linkedinProfile?: string;
+    portfolioWebsite?: string;
+    currentJobTitle?: string;
+    currentCompany?: string;
+    employmentStatus?: string;
+    yearsOfExperience?: number;
+    currentSalary?: number;
+    expectedSalary?: number;
+    noticePeriod?: string;
+    availabilityToStart?: string;
+    preferredWorkArrangement?: string;
+    education?: Array<{
+      level: string;
+      degree?: string;
+      institution: string;
+      graduationYear?: number;
+      description?: string;
+    }>;
+    skills?: Array<{
+      name: string;
+      proficiency?: string;
+    }>;
+    certifications?: string[];
+    currentAddress?: {
+      street?: string;
+      city?: string;
+      state?: string;
+      postalCode?: string;
+      country?: string;
+    };
+    willingToRelocate?: boolean;
+    additionalComments?: string;
+    accommodationNeeds?: string;
+    dateOfBirth?: string;
+    previousEmployment?: Array<{
+      company: string;
+      jobTitle: string;
+      startDate: string;
+      endDate?: string;
+      description?: string;
+    }>;
+  };
   status:
     | "applied"
     | "screening"
-    | "interview"
-    | "offer"
+    | "interview_scheduled"
+    | "interviewed"
+    | "offered"
     | "hired"
-    | "rejected"
-    | "withdrawn";
+    | "rejected";
   applicationDate: string;
-  resumeId?: string;
-  coverLetterId?: string;
-  customFieldResponses?: Record<string, unknown>;
-  questionResponses?: Array<{
-    question: string;
-    answer: string;
-  }>;
+  resume: {
+    url: string;
+    filename: string;
+  };
+  coverLetter?: {
+    url: string;
+    filename: string;
+  };
   matchingScore?: {
     overall: number;
     skillsMatch?: number;
@@ -60,18 +108,4 @@ export interface ApplicationType {
   token?: string;
   createdAt?: string;
   updatedAt?: string;
-
-  // Populated references
-  job?: {
-    _id: string;
-    title: string;
-    company: string;
-  };
-  candidate?: {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    profilePhoto?: string;
-  };
 }

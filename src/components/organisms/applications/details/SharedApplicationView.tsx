@@ -175,18 +175,15 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
 
   const getStatusColor = (status: string) => {
     const statusColors = {
-      applied: "bg-blue-100 text-blue-800",
-      screening: "bg-yellow-100 text-yellow-800",
-      interview_scheduled: "bg-purple-100 text-purple-800",
-      interviewed: "bg-orange-100 text-orange-800",
-      offered: "bg-green-100 text-green-800",
-      hired: "bg-emerald-100 text-emerald-800",
-      rejected: "bg-red-100 text-red-800",
+      applied: "border",
+      screening: "border",
+      interview_scheduled: "border",
+      interviewed: "border",
+      offered: "border",
+      hired: "border",
+      rejected: "border",
     };
-    return (
-      statusColors[status as keyof typeof statusColors] ||
-      "bg-gray-100 text-gray-800"
-    );
+    return statusColors[status as keyof typeof statusColors] || "border";
   };
 
   const getInterviewIcon = (type: string) => {
@@ -303,7 +300,559 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
             </div>
 
             {/* Application Info */}
-            <div className="flex-1 space-y-4">
+            <div className="flex-1 space-y-6">
+              {/* Job & Application Overview */}
+              <div>
+                <h2 className="font-semibold text-lg mb-4 flex items-center">
+                  <FileText className="w-5 h-5 mr-2" />
+                  Application Overview
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="border rounded-lg p-4">
+                    <div className="text-sm text-muted-foreground font-medium">
+                      Job Position
+                    </div>
+                    <div className="font-semibold text-lg">
+                      {application.job?.title || "Position not specified"}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {application.job?.company || "Company not specified"}
+                    </div>
+                  </div>
+                  <div className="border rounded-lg p-4">
+                    <div className="text-sm text-muted-foreground font-medium">
+                      Applied
+                    </div>
+                    <div className="font-semibold">
+                      {application.createdAt
+                        ? format(new Date(application.createdAt), "PPP")
+                        : "N/A"}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {application.source
+                        ? `via ${application.source}`
+                        : "Direct application"}
+                    </div>
+                  </div>
+                  <div className="border rounded-lg p-4">
+                    <div className="text-sm text-muted-foreground font-medium">
+                      Match Score
+                    </div>
+                    <div className="font-semibold flex items-center">
+                      <Star className="w-4 h-4 mr-1 text-yellow-500" />
+                      {application.matchScore || "N/A"}%
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      AI Assessment
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Personal Information */}
+              <div>
+                <h3 className="font-semibold text-md mb-3 flex items-center">
+                  <User className="w-4 h-4 mr-2" />
+                  Personal Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <div className="text-muted-foreground">Full Name</div>
+                    <div className="font-medium">
+                      {application.candidate?.firstName || "Unknown"}{" "}
+                      {application.candidate?.lastName || "Candidate"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-muted-foreground">Email</div>
+                    <div className="font-medium">
+                      {application.candidate?.email || "No email provided"}
+                    </div>
+                  </div>
+                  {application.candidate?.phone && (
+                    <div>
+                      <div className="text-muted-foreground">Phone</div>
+                      <div className="font-medium">
+                        {application.candidate.phone}
+                      </div>
+                    </div>
+                  )}
+                  {application.candidate?.dateOfBirth && (
+                    <div>
+                      <div className="text-muted-foreground">Date of Birth</div>
+                      <div className="font-medium">
+                        {format(
+                          new Date(application.candidate.dateOfBirth),
+                          "PPP"
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {application.candidate?.currentAddress && (
+                    <div className="md:col-span-2">
+                      <div className="text-muted-foreground">
+                        Current Address
+                      </div>
+                      <div className="font-medium">
+                        {[
+                          application.candidate.currentAddress.street,
+                          application.candidate.currentAddress.city,
+                          application.candidate.currentAddress.state,
+                          application.candidate.currentAddress.postalCode,
+                          application.candidate.currentAddress.country,
+                        ]
+                          .filter(Boolean)
+                          .join(", ") || "Not provided"}
+                      </div>
+                    </div>
+                  )}
+                  {application.candidate?.willingToRelocate !== undefined && (
+                    <div>
+                      <div className="text-muted-foreground">
+                        Willing to Relocate
+                      </div>
+                      <div className="font-medium">
+                        <Badge
+                          variant={
+                            application.candidate.willingToRelocate
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
+                          {application.candidate.willingToRelocate
+                            ? "Yes"
+                            : "No"}
+                        </Badge>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Professional Information */}
+              <div>
+                <h3 className="font-semibold text-md mb-3 flex items-center">
+                  <Clock className="w-4 h-4 mr-2" />
+                  Professional Background
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                  {application.candidate?.currentJobTitle && (
+                    <div>
+                      <div className="text-muted-foreground">
+                        Current Position
+                      </div>
+                      <div className="font-medium">
+                        {application.candidate.currentJobTitle}
+                      </div>
+                    </div>
+                  )}
+                  {application.candidate?.currentCompany && (
+                    <div>
+                      <div className="text-muted-foreground">
+                        Current Company
+                      </div>
+                      <div className="font-medium">
+                        {application.candidate.currentCompany}
+                      </div>
+                    </div>
+                  )}
+                  {application.candidate?.employmentStatus && (
+                    <div>
+                      <div className="text-muted-foreground">
+                        Employment Status
+                      </div>
+                      <div className="font-medium capitalize">
+                        {application.candidate.employmentStatus}
+                      </div>
+                    </div>
+                  )}
+                  {application.candidate?.yearsOfExperience && (
+                    <div>
+                      <div className="text-muted-foreground">
+                        Years of Experience
+                      </div>
+                      <div className="font-medium">
+                        {application.candidate.yearsOfExperience} years
+                      </div>
+                    </div>
+                  )}
+                  {application.candidate?.currentSalary && (
+                    <div>
+                      <div className="text-muted-foreground">
+                        Current Salary
+                      </div>
+                      <div className="font-medium">
+                        ${application.candidate.currentSalary.toLocaleString()}
+                      </div>
+                    </div>
+                  )}
+                  {application.candidate?.expectedSalary && (
+                    <div>
+                      <div className="text-muted-foreground">
+                        Expected Salary
+                      </div>
+                      <div className="font-medium">
+                        ${application.candidate.expectedSalary.toLocaleString()}
+                      </div>
+                    </div>
+                  )}
+                  {application.candidate?.noticePeriod && (
+                    <div>
+                      <div className="text-muted-foreground">Notice Period</div>
+                      <div className="font-medium">
+                        {application.candidate.noticePeriod}
+                      </div>
+                    </div>
+                  )}
+                  {application.candidate?.availabilityToStart && (
+                    <div>
+                      <div className="text-muted-foreground">
+                        Available to Start
+                      </div>
+                      <div className="font-medium">
+                        {format(
+                          new Date(application.candidate.availabilityToStart),
+                          "PPP"
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {application.candidate?.preferredWorkArrangement && (
+                    <div>
+                      <div className="text-muted-foreground">
+                        Preferred Work Style
+                      </div>
+                      <div className="font-medium capitalize">
+                        {application.candidate.preferredWorkArrangement}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Skills & Education */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Skills */}
+                {application.candidate?.skills &&
+                  application.candidate.skills.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold text-md mb-3">
+                        Skills & Expertise
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {application.candidate.skills.map(
+                          (skill: any, index: number) => (
+                            <Badge
+                              key={index}
+                              variant="secondary"
+                              className="text-xs"
+                            >
+                              {typeof skill === "string" ? skill : skill.name}
+                              {typeof skill === "object" &&
+                                skill.proficiency && (
+                                  <span className="ml-1 opacity-70">
+                                    ({skill.proficiency})
+                                  </span>
+                                )}
+                            </Badge>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                {/* Education */}
+                {application.candidate?.education &&
+                  application.candidate.education.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold text-md mb-3">Education</h3>
+                      <div className="space-y-3">
+                        {application.candidate.education.map(
+                          (edu: any, index: number) => (
+                            <div
+                              key={index}
+                              className="border-l-2 border-blue-200 pl-3"
+                            >
+                              <div className="font-medium">
+                                {edu.degree || edu.level}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {edu.institution}
+                              </div>
+                              {edu.graduationYear && (
+                                <div className="text-xs text-muted-foreground">
+                                  Graduated: {edu.graduationYear}
+                                </div>
+                              )}
+                              {edu.description && (
+                                <div className="text-xs mt-1">
+                                  {edu.description}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+              </div>
+
+              {/* Certifications */}
+              {application.candidate?.certifications &&
+                application.candidate.certifications.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-md mb-3">
+                      Certifications
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {application.candidate.certifications.map(
+                        (cert: string, index: number) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {cert}
+                          </Badge>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Work History */}
+              {application.candidate?.previousEmployment &&
+                application.candidate.previousEmployment.length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-md mb-3">
+                      Employment History
+                    </h3>
+                    <div className="space-y-4">
+                      {application.candidate.previousEmployment.map(
+                        (emp: any, index: number) => (
+                          <div key={index} className="border rounded-lg p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <div className="font-medium">
+                                  {emp.jobTitle}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {emp.company}
+                                </div>
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {format(new Date(emp.startDate), "MMM yyyy")} -
+                                {emp.endDate
+                                  ? format(new Date(emp.endDate), "MMM yyyy")
+                                  : "Present"}
+                              </div>
+                            </div>
+                            {emp.description && (
+                              <div className="text-sm text-gray-700 dark:text-gray-300">
+                                {emp.description}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Screening Questions */}
+              {application.answers &&
+                Object.keys(application.answers).length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-md mb-3 flex items-center">
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Screening Questions & Answers
+                    </h3>
+                    <div className="space-y-4">
+                      {Object.entries(application.answers).map(
+                        ([question, answer]: [string, any], index: number) => (
+                          <div key={index} className="border rounded-lg p-4">
+                            <div className="font-medium text-sm mb-2">
+                              {question}
+                            </div>
+                            <div className="text-sm border p-3 rounded">
+                              {typeof answer === "string"
+                                ? answer
+                                : JSON.stringify(answer, null, 2)}
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Additional Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Match Details */}
+                {application.matchDetails && (
+                  <div>
+                    <h3 className="font-semibold text-md mb-3">
+                      AI Match Analysis
+                    </h3>
+                    <div className="space-y-2">
+                      {application.matchDetails.skills && (
+                        <div className="flex justify-between items-center p-2 border rounded">
+                          <span className="text-sm">Skills Match</span>
+                          <Badge variant="secondary">
+                            {application.matchDetails.skills}%
+                          </Badge>
+                        </div>
+                      )}
+                      {application.matchDetails.experience && (
+                        <div className="flex justify-between items-center p-2 border rounded">
+                          <span className="text-sm">Experience Match</span>
+                          <Badge variant="secondary">
+                            {application.matchDetails.experience}%
+                          </Badge>
+                        </div>
+                      )}
+                      {application.matchDetails.education && (
+                        <div className="flex justify-between items-center p-2 border rounded">
+                          <span className="text-sm">Education Match</span>
+                          <Badge variant="secondary">
+                            {application.matchDetails.education}%
+                          </Badge>
+                        </div>
+                      )}
+                      {application.matchDetails.location && (
+                        <div className="flex justify-between items-center p-2 border rounded">
+                          <span className="text-sm">Location Match</span>
+                          <Badge variant="secondary">
+                            {application.matchDetails.location}%
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Job Requirements vs Candidate */}
+                <div>
+                  <h3 className="font-semibold text-md mb-3">
+                    Job Requirements
+                  </h3>
+                  <div className="space-y-3 text-sm">
+                    {application.job?.location && (
+                      <div>
+                        <div className="text-muted-foreground">
+                          Work Location
+                        </div>
+                        <div className="font-medium capitalize">
+                          {application.job.location.type}
+                          {application.job.location.city && (
+                            <span className="text-muted-foreground ml-1">
+                              - {application.job.location.city}
+                              {application.job.location.state &&
+                                `, ${application.job.location.state}`}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {application.job?.experienceLevel && (
+                      <div>
+                        <div className="text-muted-foreground">
+                          Experience Level
+                        </div>
+                        <div className="font-medium capitalize">
+                          {application.job.experienceLevel.replace("_", " ")}
+                        </div>
+                      </div>
+                    )}
+                    {application.job?.employmentType && (
+                      <div>
+                        <div className="text-muted-foreground">
+                          Employment Type
+                        </div>
+                        <div className="font-medium capitalize">
+                          {application.job.employmentType.replace("_", " ")}
+                        </div>
+                      </div>
+                    )}
+                    {application.job?.salary &&
+                      application.job.salary.visible && (
+                        <div>
+                          <div className="text-muted-foreground">
+                            Salary Range
+                          </div>
+                          <div className="font-medium">
+                            {application.job.salary.min &&
+                            application.job.salary.max
+                              ? `$${application.job.salary.min.toLocaleString()} - $${application.job.salary.max.toLocaleString()}`
+                              : application.job.salary.min
+                              ? `From $${application.job.salary.min.toLocaleString()}`
+                              : application.job.salary.max
+                              ? `Up to $${application.job.salary.max.toLocaleString()}`
+                              : "Competitive"}
+                          </div>
+                        </div>
+                      )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Comments & Accommodation */}
+              {(application.candidate?.additionalComments ||
+                application.candidate?.accommodationNeeds) && (
+                <div>
+                  <h3 className="font-semibold text-md mb-3">
+                    Additional Information
+                  </h3>
+                  <div className="space-y-3">
+                    {application.candidate?.additionalComments && (
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-1">
+                          Additional Comments
+                        </div>
+                        <div className="text-sm border p-3 rounded">
+                          {application.candidate.additionalComments}
+                        </div>
+                      </div>
+                    )}
+                    {application.candidate?.accommodationNeeds && (
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-1">
+                          Accommodation Needs
+                        </div>
+                        <div className="text-sm border p-3 rounded">
+                          {application.candidate.accommodationNeeds}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Custom Fields */}
+              {application.customFields &&
+                Object.keys(application.customFields).length > 0 && (
+                  <div>
+                    <h3 className="font-semibold text-md mb-3">
+                      Custom Application Fields
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Object.entries(application.customFields).map(
+                        ([key, value]: [string, any], index: number) => (
+                          <div key={index} className="border rounded p-3">
+                            <div className="text-sm text-muted-foreground">
+                              {key}
+                            </div>
+                            <div className="font-medium">
+                              {typeof value === "string"
+                                ? value
+                                : JSON.stringify(value)}
+                            </div>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
               <div>
                 <h2 className="font-semibold text-lg mb-2">
                   Application Details
@@ -397,12 +946,12 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                               ) => (
                                 <div
                                   key={index}
-                                  className="text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded"
+                                  className="text-xs border p-2 rounded"
                                 >
                                   <div className="font-medium mb-1 text-muted-foreground">
                                     {question.substring(0, 60)}...
                                   </div>
-                                  <div className="text-gray-700 dark:text-gray-300">
+                                  <div>
                                     {typeof answer === "string"
                                       ? answer.substring(0, 100) +
                                         (answer.length > 100 ? "..." : "")
@@ -604,62 +1153,68 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                 </div>
               </div>
 
-              {/* Documents */}
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" asChild>
-                  <a
-                    href={application.resume?.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    View Resume
-                    {application.resume?.parsedData && (
-                      <span className="ml-1 text-xs bg-green-100 text-green-800 px-1 rounded">
-                        Parsed
-                      </span>
-                    )}
-                  </a>
-                </Button>
-                {application.coverLetter?.url && (
+              {/* Documents & Actions */}
+              <div>
+                <h3 className="font-semibold text-md mb-3 flex items-center">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Documents & Actions
+                </h3>
+                <div className="flex flex-wrap gap-2">
                   <Button variant="outline" size="sm" asChild>
                     <a
-                      href={application.coverLetter.url}
+                      href={application.resume?.url}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       <FileText className="w-4 h-4 mr-2" />
-                      View Cover Letter
+                      View Resume
+                      {application.resume?.parsedData && (
+                        <span className="ml-1 text-xs border px-1 rounded">
+                          Parsed
+                        </span>
+                      )}
                     </a>
                   </Button>
-                )}
-                {application.additionalDocuments &&
-                  application.additionalDocuments.length > 0 &&
-                  application.additionalDocuments.map(
-                    (doc: any, index: number) => (
-                      <Button key={index} variant="outline" size="sm" asChild>
-                        <a
-                          href={doc.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <FileText className="w-4 h-4 mr-2" />
-                          {doc.filename || `Document ${index + 1}`}
-                          {doc.documentType && (
-                            <span className="ml-1 text-xs bg-blue-100 text-blue-800 px-1 rounded">
-                              {doc.documentType}
-                            </span>
-                          )}
-                        </a>
-                      </Button>
-                    )
+                  {application.coverLetter?.url && (
+                    <Button variant="outline" size="sm" asChild>
+                      <a
+                        href={application.coverLetter.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <FileText className="w-4 h-4 mr-2" />
+                        View Cover Letter
+                      </a>
+                    </Button>
                   )}
-                <Button variant="outline" size="sm" asChild>
-                  <a href={`mailto:${application.candidate?.email}`}>
-                    <Mail className="w-4 h-4 mr-2" />
-                    Send Email
-                  </a>
-                </Button>
+                  {application.additionalDocuments &&
+                    application.additionalDocuments.length > 0 &&
+                    application.additionalDocuments.map(
+                      (doc: any, index: number) => (
+                        <Button key={index} variant="outline" size="sm" asChild>
+                          <a
+                            href={doc.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <FileText className="w-4 h-4 mr-2" />
+                            {doc.filename || `Document ${index + 1}`}
+                            {doc.documentType && (
+                              <span className="ml-1 text-xs bg-blue-100 text-blue-800 px-1 rounded">
+                                {doc.documentType}
+                              </span>
+                            )}
+                          </a>
+                        </Button>
+                      )
+                    )}
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={`mailto:${application.candidate?.email}`}>
+                      <Mail className="w-4 h-4 mr-2" />
+                      Send Email
+                    </a>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -732,17 +1287,7 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge
-                                className={`flex items-center ${
-                                  interview.status === "completed"
-                                    ? "bg-green-100 text-green-800"
-                                    : interview.status === "cancelled"
-                                    ? "bg-red-100 text-red-800"
-                                    : interview.status === "no_show"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-blue-100 text-blue-800"
-                                }`}
-                              >
+                              <Badge className="flex items-center border">
                                 <StatusIcon className="w-3 h-3 mr-1" />
                                 {interview.status
                                   ? interview.status.replace("_", " ")
@@ -832,7 +1377,7 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                             )}
 
                           {interview.notes && (
-                            <div className="mt-3 p-3 bg-gray-50 rounded-md">
+                            <div className="mt-3 p-3 border rounded-md">
                               <div className="text-sm text-muted-foreground mb-1">
                                 Notes:
                               </div>
@@ -1074,13 +1619,7 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                       <div className="text-sm text-muted-foreground mb-2">
                         Interview Recommendation
                       </div>
-                      <Badge
-                        className={
-                          application.review.interviewRecommendation
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }
-                      >
+                      <Badge className="border">
                         {application.review.interviewRecommendation
                           ? "Recommended"
                           : "Not Recommended"}
@@ -1094,7 +1633,7 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                       <div className="text-sm text-muted-foreground mb-2">
                         Additional Feedback
                       </div>
-                      <p className="text-sm bg-gray-50 p-3 rounded-md">
+                      <p className="text-sm border p-3 rounded-md">
                         {application.review.feedback}
                       </p>
                     </div>

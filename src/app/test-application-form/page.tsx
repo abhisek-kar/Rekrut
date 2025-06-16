@@ -12,16 +12,39 @@ const mockJob = {
     type: "Hybrid",
     city: "Bangalore",
     state: "Karnataka",
-    country: "India"
+    country: "India",
   },
-  requiredDocuments: ["resume", "portfolio"]
+  requiredDocuments: ["resume", "portfolio"],
 };
 
 export default function TestApplicationFormPage() {
   const handleSubmit = async (data: any, files: FormData) => {
     console.log("Application Data:", data);
     console.log("Form Files:", files);
-    alert("Application submitted successfully! Check console for details.");
+
+    try {
+      const response = await fetch("/api/applications", {
+        method: "POST",
+        body: files, // FormData with files and application data
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        console.log("Application submitted successfully:", result);
+        alert(
+          `Application submitted successfully! Application ID: ${result.applicationId}`
+        );
+      } else {
+        console.error("Application submission failed:", result);
+        alert(
+          `Application submission failed: ${result.error || "Unknown error"}`
+        );
+      }
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      alert("Error submitting application. Check console for details.");
+    }
   };
 
   const handleBack = () => {
@@ -36,10 +59,11 @@ export default function TestApplicationFormPage() {
             Test Job Application Form
           </h1>
           <p className="text-muted-foreground">
-            Testing the new multi-step application form with address and CTC fields
+            Testing the new multi-step application form with address and CTC
+            fields
           </p>
         </div>
-        
+
         <MultiStepApplicationForm
           job={mockJob}
           onSubmit={handleSubmit}

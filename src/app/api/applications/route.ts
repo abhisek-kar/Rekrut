@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import mongoose from "mongoose";
 import dbConnect from "@/lib/db/connect";
 import Application from "@/models/Application";
-import Candidate from "@/models/Candidate";
 import Job from "@/models/Job";
 import { randomBytes } from "crypto";
+import { uploadToS3, generateS3Key } from "@/lib/aws/s3/";
 
 export async function GET(request: NextRequest) {
   try {
@@ -41,9 +41,10 @@ export async function GET(request: NextRequest) {
       query.job = new mongoose.Types.ObjectId(jobFilter);
     }
 
-    // Candidate filter
+    // Candidate filter - since candidate is embedded, we search by email
     if (candidateId) {
-      query.candidate = new mongoose.Types.ObjectId(candidateId);
+      // For MVP, we'll treat candidateId as email since we don't have separate candidate records
+      query["candidate.email"] = candidateId;
     }
 
     // Status filter
@@ -147,34 +148,13 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    // Search filter (on related candidate's name or email)
+    // Search filter (search within embedded candidate data)
     if (search) {
-      // First find candidates matching the search
-      const candidates = await mongoose
-        .model("Candidate")
-        .find({
-          $or: [
-            { firstName: { $regex: search, $options: "i" } },
-            { lastName: { $regex: search, $options: "i" } },
-            { email: { $regex: search, $options: "i" } },
-          ],
-        })
-        .select("_id");
-
-      if (candidates.length > 0) {
-        query.candidate = { $in: candidates.map((c) => c._id) };
-      } else {
-        // No candidates match, return empty result
-        return NextResponse.json({
-          applications: [],
-          pagination: {
-            total: 0,
-            page,
-            limit,
-            pages: 0,
-          },
-        });
-      }
+      query.$or = [
+        { "candidate.firstName": { $regex: search, $options: "i" } },
+        { "candidate.lastName": { $regex: search, $options: "i" } },
+        { "candidate.email": { $regex: search, $options: "i" } },
+      ];
     }
 
     // Get total count for pagination
@@ -194,7 +174,6 @@ export async function GET(request: NextRequest) {
       .sort({ [sortField]: sortOrder === "asc" ? 1 : -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("candidate", "firstName lastName email profilePhoto")
       .populate("job", "title company")
       .lean();
 
@@ -211,11 +190,11 @@ export async function GET(request: NextRequest) {
         company: app.job.company,
       },
       candidate: {
-        _id: app.candidate._id.toString(),
         firstName: app.candidate.firstName,
         lastName: app.candidate.lastName,
         email: app.candidate.email,
-        profilePhoto: app.candidate.profilePhoto,
+        phone: app.candidate.phone,
+        location: app.candidate.location,
       },
     }));
 
@@ -268,6 +247,12 @@ export async function POST(request: NextRequest) {
 
     const applicationData = JSON.parse(applicationDataStr);
 
+    // Debug: Log the received application data
+    console.log(
+      "Received application data:",
+      JSON.stringify(applicationData, null, 2)
+    );
+
     // Validate required fields
     if (
       !applicationData.firstName ||
@@ -280,86 +265,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate that a resume is provided
+    const resumeFile = formData.get("resume") as File;
+    if (!resumeFile) {
+      return NextResponse.json(
+        { error: "Resume is required. Please upload your resume." },
+        { status: 400 }
+      );
+    }
+
     // Check if job exists and is active
     const job = await Job.findById(jobId);
     if (!job) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
-    // Create or find candidate
-    let candidate = await Candidate.findOne({ email: applicationData.email });
-
-    if (!candidate) {
-      // Create new candidate
-      candidate = new Candidate({
-        firstName: applicationData.firstName,
-        lastName: applicationData.lastName,
-        email: applicationData.email,
-        phone: applicationData.phone,
-        linkedinProfile: applicationData.linkedinProfile,
-        portfolioWebsite: applicationData.portfolioWebsite,
-        currentJobTitle: applicationData.currentRole,
-        currentCompany: applicationData.currentCompany,
-        expectedSalary: applicationData.expectedSalary,
-        noticePeriod: applicationData.noticePeriod,
-        skills:
-          applicationData.skills?.map((skill: string) => ({ name: skill })) ||
-          [],
-        currentAddress: {
-          city: applicationData.location,
-        },
-        preferences: {
-          workLocation: applicationData.preferredWorkType,
-          willingToRelocate: applicationData.willingToRelocate,
-          availableStartDate: applicationData.availableStartDate,
-        },
-        source: "website",
-        notes: applicationData.additionalMessage,
-      });
-
-      await candidate.save();
-    } else {
-      // Update existing candidate with new information
-      candidate.phone = applicationData.phone || candidate.phone;
-      candidate.linkedinProfile =
-        applicationData.linkedinProfile || candidate.linkedinProfile;
-      candidate.portfolioWebsite =
-        applicationData.portfolioWebsite || candidate.portfolioWebsite;
-      candidate.currentJobTitle =
-        applicationData.currentRole || candidate.currentJobTitle;
-      candidate.currentCompany =
-        applicationData.currentCompany || candidate.currentCompany;
-      candidate.expectedSalary =
-        applicationData.expectedSalary || candidate.expectedSalary;
-      candidate.noticePeriod =
-        applicationData.noticePeriod || candidate.noticePeriod;
-
-      // Merge skills
-      if (applicationData.skills?.length > 0) {
-        const existingSkills = candidate.skills?.map((s) => s.name) || [];
-        const newSkills = applicationData.skills.filter(
-          (skill: string) => !existingSkills.includes(skill)
-        );
-        candidate.skills = [
-          ...(candidate.skills || []),
-          ...newSkills.map((skill: string) => ({ name: skill })),
-        ];
-      }
-
-      if (applicationData.location && !candidate.currentAddress?.city) {
-        candidate.currentAddress = {
-          ...candidate.currentAddress,
-          city: applicationData.location,
-        };
-      }
-
-      await candidate.save();
-    }
-
-    // Check if application already exists
+    // Check if application already exists for this job and email
     const existingApplication = await Application.findOne({
       job: jobId,
-      candidate: candidate._id,
+      "candidate.email": applicationData.email,
     });
 
     if (existingApplication) {
@@ -369,48 +293,103 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Handle file uploads (for simplicity, we'll store file info without actual upload)
+    // Handle file uploads to S3
     const documents: any = {};
+    let additionalDocuments: any[] = [];
 
-    // Get resume file
-    const resumeFile = formData.get("resume") as File;
-    if (resumeFile) {
-      documents.resume = {
-        filename: resumeFile.name,
-        url: `/uploads/resumes/${candidate._id}_${Date.now()}_${
+    try {
+      // Get resume file and upload to S3
+      const resumeFile = formData.get("resume") as File;
+      if (resumeFile) {
+        console.log(
+          `Uploading resume: ${resumeFile.name}, size: ${resumeFile.size}`
+        );
+        const resumeKey = generateS3Key(
+          "applications/resumes",
           resumeFile.name
-        }`, // Placeholder URL
-      };
-    }
+        );
+        const resumeUrl = await uploadToS3(resumeFile, resumeKey);
+        documents.resume = {
+          filename: resumeFile.name,
+          url: resumeUrl,
+        };
+        console.log(`Resume uploaded successfully: ${resumeUrl}`);
+      }
 
-    // Get cover letter file
-    const coverLetterFile = formData.get("coverLetter") as File;
-    if (coverLetterFile) {
-      documents.coverLetter = {
-        filename: coverLetterFile.name,
-        url: `/uploads/cover-letters/${candidate._id}_${Date.now()}_${
+      // Get cover letter file and upload to S3
+      const coverLetterFile = formData.get("coverLetter") as File;
+      if (coverLetterFile) {
+        console.log(
+          `Uploading cover letter: ${coverLetterFile.name}, size: ${coverLetterFile.size}`
+        );
+        const coverLetterKey = generateS3Key(
+          "applications/cover-letters",
           coverLetterFile.name
-        }`, // Placeholder URL
-      };
+        );
+        const coverLetterUrl = await uploadToS3(
+          coverLetterFile,
+          coverLetterKey
+        );
+        documents.coverLetter = {
+          filename: coverLetterFile.name,
+          url: coverLetterUrl,
+        };
+        console.log(`Cover letter uploaded successfully: ${coverLetterUrl}`);
+      }
+
+      // Get portfolio files and upload to S3
+      let fileIndex = 0;
+      while (formData.get(`portfolioFile_${fileIndex}`)) {
+        const file = formData.get(`portfolioFile_${fileIndex}`) as File;
+        console.log(
+          `Uploading portfolio file ${fileIndex}: ${file.name}, size: ${file.size}`
+        );
+        const portfolioKey = generateS3Key("applications/portfolio", file.name);
+        const portfolioUrl = await uploadToS3(file, portfolioKey);
+        additionalDocuments.push({
+          filename: file.name,
+          url: portfolioUrl,
+          documentType: "portfolio",
+        });
+        console.log(
+          `Portfolio file ${fileIndex} uploaded successfully: ${portfolioUrl}`
+        );
+        fileIndex++;
+      }
+    } catch (uploadError) {
+      console.error("File upload error:", uploadError);
+      return NextResponse.json(
+        { error: "Failed to upload files. Please try again." },
+        { status: 500 }
+      );
     }
 
-    // Get portfolio files
-    const additionalDocuments: any[] = [];
-    let fileIndex = 0;
-    while (formData.get(`portfolioFile_${fileIndex}`)) {
-      const file = formData.get(`portfolioFile_${fileIndex}`) as File;
-      additionalDocuments.push({
-        filename: file.name,
-        url: `/uploads/portfolio/${candidate._id}_${Date.now()}_${file.name}`, // Placeholder URL
-        documentType: "portfolio",
-      });
-      fileIndex++;
-    }
-
-    // Create application
+    // Create application with embedded candidate data
     const application = new Application({
       job: jobId,
-      candidate: candidate._id,
+      candidate: {
+        firstName: applicationData.firstName,
+        lastName: applicationData.lastName,
+        email: applicationData.email,
+        phone: applicationData.phone,
+        location: applicationData.preferredLocation,
+        linkedinProfile: applicationData.linkedinProfile,
+        portfolioWebsite: applicationData.portfolioWebsite,
+        currentJobTitle: applicationData.currentRole,
+        currentCompany: applicationData.currentCompany,
+        employmentStatus: "employed", // Default value
+        currentSalary: applicationData.currentCTC,
+        expectedSalary: applicationData.expectedCTC,
+        noticePeriod: applicationData.noticePeriod,
+        availabilityToStart: applicationData.availableStartDate,
+        preferredWorkArrangement: applicationData.preferredWorkType,
+        skills:
+          applicationData.skills?.map((skill: string) => ({ name: skill })) ||
+          [],
+        currentAddress: applicationData.currentAddress,
+        willingToRelocate: applicationData.willingToRelocate,
+        additionalComments: applicationData.additionalMessage,
+      },
       status: "applied",
       statusHistory: [
         {
@@ -432,6 +411,12 @@ export async function POST(request: NextRequest) {
         preferredWorkType: applicationData.preferredWorkType,
       },
     });
+
+    // Debug: Log the application object before saving
+    console.log(
+      "Application object before save:",
+      JSON.stringify(application.toObject(), null, 2)
+    );
 
     await application.save();
 
@@ -457,14 +442,25 @@ export async function POST(request: NextRequest) {
     console.error("Error creating application:", error);
 
     if (error instanceof mongoose.Error.ValidationError) {
+      console.error("Validation errors:", error.errors);
       return NextResponse.json(
-        { error: "Invalid application data", details: error.message },
+        {
+          error: "Invalid application data",
+          details: error.message,
+          validationErrors: Object.keys(error.errors).map((key) => ({
+            field: key,
+            message: error.errors[key].message,
+          })),
+        },
         { status: 400 }
       );
     }
 
     return NextResponse.json(
-      { error: "Failed to submit application" },
+      {
+        error: "Failed to submit application",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
