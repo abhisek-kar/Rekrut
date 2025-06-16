@@ -1,156 +1,168 @@
-import { NextRequest, NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import dbConnect from '@/lib/db/connect';
-import Application from '@/models/Application';
-import Candidate from '@/models/Candidate';
-import Job from '@/models/Job';
-import { randomBytes } from 'crypto';
+import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
+import dbConnect from "@/lib/db/connect";
+import Application from "@/models/Application";
+import Candidate from "@/models/Candidate";
+import Job from "@/models/Job";
+import { randomBytes } from "crypto";
 
 export async function GET(request: NextRequest) {
   try {
     await dbConnect();
-    
+
     // Parse query parameters
     const searchParams = request.nextUrl.searchParams;
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const jobId = searchParams.get('jobId') || '';
-    const candidateId = searchParams.get('candidateId') || '';
-    const status = searchParams.get('status') || '';
-    const search = searchParams.get('search') || '';
-    const sortBy = searchParams.get('sortBy') || 'applicationDate';
-    const sortOrder = searchParams.get('sortOrder') || 'desc';
-    
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const jobId = searchParams.get("jobId") || "";
+    const candidateId = searchParams.get("candidateId") || "";
+    const status = searchParams.get("status") || "";
+    const search = searchParams.get("search") || "";
+    const sortBy = searchParams.get("sortBy") || "applicationDate";
+    const sortOrder = searchParams.get("sortOrder") || "desc";
+
     // Advanced filter parameters
-    const source = searchParams.get('source') || '';
-    const assignedTo = searchParams.get('assignedTo') || '';
-    const matchScore = searchParams.get('matchScore') || '';
-    const interviewStatus = searchParams.get('interviewStatus') || '';
-    const hasReview = searchParams.get('hasReview') || '';
-    const rating = searchParams.get('rating') || '';
-    const dateRange = searchParams.get('dateRange') || '';
-    
+    const source = searchParams.get("source") || "";
+    const assignedTo = searchParams.get("assignedTo") || "";
+    const matchScore = searchParams.get("matchScore") || "";
+    const interviewStatus = searchParams.get("interviewStatus") || "";
+    const hasReview = searchParams.get("hasReview") || "";
+    const rating = searchParams.get("rating") || "";
+    const dateRange = searchParams.get("dateRange") || "";
+    const jobFilter = searchParams.get("job") || ""; // Job filter from dropdown
+
     // Build query
     const query: Record<string, unknown> = {};
-    
-    // Job filter
+
+    // Job filter - handle both jobId (from URL/props) and job (from filter dropdown)
     if (jobId) {
       query.job = new mongoose.Types.ObjectId(jobId);
+    } else if (jobFilter && jobFilter !== "all") {
+      query.job = new mongoose.Types.ObjectId(jobFilter);
     }
-    
+
     // Candidate filter
     if (candidateId) {
       query.candidate = new mongoose.Types.ObjectId(candidateId);
     }
-    
+
     // Status filter
     if (status) {
       query.status = status;
     }
-    
+
     // Advanced filters
-    
+
     // Source filter
-    if (source && source !== 'all') {
+    if (source && source !== "all") {
       query.source = source;
     }
-    
+
     // Match score filter
-    if (matchScore && matchScore !== 'all') {
+    if (matchScore && matchScore !== "all") {
       switch (matchScore) {
-        case 'high':
+        case "high":
           query.matchScore = { $gte: 80 };
           break;
-        case 'medium':
+        case "medium":
           query.matchScore = { $gte: 60, $lt: 80 };
           break;
-        case 'low':
+        case "low":
           query.matchScore = { $lt: 60 };
           break;
       }
     }
-    
+
     // Interview status filter
-    if (interviewStatus && interviewStatus !== 'all') {
-      if (interviewStatus === 'no_interview') {
+    if (interviewStatus && interviewStatus !== "all") {
+      if (interviewStatus === "no_interview") {
         query.interviews = { $size: 0 };
       } else {
-        query['interviews.status'] = interviewStatus;
+        query["interviews.status"] = interviewStatus;
       }
     }
-    
+
     // Review status filter
-    if (hasReview && hasReview !== 'all') {
-      if (hasReview === 'reviewed') {
+    if (hasReview && hasReview !== "all") {
+      if (hasReview === "reviewed") {
         query.review = { $exists: true };
       } else {
         query.review = { $exists: false };
       }
     }
-    
+
     // Rating filter (only if reviewed)
-    if (rating && rating !== 'all' && hasReview === 'reviewed') {
-      query['review.rating'] = parseInt(rating);
+    if (rating && rating !== "all" && hasReview === "reviewed") {
+      query["review.rating"] = parseInt(rating);
     }
-    
+
     // Date range filter
-    if (dateRange && dateRange !== 'all') {
+    if (dateRange && dateRange !== "all") {
       const now = new Date();
       let startDate: Date;
-      
+
       switch (dateRange) {
-        case 'today':
-          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        case "today":
+          startDate = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate()
+          );
           query.createdAt = { $gte: startDate };
           break;
-        case 'week':
+        case "week":
           startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
           query.createdAt = { $gte: startDate };
           break;
-        case 'month':
+        case "month":
           startDate = new Date(now.getFullYear(), now.getMonth(), 1);
           query.createdAt = { $gte: startDate };
           break;
-        case 'quarter':
+        case "quarter":
           const quarter = Math.floor(now.getMonth() / 3);
           startDate = new Date(now.getFullYear(), quarter * 3, 1);
           query.createdAt = { $gte: startDate };
           break;
       }
     }
-    
+
     // Review status filter
     if (hasReview) {
-      query.hasReview = hasReview === 'true';
+      query.hasReview = hasReview === "true";
     }
-    
+
     // Rating filter
     if (rating) {
       query.rating = { $gte: parseFloat(rating) };
     }
-    
+
     // Date range filter (for application date)
     if (dateRange) {
-      const [startDate, endDate] = dateRange.split(',').map(dateStr => new Date(dateStr.trim()));
+      const [startDate, endDate] = dateRange
+        .split(",")
+        .map((dateStr) => new Date(dateStr.trim()));
       query.applicationDate = {
         $gte: startDate,
-        $lte: endDate
+        $lte: endDate,
       };
     }
-    
+
     // Search filter (on related candidate's name or email)
     if (search) {
       // First find candidates matching the search
-      const candidates = await mongoose.model('Candidate').find({
-        $or: [
-          { firstName: { $regex: search, $options: 'i' } },
-          { lastName: { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } }
-        ]
-      }).select('_id');
-      
+      const candidates = await mongoose
+        .model("Candidate")
+        .find({
+          $or: [
+            { firstName: { $regex: search, $options: "i" } },
+            { lastName: { $regex: search, $options: "i" } },
+            { email: { $regex: search, $options: "i" } },
+          ],
+        })
+        .select("_id");
+
       if (candidates.length > 0) {
-        query.candidate = { $in: candidates.map(c => c._id) };
+        query.candidate = { $in: candidates.map((c) => c._id) };
       } else {
         // No candidates match, return empty result
         return NextResponse.json({
@@ -159,33 +171,33 @@ export async function GET(request: NextRequest) {
             total: 0,
             page,
             limit,
-            pages: 0
-          }
+            pages: 0,
+          },
         });
       }
     }
-    
+
     // Get total count for pagination
     const totalApplications = await Application.countDocuments(query);
-    
+
     // Determine sort field
     let sortField = sortBy;
-    
+
     // Handle nested sort fields
-    if (sortBy === 'candidate.lastName') {
+    if (sortBy === "candidate.lastName") {
       // We'll handle this by populating and sorting in memory
-      sortField = 'applicationDate'; // Default sort for now
+      sortField = "applicationDate"; // Default sort for now
     }
-    
+
     // Get applications with pagination
     const rawApplications = await Application.find(query)
-      .sort({ [sortField]: sortOrder === 'asc' ? 1 : -1 })
+      .sort({ [sortField]: sortOrder === "asc" ? 1 : -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate('candidate', 'firstName lastName email profilePhoto')
-      .populate('job', 'title company')
+      .populate("candidate", "firstName lastName email profilePhoto")
+      .populate("job", "title company")
       .lean();
-      
+
     // Transform to expected format
     let applications = rawApplications.map((app: any) => ({
       _id: app._id.toString(),
@@ -196,44 +208,44 @@ export async function GET(request: NextRequest) {
       job: {
         _id: app.job._id.toString(),
         title: app.job.title,
-        company: app.job.company
+        company: app.job.company,
       },
       candidate: {
         _id: app.candidate._id.toString(),
         firstName: app.candidate.firstName,
         lastName: app.candidate.lastName,
         email: app.candidate.email,
-        profilePhoto: app.candidate.profilePhoto
-      }
+        profilePhoto: app.candidate.profilePhoto,
+      },
     }));
-    
+
     // Handle sorting by candidate name if needed
-    if (sortBy === 'candidate.lastName') {
+    if (sortBy === "candidate.lastName") {
       applications.sort((a, b) => {
         const lastNameA = a.candidate.lastName.toLowerCase();
         const lastNameB = b.candidate.lastName.toLowerCase();
-        
-        if (sortOrder === 'asc') {
+
+        if (sortOrder === "asc") {
           return lastNameA.localeCompare(lastNameB);
         } else {
           return lastNameB.localeCompare(lastNameA);
         }
       });
     }
-    
+
     return NextResponse.json({
       applications,
       pagination: {
         total: totalApplications,
         page,
         limit,
-        pages: Math.ceil(totalApplications / limit)
-      }
+        pages: Math.ceil(totalApplications / limit),
+      },
     });
   } catch (error) {
-    console.error('Error fetching applications:', error);
+    console.error("Error fetching applications:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch applications' },
+      { error: "Failed to fetch applications" },
       { status: 500 }
     );
   }
@@ -242,40 +254,41 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     await dbConnect();
-    
+
     const formData = await request.formData();
-    const jobId = formData.get('jobId') as string;
-    const applicationDataStr = formData.get('applicationData') as string;
-    
+    const jobId = formData.get("jobId") as string;
+    const applicationDataStr = formData.get("applicationData") as string;
+
     if (!jobId || !applicationDataStr) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
-    
+
     const applicationData = JSON.parse(applicationDataStr);
-    
+
     // Validate required fields
-    if (!applicationData.firstName || !applicationData.lastName || !applicationData.email) {
+    if (
+      !applicationData.firstName ||
+      !applicationData.lastName ||
+      !applicationData.email
+    ) {
       return NextResponse.json(
-        { error: 'Missing required personal information' },
+        { error: "Missing required personal information" },
         { status: 400 }
       );
     }
-    
+
     // Check if job exists and is active
     const job = await Job.findById(jobId);
     if (!job) {
-      return NextResponse.json(
-        { error: 'Job not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
-    
+
     // Create or find candidate
     let candidate = await Candidate.findOne({ email: applicationData.email });
-    
+
     if (!candidate) {
       // Create new candidate
       candidate = new Candidate({
@@ -289,84 +302,98 @@ export async function POST(request: NextRequest) {
         currentCompany: applicationData.currentCompany,
         expectedSalary: applicationData.expectedSalary,
         noticePeriod: applicationData.noticePeriod,
-        skills: applicationData.skills?.map((skill: string) => ({ name: skill })) || [],
+        skills:
+          applicationData.skills?.map((skill: string) => ({ name: skill })) ||
+          [],
         currentAddress: {
-          city: applicationData.location
+          city: applicationData.location,
         },
         preferences: {
           workLocation: applicationData.preferredWorkType,
           willingToRelocate: applicationData.willingToRelocate,
-          availableStartDate: applicationData.availableStartDate
+          availableStartDate: applicationData.availableStartDate,
         },
-        source: 'website',
-        notes: applicationData.additionalMessage
+        source: "website",
+        notes: applicationData.additionalMessage,
       });
-      
+
       await candidate.save();
     } else {
       // Update existing candidate with new information
       candidate.phone = applicationData.phone || candidate.phone;
-      candidate.linkedinProfile = applicationData.linkedinProfile || candidate.linkedinProfile;
-      candidate.portfolioWebsite = applicationData.portfolioWebsite || candidate.portfolioWebsite;
-      candidate.currentJobTitle = applicationData.currentRole || candidate.currentJobTitle;
-      candidate.currentCompany = applicationData.currentCompany || candidate.currentCompany;
-      candidate.expectedSalary = applicationData.expectedSalary || candidate.expectedSalary;
-      candidate.noticePeriod = applicationData.noticePeriod || candidate.noticePeriod;
-      
+      candidate.linkedinProfile =
+        applicationData.linkedinProfile || candidate.linkedinProfile;
+      candidate.portfolioWebsite =
+        applicationData.portfolioWebsite || candidate.portfolioWebsite;
+      candidate.currentJobTitle =
+        applicationData.currentRole || candidate.currentJobTitle;
+      candidate.currentCompany =
+        applicationData.currentCompany || candidate.currentCompany;
+      candidate.expectedSalary =
+        applicationData.expectedSalary || candidate.expectedSalary;
+      candidate.noticePeriod =
+        applicationData.noticePeriod || candidate.noticePeriod;
+
       // Merge skills
       if (applicationData.skills?.length > 0) {
-        const existingSkills = candidate.skills?.map(s => s.name) || [];
-        const newSkills = applicationData.skills.filter((skill: string) => !existingSkills.includes(skill));
+        const existingSkills = candidate.skills?.map((s) => s.name) || [];
+        const newSkills = applicationData.skills.filter(
+          (skill: string) => !existingSkills.includes(skill)
+        );
         candidate.skills = [
           ...(candidate.skills || []),
-          ...newSkills.map((skill: string) => ({ name: skill }))
+          ...newSkills.map((skill: string) => ({ name: skill })),
         ];
       }
-      
+
       if (applicationData.location && !candidate.currentAddress?.city) {
         candidate.currentAddress = {
           ...candidate.currentAddress,
-          city: applicationData.location
+          city: applicationData.location,
         };
       }
-      
+
       await candidate.save();
     }
-    
+
     // Check if application already exists
     const existingApplication = await Application.findOne({
       job: jobId,
-      candidate: candidate._id
+      candidate: candidate._id,
     });
-    
+
     if (existingApplication) {
       return NextResponse.json(
-        { error: 'You have already applied for this position' },
+        { error: "You have already applied for this position" },
         { status: 409 }
       );
     }
-    
+
     // Handle file uploads (for simplicity, we'll store file info without actual upload)
     const documents: any = {};
-    
+
     // Get resume file
-    const resumeFile = formData.get('resume') as File;
+    const resumeFile = formData.get("resume") as File;
     if (resumeFile) {
       documents.resume = {
         filename: resumeFile.name,
-        url: `/uploads/resumes/${candidate._id}_${Date.now()}_${resumeFile.name}`, // Placeholder URL
+        url: `/uploads/resumes/${candidate._id}_${Date.now()}_${
+          resumeFile.name
+        }`, // Placeholder URL
       };
     }
-    
+
     // Get cover letter file
-    const coverLetterFile = formData.get('coverLetter') as File;
+    const coverLetterFile = formData.get("coverLetter") as File;
     if (coverLetterFile) {
       documents.coverLetter = {
         filename: coverLetterFile.name,
-        url: `/uploads/cover-letters/${candidate._id}_${Date.now()}_${coverLetterFile.name}`, // Placeholder URL
+        url: `/uploads/cover-letters/${candidate._id}_${Date.now()}_${
+          coverLetterFile.name
+        }`, // Placeholder URL
       };
     }
-    
+
     // Get portfolio files
     const additionalDocuments: any[] = [];
     let fileIndex = 0;
@@ -375,64 +402,69 @@ export async function POST(request: NextRequest) {
       additionalDocuments.push({
         filename: file.name,
         url: `/uploads/portfolio/${candidate._id}_${Date.now()}_${file.name}`, // Placeholder URL
-        documentType: 'portfolio'
+        documentType: "portfolio",
       });
       fileIndex++;
     }
-    
+
     // Create application
     const application = new Application({
       job: jobId,
       candidate: candidate._id,
-      status: 'applied',
-      statusHistory: [{
-        status: 'applied',
-        date: new Date(),
-        reason: 'Application submitted via website'
-      }],
+      status: "applied",
+      statusHistory: [
+        {
+          status: "applied",
+          date: new Date(),
+          reason: "Application submitted via website",
+        },
+      ],
       resume: documents.resume,
       coverLetter: documents.coverLetter,
-      additionalDocuments: additionalDocuments.length > 0 ? additionalDocuments : undefined,
-      source: 'website',
+      additionalDocuments:
+        additionalDocuments.length > 0 ? additionalDocuments : undefined,
+      source: "website",
       answers: {
         experienceLevel: applicationData.experienceLevel,
         additionalMessage: applicationData.additionalMessage,
         availableStartDate: applicationData.availableStartDate,
         willingToRelocate: applicationData.willingToRelocate,
-        preferredWorkType: applicationData.preferredWorkType
-      }
+        preferredWorkType: applicationData.preferredWorkType,
+      },
     });
-    
+
     await application.save();
-    
+
     // Generate a tracking token for the application
-    const trackingToken = randomBytes(32).toString('hex');
-    
+    const trackingToken = randomBytes(32).toString("hex");
+
     // TODO: In a real implementation, you would:
     // 1. Upload files to AWS S3 or similar storage
     // 2. Send confirmation email to candidate
     // 3. Send notification to hiring team
     // 4. Store tracking token in database for application status tracking
-    
-    return NextResponse.json({
-      success: true,
-      message: 'Application submitted successfully',
-      applicationId: application._id,
-      token: trackingToken
-    }, { status: 201 });
-    
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Application submitted successfully",
+        applicationId: application._id,
+        token: trackingToken,
+      },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error('Error creating application:', error);
-    
+    console.error("Error creating application:", error);
+
     if (error instanceof mongoose.Error.ValidationError) {
       return NextResponse.json(
-        { error: 'Invalid application data', details: error.message },
+        { error: "Invalid application data", details: error.message },
         { status: 400 }
       );
     }
-    
+
     return NextResponse.json(
-      { error: 'Failed to submit application' },
+      { error: "Failed to submit application" },
       { status: 500 }
     );
   }

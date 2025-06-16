@@ -80,16 +80,42 @@ export function ApplicationFilters({
       setLoadingJobs(true);
       const endpoint =
         userRole === "admin" ? "/api/jobs" : "/api/subadmin/jobs";
-      const response = await fetch(`${endpoint}?limit=100&status=active`);
+      const response = await fetch(`${endpoint}?limit=100`);
 
       if (response.ok) {
         const data = await response.json();
         setJobs(data.jobs || []);
+        console.log("Fetched jobs:", data.jobs); // Debug log
       } else {
-        console.error("Failed to fetch jobs:", response.status);
+        console.error(
+          "Failed to fetch jobs:",
+          response.status,
+          response.statusText
+        );
+        // Fallback to public endpoint if private fails
+        const publicResponse = await fetch(`/api/public/jobs?limit=100`);
+        if (publicResponse.ok) {
+          const publicData = await publicResponse.json();
+          setJobs(publicData.jobs || []);
+          console.log("Fetched jobs from public endpoint:", publicData.jobs);
+        }
       }
     } catch (error) {
       console.error("Error fetching jobs:", error);
+      // Try public endpoint as fallback
+      try {
+        const publicResponse = await fetch(`/api/public/jobs?limit=100`);
+        if (publicResponse.ok) {
+          const publicData = await publicResponse.json();
+          setJobs(publicData.jobs || []);
+          console.log(
+            "Fetched jobs from public endpoint (fallback):",
+            publicData.jobs
+          );
+        }
+      } catch (fallbackError) {
+        console.error("Fallback fetch also failed:", fallbackError);
+      }
     } finally {
       setLoadingJobs(false);
     }
