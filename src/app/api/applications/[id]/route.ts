@@ -11,7 +11,7 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-    
+
     // Ensure all models are registered
     const JobModel = Job;
     const UserModel = User;

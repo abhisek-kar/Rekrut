@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Briefcase } from 'lucide-react';
+import { ArrowLeft, Briefcase, Clock, AlertTriangle, Info } from 'lucide-react';
 import { Button } from '@/components/shadcn-ui/button';
 import { Skeleton } from '@/components/shadcn-ui/skeleton';
+import { Alert, AlertDescription } from '@/components/shadcn-ui/alert';
+import { Card, CardContent } from '@/components/shadcn-ui/card';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import MultiStepApplicationForm, { ApplicationData } from '@/components/organisms/application/MultiStepApplicationForm';
@@ -24,6 +26,11 @@ interface Job {
   experienceLevel?: string;
   skills?: string[];
   requiredDocuments?: string[];
+  screeningQuestions?: Array<{
+    id: string;
+    question: string;
+    required: boolean;
+  }>;
   description?: string;
   requirements?: string;
   responsibilities?: string;
@@ -103,8 +110,41 @@ export default function JobApplicationPage() {
     router.push(`/jobs/${jobId}`);
   };
 
+  // Check if application deadline has passed
+  const isApplicationDeadlinePassed = () => {
+    if (!job?.applicationDeadline) return false;
+    return new Date() > new Date(job.applicationDeadline);
+  };
+
+  // Format deadline for display
+  const formatDeadline = (deadline: string) => {
+    const date = new Date(deadline);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Check if deadline is within 24 hours
+  const isDeadlineNear = () => {
+    if (!job?.applicationDeadline) return false;
+    const deadline = new Date(job.applicationDeadline);
+    const now = new Date();
+    const hoursDiff = (deadline.getTime() - now.getTime()) / (1000 * 60 * 60);
+    return hoursDiff > 0 && hoursDiff <= 24;
+  };
+
   const handleApplicationSubmit = async (data: ApplicationData, files: FormData) => {
     try {
+      // Check deadline before submission
+      if (isApplicationDeadlinePassed()) {
+        toast.error('The application deadline for this position has passed.');
+        return;
+      }
+
       // Add job ID to form data
       files.append('jobId', jobId);
       files.append('applicationData', JSON.stringify(data));
@@ -187,12 +227,77 @@ export default function JobApplicationPage() {
           </div>
         </div>
 
-        {/* Multi-Step Application Form */}
-        <MultiStepApplicationForm 
-          job={job} 
-          onSubmit={handleApplicationSubmit}
-          onBack={handleBackToJob}
-        />
+        {/* Application Deadline Warning */}
+        {job.applicationDeadline && (
+          <div className="mb-6">
+            {isApplicationDeadlinePassed() ? (
+              <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/10">
+                <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <AlertDescription className="text-red-800 dark:text-red-300">
+                  <strong>Application Closed:</strong> The deadline for this position was{" "}
+                  {formatDeadline(job.applicationDeadline)}. Applications are no longer being accepted.
+                </AlertDescription>
+              </Alert>
+            ) : isDeadlineNear() ? (
+              <Alert className="border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-900/10">
+                <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                <AlertDescription className="text-orange-800 dark:text-orange-300">
+                  <strong>Deadline Approaching:</strong> Applications close on{" "}
+                  {formatDeadline(job.applicationDeadline)}. Apply soon!
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/10">
+                <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <AlertDescription className="text-blue-800 dark:text-blue-300">
+                  <strong>Application Deadline:</strong> {formatDeadline(job.applicationDeadline)}
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        )}
+
+        {/* Application Instructions */}
+        {job.applicationInstructions && (
+          <Card className="mb-6">
+            <CardContent className="p-4">
+              <div className="flex items-start space-x-3">
+                <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">Application Instructions</h3>
+                  <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {job.applicationInstructions}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Block application if deadline passed */}
+        {isApplicationDeadlinePassed() ? (
+          <div className="text-center py-12">
+            <div className="text-red-400 mb-4">
+              <AlertTriangle className="h-16 w-16 mx-auto" />
+            </div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              Application Period Closed
+            </h2>
+            <p className="text-gray-600 mb-6">
+              The application deadline for this position has passed. Please check other available positions.
+            </p>
+            <Link href="/jobs">
+              <Button>Browse Other Jobs</Button>
+            </Link>
+          </div>
+        ) : (
+          /* Multi-Step Application Form */
+          <MultiStepApplicationForm 
+            job={job} 
+            onSubmit={handleApplicationSubmit}
+            onBack={handleBackToJob}
+          />
+        )}
       </div>
     </div>
   );

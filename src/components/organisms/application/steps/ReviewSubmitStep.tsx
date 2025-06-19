@@ -16,7 +16,8 @@ import {
   Calendar,
   DollarSign,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  HelpCircle
 } from "lucide-react";
 import { ApplicationData } from "../MultiStepApplicationForm";
 
@@ -26,6 +27,14 @@ interface ReviewSubmitStepProps {
   isSubmitting: boolean;
   jobTitle: string;
   companyName: string;
+  job: {
+    requiredDocuments?: string[];
+    screeningQuestions?: Array<{
+      id: string;
+      question: string;
+      required: boolean;
+    }>;
+  };
 }
 
 export function ReviewSubmitStep({ 
@@ -33,7 +42,8 @@ export function ReviewSubmitStep({
   onSubmit, 
   isSubmitting, 
   jobTitle, 
-  companyName 
+  companyName,
+  job 
 }: ReviewSubmitStepProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +63,7 @@ export function ReviewSubmitStep({
       { name: 'Personal Information', completed: !!(data.firstName && data.lastName && data.email) },
       { name: 'Address Information', completed: !!(data.currentAddress?.street || data.permanentAddress?.street || data.preferredLocation) },
       { name: 'Professional Details', completed: !!(data.currentRole || data.experienceLevel) },
-      { name: 'Documents', completed: !!data.resume },
+      { name: 'Documents', completed: !!(data.documents && Object.keys(data.documents).length > 0) },
       { name: 'Application Settings', completed: true }
     ];
     
@@ -142,15 +152,6 @@ export function ReviewSubmitStep({
                 <div className="flex items-center space-x-2">
                   <Phone className="h-4 w-4 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">{data.phone}</p>
-                </div>
-              </div>
-            )}
-            {data.location && (
-              <div>
-                <p className="text-sm font-medium text-foreground">Location</p>
-                <div className="flex items-center space-x-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">{data.location}</p>
                 </div>
               </div>
             )}
@@ -289,58 +290,58 @@ export function ReviewSubmitStep({
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="space-y-3">
-            {data.resume && (
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <FileText className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Resume</p>
-                    <p className="text-xs text-muted-foreground">
-                      {data.resume.name} ({formatFileSize(data.resume.size)})
-                    </p>
-                  </div>
-                </div>
-                <Badge variant="outline">Uploaded</Badge>
-              </div>
-            )}
-            
-            {data.coverLetter && (
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <FileText className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Cover Letter</p>
-                    <p className="text-xs text-muted-foreground">
-                      {data.coverLetter.name} ({formatFileSize(data.coverLetter.size)})
-                    </p>
-                  </div>
-                </div>
-                <Badge variant="outline">Uploaded</Badge>
-              </div>
-            )}
-            
-            {data.portfolioFiles && data.portfolioFiles.length > 0 && (
-              <div>
-                <p className="text-sm font-medium text-foreground mb-2">Portfolio Files</p>
-                {data.portfolioFiles.map((file: File, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg mb-2">
-                    <div className="flex items-center space-x-3">
-                      <FileText className="h-5 w-5 text-primary" />
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{file.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {formatFileSize(file.size)}
-                        </p>
-                      </div>
+            {data.documents && Object.keys(data.documents).length > 0 ? (
+              Object.entries(data.documents).map(([documentType, file]) => (
+                <div key={documentType} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <FileText className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        {documentType.charAt(0).toUpperCase() + documentType.slice(1)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {file.name} ({formatFileSize(file.size)})
+                      </p>
                     </div>
-                    <Badge variant="outline">Uploaded</Badge>
                   </div>
-                ))}
-              </div>
+                  <Badge variant="outline">Uploaded</Badge>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground">No documents uploaded</p>
             )}
           </div>
         </CardContent>
       </Card>
+
+      {/* Screening Questions Review */}
+      {job.screeningQuestions && job.screeningQuestions.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center space-x-2">
+              <HelpCircle className="h-5 w-5" />
+              <span>Screening Questions</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {job.screeningQuestions.map((question) => (
+              <div key={question.id} className="space-y-2">
+                <div className="flex items-start space-x-2">
+                  <p className="text-sm font-medium text-foreground">
+                    {question.question}
+                    {question.required && <span className="text-red-500 ml-1">*</span>}
+                  </p>
+                </div>
+                <div className="pl-4 border-l-2 border-muted">
+                  <p className="text-sm text-muted-foreground">
+                    {data.screeningAnswers?.[question.id] || 'No answer provided'}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Application Preferences Review */}
       <Card>

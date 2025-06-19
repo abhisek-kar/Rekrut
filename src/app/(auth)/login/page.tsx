@@ -6,15 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
-  UserCheck,
-  User,
-  Shield,
-} from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, UserCheck, User, Shield } from "lucide-react";
 import { ButtonLoader } from "@/components/atoms/loader";
 import { useAuthForm } from "@/hooks/useAuthForm";
 import { useAuth } from "@/hooks/useAuth";
@@ -107,9 +99,9 @@ export default function LoginPage() {
                   name="role"
                   render={({ field }) => (
                     <FormItem className="space-y-3">
-                      <FormLabel className="text-gray-700 font-medium">
+                      {/* <FormLabel className="text-gray-700 font-medium">
                         Login as
-                      </FormLabel>
+                      </FormLabel> */}
                       <FormControl>
                         <Tabs
                           value={field.value}

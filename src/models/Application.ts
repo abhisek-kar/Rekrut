@@ -81,20 +81,15 @@ export interface IApplication extends Document {
     overall?: number;
     breakdown?: Record<string, unknown>;
   };
-  resume: {
-    url: string;
-    filename: string;
-    parsedData?: Record<string, unknown>;
-  };
-  coverLetter?: {
-    url: string;
-    filename: string;
-  };
-  additionalDocuments?: Array<{
-    url: string;
-    filename: string;
-    documentType?: string;
-  }>;
+  // Documents - Dynamic based on job requirements
+  documents?: Record<
+    string,
+    {
+      url: string;
+      filename: string;
+      documentType?: string;
+    }
+  >;
   answers?: Record<string, unknown>; // Answers to screening questions
   notes?: Array<{
     content: string;
@@ -151,9 +146,9 @@ const ApplicationSchema = new Schema<IApplication>(
       experienceLevel: { type: String },
       yearsOfExperience: { type: Number },
       currentSalary: { type: Number },
-      currentSalaryCurrency: { type: String, default: 'INR' },
+      currentSalaryCurrency: { type: String, default: "INR" },
       expectedSalary: { type: Number },
-      expectedSalaryCurrency: { type: String, default: 'INR' },
+      expectedSalaryCurrency: { type: String, default: "INR" },
       noticePeriod: { type: String },
       availabilityToStart: { type: Date },
       preferredWorkArrangement: { type: String },
@@ -245,22 +240,11 @@ const ApplicationSchema = new Schema<IApplication>(
       overall: { type: Number },
       breakdown: { type: Schema.Types.Mixed },
     },
-    resume: {
-      url: { type: String, required: true },
-      filename: { type: String, required: true },
-      parsedData: { type: Schema.Types.Mixed },
+    // Documents - Dynamic based on job requirements
+    documents: {
+      type: Schema.Types.Mixed, // Flexible object to store different document types
+      default: {},
     },
-    coverLetter: {
-      url: { type: String },
-      filename: { type: String },
-    },
-    additionalDocuments: [
-      {
-        url: { type: String, required: true },
-        filename: { type: String, required: true },
-        documentType: { type: String },
-      },
-    ],
     answers: { type: Schema.Types.Mixed },
     notes: [
       {

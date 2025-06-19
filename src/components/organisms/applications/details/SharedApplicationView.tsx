@@ -115,7 +115,9 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
   };
 
   if (loading) {
-    return <SectionLoader message="Loading application details..." height="400px" />;
+    return (
+      <SectionLoader message="Loading application details..." height="400px" />
+    );
   }
 
   if (!application) {
@@ -126,12 +128,12 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
     );
   }
 
-  const formatCurrency = (amount: number, currency: string = 'USD') => {
-    if (currency === 'INR') {
-      return `₹${amount.toLocaleString('en-IN')}`;
-    } else if (currency === 'EUR') {
+  const formatCurrency = (amount: number, currency: string = "USD") => {
+    if (currency === "INR") {
+      return `₹${amount.toLocaleString("en-IN")}`;
+    } else if (currency === "EUR") {
       return `€${amount.toLocaleString()}`;
-    } else if (currency === 'GBP') {
+    } else if (currency === "GBP") {
       return `£${amount.toLocaleString()}`;
     }
     return `$${amount.toLocaleString()}`;
@@ -152,33 +154,41 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                   {application.candidate?.lastName?.[0]}
                 </AvatarFallback>
               </Avatar>
-              
+
               <div className="text-center md:text-left">
                 <h1 className="text-2xl font-bold mb-1">
-                  {application.candidate?.firstName} {application.candidate?.lastName}
+                  {application.candidate?.firstName}{" "}
+                  {application.candidate?.lastName}
                 </h1>
-                <p className="text-muted-foreground mb-2">{application.candidate?.email}</p>
-                
+                <p className="text-muted-foreground mb-2">
+                  {application.candidate?.email}
+                </p>
+
                 {application.candidate?.currentJobTitle && (
                   <p className="text-sm font-medium text-primary mb-2">
                     {application.candidate.currentJobTitle}
                     {application.candidate.currentCompany && (
-                      <span className="text-muted-foreground"> at {application.candidate.currentCompany}</span>
+                      <span className="text-muted-foreground">
+                        {" "}
+                        at {application.candidate.currentCompany}
+                      </span>
                     )}
                   </p>
                 )}
-                
+
                 <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                   <Badge variant="default">
-                    {application.status?.replace('_', ' ').toUpperCase()}
+                    {application.status?.replace("_", " ").toUpperCase()}
                   </Badge>
-                  
+
                   {application.candidate?.experienceLevel && (
                     <Badge variant="secondary">
-                      {application.candidate.experienceLevel.replace('_', ' ').toUpperCase()}
+                      {application.candidate.experienceLevel
+                        .replace("_", " ")
+                        .toUpperCase()}
                     </Badge>
                   )}
-                  
+
                   {application.matchScore && (
                     <Badge variant="outline">
                       <Star className="w-3 h-3 mr-1" />
@@ -197,8 +207,12 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                     <Briefcase className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium">Position</span>
                   </div>
-                  <p className="font-semibold">{application.job?.title || "Not specified"}</p>
-                  <p className="text-sm text-muted-foreground">{application.job?.company}</p>
+                  <p className="font-semibold">
+                    {application.job?.title || "Not specified"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {application.job?.company}
+                  </p>
                 </div>
 
                 <div className="border rounded-lg p-3">
@@ -207,27 +221,33 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                     <span className="text-sm font-medium">Applied</span>
                   </div>
                   <p className="font-semibold">
-                    {application.createdAt ? format(new Date(application.createdAt), "MMM d, yyyy") : "N/A"}
+                    {application.createdAt
+                      ? format(new Date(application.createdAt), "MMM d, yyyy")
+                      : "N/A"}
                   </p>
-                  <p className="text-sm text-muted-foreground">{application.source || "Direct"}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {application.source || "Direct"}
+                  </p>
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div className="border-t pt-4 mt-4">
-                <p className="text-sm font-medium text-muted-foreground mb-3">Quick Actions</p>
+                <p className="text-sm font-medium text-muted-foreground mb-3">
+                  Quick Actions
+                </p>
                 <div className="flex flex-wrap gap-2">
-                  <Button 
-                    onClick={() => setShowInterviewDialog(true)} 
+                  <Button
+                    onClick={() => setShowInterviewDialog(true)}
                     size="sm"
                     className="bg-primary hover:bg-primary/90"
                   >
                     <Calendar className="w-4 h-4 mr-2" />
                     Schedule Interview
                   </Button>
-                  
-                  <Button 
-                    onClick={() => setShowNoteDialog(true)} 
+
+                  <Button
+                    onClick={() => setShowNoteDialog(true)}
                     size="sm"
                     variant="outline"
                     className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
@@ -235,9 +255,9 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                     <MessageSquare className="w-4 h-4 mr-2" />
                     Add Note
                   </Button>
-                  
-                  <Button 
-                    onClick={() => setShowReviewDialog(true)} 
+
+                  <Button
+                    onClick={() => setShowReviewDialog(true)}
                     size="sm"
                     variant="outline"
                     className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
@@ -269,16 +289,20 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                   <Mail className="w-4 h-4 text-muted-foreground" />
                   <div>
                     <p className="text-sm text-muted-foreground">Email</p>
-                    <p className="font-medium">{application.candidate?.email}</p>
+                    <p className="font-medium">
+                      {application.candidate?.email}
+                    </p>
                   </div>
                 </div>
-                
+
                 {application.candidate?.phone && (
                   <div className="flex items-center gap-3">
                     <Phone className="w-4 h-4 text-muted-foreground" />
                     <div>
                       <p className="text-sm text-muted-foreground">Phone</p>
-                      <p className="font-medium">{application.candidate.phone}</p>
+                      <p className="font-medium">
+                        {application.candidate.phone}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -289,7 +313,9 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                   <div className="flex items-start gap-3">
                     <Home className="w-4 h-4 text-muted-foreground mt-1" />
                     <div>
-                      <p className="text-sm text-muted-foreground font-medium">Current Address</p>
+                      <p className="text-sm text-muted-foreground font-medium">
+                        Current Address
+                      </p>
                       <p className="mt-1">
                         {[
                           application.candidate.currentAddress.street,
@@ -297,32 +323,39 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                           application.candidate.currentAddress.state,
                           application.candidate.currentAddress.postalCode,
                           application.candidate.currentAddress.country,
-                        ].filter(Boolean).join(", ")}
+                        ]
+                          .filter(Boolean)
+                          .join(", ")}
                       </p>
                     </div>
                   </div>
                 </div>
               )}
 
-              {application.candidate?.permanentAddress && !application.candidate?.isSameAsPermanent && (
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <MapPin className="w-4 h-4 text-muted-foreground mt-1" />
-                    <div>
-                      <p className="text-sm text-muted-foreground font-medium">Permanent Address</p>
-                      <p className="mt-1">
-                        {[
-                          application.candidate.permanentAddress.street,
-                          application.candidate.permanentAddress.city,
-                          application.candidate.permanentAddress.state,
-                          application.candidate.permanentAddress.postalCode,
-                          application.candidate.permanentAddress.country,
-                        ].filter(Boolean).join(", ")}
-                      </p>
+              {application.candidate?.permanentAddress &&
+                !application.candidate?.isSameAsPermanent && (
+                  <div className="border rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <MapPin className="w-4 h-4 text-muted-foreground mt-1" />
+                      <div>
+                        <p className="text-sm text-muted-foreground font-medium">
+                          Permanent Address
+                        </p>
+                        <p className="mt-1">
+                          {[
+                            application.candidate.permanentAddress.street,
+                            application.candidate.permanentAddress.city,
+                            application.candidate.permanentAddress.state,
+                            application.candidate.permanentAddress.postalCode,
+                            application.candidate.permanentAddress.country,
+                          ]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
             </CardContent>
           </Card>
 
@@ -340,16 +373,24 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                   <div className="border rounded-lg p-3">
                     <p className="text-sm text-muted-foreground">Current CTC</p>
                     <p className="text-lg font-semibold">
-                      {formatCurrency(application.candidate.currentSalary, application.candidate.currentSalaryCurrency)}
+                      {formatCurrency(
+                        application.candidate.currentSalary,
+                        application.candidate.currentSalaryCurrency
+                      )}
                     </p>
                   </div>
                 )}
 
                 {application.candidate?.expectedSalary && (
                   <div className="border rounded-lg p-3">
-                    <p className="text-sm text-muted-foreground">Expected CTC</p>
+                    <p className="text-sm text-muted-foreground">
+                      Expected CTC
+                    </p>
                     <p className="text-lg font-semibold">
-                      {formatCurrency(application.candidate.expectedSalary, application.candidate.expectedSalaryCurrency)}
+                      {formatCurrency(
+                        application.candidate.expectedSalary,
+                        application.candidate.expectedSalaryCurrency
+                      )}
                     </p>
                   </div>
                 )}
@@ -357,28 +398,46 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                 {application.candidate?.yearsOfExperience && (
                   <div className="border rounded-lg p-3">
                     <p className="text-sm text-muted-foreground">Experience</p>
-                    <p className="font-semibold">{application.candidate.yearsOfExperience} years</p>
+                    <p className="font-semibold">
+                      {application.candidate.yearsOfExperience} years
+                    </p>
                   </div>
                 )}
 
                 {application.candidate?.noticePeriod && (
                   <div className="border rounded-lg p-3">
-                    <p className="text-sm text-muted-foreground">Notice Period</p>
-                    <p className="font-semibold">{application.candidate.noticePeriod}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Notice Period
+                    </p>
+                    <p className="font-semibold">
+                      {application.candidate.noticePeriod}
+                    </p>
                   </div>
                 )}
 
                 {application.candidate?.preferredWorkArrangement && (
                   <div className="border rounded-lg p-3">
-                    <p className="text-sm text-muted-foreground">Work Preference</p>
-                    <p className="font-semibold capitalize">{application.candidate.preferredWorkArrangement}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Work Preference
+                    </p>
+                    <p className="font-semibold capitalize">
+                      {application.candidate.preferredWorkArrangement}
+                    </p>
                   </div>
                 )}
 
                 {application.candidate?.willingToRelocate !== undefined && (
                   <div className="border rounded-lg p-3">
-                    <p className="text-sm text-muted-foreground">Willing to Relocate</p>
-                    <Badge variant={application.candidate.willingToRelocate ? "default" : "secondary"}>
+                    <p className="text-sm text-muted-foreground">
+                      Willing to Relocate
+                    </p>
+                    <Badge
+                      variant={
+                        application.candidate.willingToRelocate
+                          ? "default"
+                          : "secondary"
+                      }
+                    >
                       {application.candidate.willingToRelocate ? "Yes" : "No"}
                     </Badge>
                   </div>
@@ -388,25 +447,28 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
           </Card>
 
           {/* Skills */}
-          {application.candidate?.skills && application.candidate.skills.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="w-5 h-5" />
-                  Skills & Expertise
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {application.candidate.skills.map((skill: string, index: number) => (
-                    <Badge key={index} variant="outline">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {application.candidate?.skills &&
+            application.candidate.skills.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Star className="w-5 h-5" />
+                    Skills & Expertise
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {application.candidate.skills.map(
+                      (skill: string, index: number) => (
+                        <Badge key={index} variant="outline">
+                          {skill}
+                        </Badge>
+                      )
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
           {/* Additional Comments */}
           {application.candidate?.additionalComments && (
@@ -436,18 +498,31 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
               </CardHeader>
               <CardContent className="space-y-4">
                 {application.interviews.map((interview: any, index: number) => (
-                  <div key={interview._id || index} className="border rounded-lg p-4">
+                  <div
+                    key={interview._id || index}
+                    className="border rounded-lg p-4"
+                  >
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h4 className="font-semibold text-lg">{interview.title || "Interview"}</h4>
+                        <h4 className="font-semibold text-lg">
+                          {interview.title || "Interview"}
+                        </h4>
                         <p className="text-sm text-muted-foreground">
                           {interview.type && (
                             <Badge variant="outline" className="mr-2">
-                              {interview.type.replace('_', ' ').toUpperCase()}
+                              {interview.type.replace("_", " ").toUpperCase()}
                             </Badge>
                           )}
                           {interview.status && (
-                            <Badge variant={interview.status === 'completed' ? 'default' : interview.status === 'cancelled' ? 'destructive' : 'secondary'}>
+                            <Badge
+                              variant={
+                                interview.status === "completed"
+                                  ? "default"
+                                  : interview.status === "cancelled"
+                                  ? "destructive"
+                                  : "secondary"
+                              }
+                            >
                               {interview.status.toUpperCase()}
                             </Badge>
                           )}
@@ -474,42 +549,61 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                         </Button>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       {interview.scheduledDate && (
                         <div>
                           <p className="text-muted-foreground">Date & Time</p>
                           <p className="font-medium">
-                            {format(new Date(interview.scheduledDate), "MMM d, yyyy 'at' h:mm a")}
+                            {format(
+                              new Date(interview.scheduledDate),
+                              "MMM d, yyyy 'at' h:mm a"
+                            )}
                           </p>
                         </div>
                       )}
-                      
+
                       {interview.duration && (
                         <div>
                           <p className="text-muted-foreground">Duration</p>
-                          <p className="font-medium">{interview.duration} minutes</p>
+                          <p className="font-medium">
+                            {interview.duration} minutes
+                          </p>
                         </div>
                       )}
-                      
-                      {interview.interviewers && interview.interviewers.length > 0 && (
-                        <div className="md:col-span-2">
-                          <p className="text-muted-foreground">Interviewers</p>
-                          <div className="flex flex-wrap gap-2 mt-1">
-                            {interview.interviewers.map((interviewer: any, idx: number) => (
-                              <Badge key={idx} variant="secondary">
-                                {interviewer.name || interviewer.email}
-                              </Badge>
-                            ))}
+
+                      {interview.interviewers &&
+                        interview.interviewers.length > 0 && (
+                          <div className="md:col-span-2">
+                            <p className="text-muted-foreground">
+                              Interviewers
+                            </p>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {interview.interviewers.map(
+                                (interviewer: any, idx: number) => (
+                                  <Badge key={idx} variant="secondary">
+                                    {interviewer.name || interviewer.email}
+                                  </Badge>
+                                )
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                      
+                        )}
+
                       {interview.meetingLink && (
                         <div className="md:col-span-2">
                           <p className="text-muted-foreground">Meeting Link</p>
-                          <Button variant="link" size="sm" className="h-auto p-0" asChild>
-                            <a href={interview.meetingLink} target="_blank" rel="noopener noreferrer">
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0"
+                            asChild
+                          >
+                            <a
+                              href={interview.meetingLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
                               <ExternalLink className="w-4 h-4 mr-1" />
                               Join Meeting
                             </a>
@@ -517,10 +611,12 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                         </div>
                       )}
                     </div>
-                    
+
                     {interview.notes && (
                       <div className="mt-3 pt-3 border-t">
-                        <p className="text-muted-foreground text-sm mb-1">Notes</p>
+                        <p className="text-muted-foreground text-sm mb-1">
+                          Notes
+                        </p>
                         <p className="text-sm">{interview.notes}</p>
                       </div>
                     )}
@@ -541,14 +637,24 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
               </CardHeader>
               <CardContent className="space-y-4">
                 {application.notes.map((note: any, index: number) => (
-                  <div key={note._id || index} className="border rounded-lg p-4">
+                  <div
+                    key={note._id || index}
+                    className="border rounded-lg p-4"
+                  >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
                         <p className="font-medium text-sm text-muted-foreground">
-                          {note.author?.name || note.author?.email || "Anonymous"}
+                          {note.author?.name ||
+                            note.author?.email ||
+                            "Anonymous"}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {note.createdAt ? format(new Date(note.createdAt), "MMM d, yyyy 'at' h:mm a") : ""}
+                          {note.createdAt
+                            ? format(
+                                new Date(note.createdAt),
+                                "MMM d, yyyy 'at' h:mm a"
+                              )
+                            : ""}
                         </p>
                       </div>
                       <div className="flex gap-2">
@@ -572,11 +678,13 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                         </Button>
                       </div>
                     </div>
-                    
+
                     <div className="mt-2">
-                      <p className="text-sm whitespace-pre-wrap">{note.content}</p>
+                      <p className="text-sm whitespace-pre-wrap">
+                        {note.content}
+                      </p>
                     </div>
-                    
+
                     {note.isPrivate && (
                       <Badge variant="outline" className="mt-2">
                         Private Note
@@ -635,52 +743,73 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <div>
                       <p className="text-sm text-muted-foreground">Reviewer</p>
                       <p className="font-medium">
-                        {application.review.reviewer?.name || application.review.reviewer?.email || "Anonymous"}
+                        {application.review.reviewer?.name ||
+                          application.review.reviewer?.email ||
+                          "Anonymous"}
                       </p>
                     </div>
-                    
+
                     {application.review.summary && (
                       <div>
                         <p className="text-sm text-muted-foreground">Summary</p>
                         <p className="text-sm">{application.review.summary}</p>
                       </div>
                     )}
-                    
+
                     {application.review.strengths && (
                       <div>
-                        <p className="text-sm text-muted-foreground">Strengths</p>
-                        <p className="text-sm">{application.review.strengths}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Strengths
+                        </p>
+                        <p className="text-sm">
+                          {application.review.strengths}
+                        </p>
                       </div>
                     )}
-                    
+
                     {application.review.weaknesses && (
                       <div>
-                        <p className="text-sm text-muted-foreground">Areas for Improvement</p>
-                        <p className="text-sm">{application.review.weaknesses}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Areas for Improvement
+                        </p>
+                        <p className="text-sm">
+                          {application.review.weaknesses}
+                        </p>
                       </div>
                     )}
-                    
+
                     {application.review.recommendation && (
                       <div>
-                        <p className="text-sm text-muted-foreground">Recommendation</p>
-                        <Badge variant={
-                          application.review.recommendation === 'hire' ? 'default' :
-                          application.review.recommendation === 'reject' ? 'destructive' : 'secondary'
-                        }>
+                        <p className="text-sm text-muted-foreground">
+                          Recommendation
+                        </p>
+                        <Badge
+                          variant={
+                            application.review.recommendation === "hire"
+                              ? "default"
+                              : application.review.recommendation === "reject"
+                              ? "destructive"
+                              : "secondary"
+                          }
+                        >
                           {application.review.recommendation.toUpperCase()}
                         </Badge>
                       </div>
                     )}
-                    
+
                     {application.review.createdAt && (
                       <div className="pt-2 border-t">
                         <p className="text-xs text-muted-foreground">
-                          Reviewed on {format(new Date(application.review.createdAt), "MMM d, yyyy 'at' h:mm a")}
+                          Reviewed on{" "}
+                          {format(
+                            new Date(application.review.createdAt),
+                            "MMM d, yyyy 'at' h:mm a"
+                          )}
                         </p>
                       </div>
                     )}
@@ -702,77 +831,83 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {application.resume && (
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-4 h-4 text-primary" />
-                    <div>
-                      <p className="font-medium">Resume</p>
-                      <p className="text-xs text-muted-foreground">{application.resume.filename}</p>
+              {application.documents &&
+              Object.keys(application.documents).length > 0 ? (
+                Object.entries(application.documents).map(
+                  ([documentType, document]: [string, any]) => (
+                    <div
+                      key={documentType}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <FileText className="w-4 h-4 text-primary" />
+                        <div>
+                          <p className="font-medium">{documentType}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {document.filename}
+                          </p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" asChild>
+                        <a
+                          href={document.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Download className="w-4 h-4" />
+                        </a>
+                      </Button>
                     </div>
-                  </div>
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={application.resume.url} target="_blank" rel="noopener noreferrer">
-                      <Download className="w-4 h-4" />
-                    </a>
-                  </Button>
-                </div>
-              )}
-
-              {application.coverLetter && (
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-4 h-4 text-primary" />
-                    <div>
-                      <p className="font-medium">Cover Letter</p>
-                      <p className="text-xs text-muted-foreground">{application.coverLetter.filename}</p>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={application.coverLetter.url} target="_blank" rel="noopener noreferrer">
-                      <Download className="w-4 h-4" />
-                    </a>
-                  </Button>
-                </div>
-              )}
-
-              {!application.resume && !application.coverLetter && (
-                <p className="text-sm text-muted-foreground text-center py-4">No files uploaded</p>
+                  )
+                )
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No files uploaded
+                </p>
               )}
             </CardContent>
           </Card>
 
           {/* Status History */}
-          {application.statusHistory && application.statusHistory.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
-                  Status History
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {application.statusHistory.map((status: any, index: number) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <div className={`w-2 h-2 rounded-full ${index === 0 ? 'bg-primary' : 'bg-muted-foreground'}`}></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium capitalize">
-                          {status.status.replace('_', ' ')}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {format(new Date(status.date), "MMM d, yyyy")}
-                        </p>
-                        {status.reason && (
-                          <p className="text-xs text-muted-foreground">{status.reason}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {application.statusHistory &&
+            application.statusHistory.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="w-5 h-5" />
+                    Status History
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {application.statusHistory.map(
+                      (status: any, index: number) => (
+                        <div key={index} className="flex items-center gap-3">
+                          <div
+                            className={`w-2 h-2 rounded-full ${
+                              index === 0 ? "bg-primary" : "bg-muted-foreground"
+                            }`}
+                          ></div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium capitalize">
+                              {status.status.replace("_", " ")}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {format(new Date(status.date), "MMM d, yyyy")}
+                            </p>
+                            {status.reason && (
+                              <p className="text-xs text-muted-foreground">
+                                {status.reason}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
         </div>
       </div>
 

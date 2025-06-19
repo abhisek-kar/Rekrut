@@ -31,6 +31,11 @@ export interface IJob extends Document {
   expectedStartDate?: Date;
   applicationInstructions?: string;
   requiredDocuments?: string[];
+  screeningQuestions?: Array<{
+    question: string;
+    required: boolean;
+    id: string;
+  }>;
   customFields?: Record<string, unknown>;
   visibility: string; // 'public', 'private'
   featured: boolean;
@@ -113,6 +118,13 @@ const JobSchema = new Schema<IJob>(
     expectedStartDate: { type: Date },
     applicationInstructions: { type: String },
     requiredDocuments: [{ type: String }],
+    screeningQuestions: [
+      {
+        question: { type: String, required: true },
+        required: { type: Boolean, default: false },
+        id: { type: String, required: true },
+      },
+    ],
     customFields: { type: Schema.Types.Mixed },
     visibility: {
       type: String,

@@ -11,6 +11,7 @@ import PersonalInfoStep from "./steps/PersonalInfoStep";
 import AddressInfoStep from "./steps/AddressInfoStep";
 import ProfessionalDetailsStep from "./steps/ProfessionalDetailsStep";
 import DocumentUploadStep from "./steps/DocumentUploadStep";
+import ScreeningQuestionsStep from "./steps/ScreeningQuestionsStep";
 import ApplicationSettingsStep from "./steps/ApplicationSettingsStep";
 import ReviewSubmitStep from "./steps/ReviewSubmitStep";
 
@@ -26,6 +27,13 @@ interface Job {
     country?: string;
   };
   requiredDocuments?: string[];
+  screeningQuestions?: Array<{
+    id: string;
+    question: string;
+    required: boolean;
+  }>;
+  applicationInstructions?: string;
+  applicationDeadline?: string;
 }
 
 export interface ApplicationData {
@@ -66,16 +74,24 @@ export interface ApplicationData {
   expectedCTCCurrency?: string;
   noticePeriod?: string;
 
-  // Documents
-  resume?: File;
-  coverLetter?: File;
-  portfolioFiles?: File[];
+  // Documents - Dynamic based on job requirements
+  documents?: {
+    [key: string]: File; // Dynamic document uploads based on job.requiredDocuments
+  };
+
+  // Screening Questions - Answers to job-specific questions
+  screeningAnswers?: {
+    [questionId: string]: string; // Question ID -> Answer
+  };
 
   // Application Settings
   availableStartDate?: Date;
   willingToRelocate?: boolean;
   preferredWorkType?: string;
   additionalMessage?: string;
+  customFieldAnswers?: {
+    [fieldKey: string]: any;
+  };
 }
 
 interface MultiStepApplicationFormProps {
@@ -89,8 +105,9 @@ const STEPS = [
   { id: 2, title: "Address", description: "Address & location details" },
   { id: 3, title: "Professional", description: "Work experience & skills" },
   { id: 4, title: "Documents", description: "Resume & portfolio" },
-  { id: 5, title: "Preferences", description: "Work preferences" },
-  { id: 6, title: "Review", description: "Review & submit" },
+  { id: 5, title: "Questions", description: "Screening questions" },
+  { id: 6, title: "Preferences", description: "Work preferences" },
+  { id: 7, title: "Review", description: "Review & submit" },
 ];
 
 export default function MultiStepApplicationForm({
@@ -175,17 +192,12 @@ export default function MultiStepApplicationForm({
       formData.append("jobId", job._id);
       formData.append("applicationData", JSON.stringify(applicationData));
 
-      if (applicationData.resume) {
-        formData.append("resume", applicationData.resume);
-      }
-
-      if (applicationData.coverLetter) {
-        formData.append("coverLetter", applicationData.coverLetter);
-      }
-
-      if (applicationData.portfolioFiles) {
-        applicationData.portfolioFiles.forEach((file, index) => {
-          formData.append(`portfolioFile_${index}`, file);
+      // Handle dynamic documents based on job requirements
+      if (applicationData.documents) {
+        Object.entries(applicationData.documents).forEach(([documentType, file]) => {
+          if (file) {
+            formData.append(documentType, file);
+          }
         });
       }
 
@@ -231,12 +243,20 @@ export default function MultiStepApplicationForm({
         );
       case 5:
         return (
+          <ScreeningQuestionsStep
+            data={applicationData}
+            updateData={updateApplicationData}
+            job={job}
+          />
+        );
+      case 6:
+        return (
           <ApplicationSettingsStep
             data={applicationData}
             updateData={updateApplicationData}
           />
         );
-      case 6:
+      case 7:
         return (
           <ReviewSubmitStep
             data={applicationData}
@@ -244,6 +264,7 @@ export default function MultiStepApplicationForm({
             isSubmitting={isSubmitting}
             jobTitle={job.title}
             companyName={job.company}
+            job={job}
           />
         );
       default:
@@ -273,10 +294,30 @@ export default function MultiStepApplicationForm({
           applicationData.expectedCTC // Required field as per our changes
         );
       case 4:
-        return applicationData.resume;
+        // Check if all required documents are uploaded
+        const requiredDocs = job.requiredDocuments || [];
+        if (requiredDocs.length === 0) {
+          // If no specific documents required, at least one document should be uploaded
+          return applicationData.documents && Object.keys(applicationData.documents).length > 0;
+        }
+        // Check if all required documents are present
+        return requiredDocs.every(docType => 
+          applicationData.documents && applicationData.documents[docType]
+        );
       case 5:
-        return true; // Optional step
+        // Check if all required screening questions are answered
+        const screeningQuestions = job.screeningQuestions || [];
+        const requiredQuestions = screeningQuestions.filter(q => q.required);
+        if (requiredQuestions.length === 0) {
+          return true; // No required questions
+        }
+        const answers = applicationData.screeningAnswers || {};
+        return requiredQuestions.every(q => 
+          answers[q.id] && answers[q.id].trim().length > 0
+        );
       case 6:
+        return true; // Optional step
+      case 7:
         return true;
       default:
         return false;

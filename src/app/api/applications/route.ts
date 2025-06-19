@@ -293,19 +293,53 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate that a resume is provided
-    const resumeFile = formData.get("resume") as File;
-    if (!resumeFile) {
-      return NextResponse.json(
-        { error: "Resume is required. Please upload your resume." },
-        { status: 400 }
-      );
-    }
-
-    // Check if job exists and is active
+    // Check if job exists and is active (move this earlier)
     const job = await Job.findById(jobId);
     if (!job) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    }
+
+    // Validate that required documents are provided
+    const requiredDocuments = job.requiredDocuments || [];
+    console.log("Job required documents:", requiredDocuments);
+
+    // If no specific requirements, default to requiring at least one document
+    if (requiredDocuments.length === 0) {
+      // Check if at least one document is uploaded
+      const hasAnyDocument = Array.from(formData.keys()).some(
+        (key) =>
+          key !== "jobId" &&
+          key !== "applicationData" &&
+          formData.get(key) instanceof File
+      );
+
+      if (!hasAnyDocument) {
+        return NextResponse.json(
+          {
+            error:
+              "At least one document is required. Please upload your resume or other relevant documents.",
+          },
+          { status: 400 }
+        );
+      }
+    } else {
+      // Check if all required documents are present
+      const missingDocuments = requiredDocuments.filter((docType) => {
+        const file = formData.get(docType) as File;
+        return !file || file.size === 0;
+      });
+
+      if (missingDocuments.length > 0) {
+        return NextResponse.json(
+          {
+            error: `Missing required documents: ${missingDocuments.join(
+              ", "
+            )}. Please upload all required documents.`,
+            missingDocuments,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // Check if application already exists for this job and email
@@ -321,68 +355,62 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Handle file uploads to S3
+    // Handle file uploads to S3 - Dynamic documents based on job requirements
     const documents: any = {};
-    let additionalDocuments: any[] = [];
+    const documentsToProcess =
+      requiredDocuments.length > 0
+        ? requiredDocuments
+        : Array.from(formData.keys()).filter(
+            (key) =>
+              key !== "jobId" &&
+              key !== "applicationData" &&
+              formData.get(key) instanceof File
+          );
 
     try {
-      // Get resume file and upload to S3
-      const resumeFile = formData.get("resume") as File;
-      if (resumeFile) {
-        console.log(
-          `Uploading resume: ${resumeFile.name}, size: ${resumeFile.size}`
-        );
-        const resumeKey = generateS3Key(
-          "applications/resumes",
-          resumeFile.name
-        );
-        const resumeUrl = await uploadToS3(resumeFile, resumeKey);
-        documents.resume = {
-          filename: resumeFile.name,
-          url: resumeUrl,
-        };
-        console.log(`Resume uploaded successfully: ${resumeUrl}`);
-      }
+      for (const documentType of documentsToProcess) {
+        const file = formData.get(documentType) as File;
+        if (file && file.size > 0) {
+          console.log(
+            `Uploading ${documentType}: ${file.name}, size: ${file.size}`
+          );
 
-      // Get cover letter file and upload to S3
-      const coverLetterFile = formData.get("coverLetter") as File;
-      if (coverLetterFile) {
-        console.log(
-          `Uploading cover letter: ${coverLetterFile.name}, size: ${coverLetterFile.size}`
-        );
-        const coverLetterKey = generateS3Key(
-          "applications/cover-letters",
-          coverLetterFile.name
-        );
-        const coverLetterUrl = await uploadToS3(
-          coverLetterFile,
-          coverLetterKey
-        );
-        documents.coverLetter = {
-          filename: coverLetterFile.name,
-          url: coverLetterUrl,
-        };
-        console.log(`Cover letter uploaded successfully: ${coverLetterUrl}`);
-      }
+          // Determine S3 directory based on document type
+          let s3Directory = "applications/documents";
+          const normalizedType = documentType.toLowerCase();
 
-      // Get portfolio files and upload to S3
-      let fileIndex = 0;
-      while (formData.get(`portfolioFile_${fileIndex}`)) {
-        const file = formData.get(`portfolioFile_${fileIndex}`) as File;
-        console.log(
-          `Uploading portfolio file ${fileIndex}: ${file.name}, size: ${file.size}`
-        );
-        const portfolioKey = generateS3Key("applications/portfolio", file.name);
-        const portfolioUrl = await uploadToS3(file, portfolioKey);
-        additionalDocuments.push({
-          filename: file.name,
-          url: portfolioUrl,
-          documentType: "portfolio",
-        });
-        console.log(
-          `Portfolio file ${fileIndex} uploaded successfully: ${portfolioUrl}`
-        );
-        fileIndex++;
+          if (
+            normalizedType.includes("resume") ||
+            normalizedType.includes("cv")
+          ) {
+            s3Directory = "applications/resumes";
+          } else if (
+            normalizedType.includes("cover") ||
+            normalizedType.includes("letter")
+          ) {
+            s3Directory = "applications/cover-letters";
+          } else if (
+            normalizedType.includes("portfolio") ||
+            normalizedType.includes("sample")
+          ) {
+            s3Directory = "applications/portfolio";
+          } else if (normalizedType.includes("certificate")) {
+            s3Directory = "applications/certificates";
+          } else if (normalizedType.includes("transcript")) {
+            s3Directory = "applications/transcripts";
+          }
+
+          const documentKey = generateS3Key(s3Directory, file.name);
+          const documentUrl = await uploadToS3(file, documentKey);
+
+          documents[documentType] = {
+            filename: file.name,
+            url: documentUrl,
+            documentType: documentType,
+          };
+
+          console.log(`${documentType} uploaded successfully: ${documentUrl}`);
+        }
       }
     } catch (uploadError) {
       console.error("File upload error:", uploadError);
@@ -430,10 +458,7 @@ export async function POST(request: NextRequest) {
           reason: "Application submitted via website",
         },
       ],
-      resume: documents.resume,
-      coverLetter: documents.coverLetter,
-      additionalDocuments:
-        additionalDocuments.length > 0 ? additionalDocuments : undefined,
+      documents: documents, // Use dynamic documents structure
       source: "website",
       // Only store custom screening question answers here, not standard form fields
       answers: {},
