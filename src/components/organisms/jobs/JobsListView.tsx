@@ -45,7 +45,8 @@ import { useJobActions } from "@/hooks/useJobActions";
 
 // Enhanced job interface
 interface JobItem {
-  _id: string;
+  slug: string;
+  publicId: string;
   title: string;
   company: string;
   department?: string;
@@ -261,7 +262,7 @@ export function JobsListView({
   // Bulk actions
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedJobs(jobs.map((job) => job._id));
+      setSelectedJobs(jobs.map((job) => job.publicId));
     } else {
       setSelectedJobs([]);
     }
@@ -498,38 +499,60 @@ export function JobsListView({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuLabel>Bulk Actions</DropdownMenuLabel>
-                
-                <DropdownMenuItem onClick={() => jobActions.handleJobAction("status", selectedJobs)}>
+
+                <DropdownMenuItem
+                  onClick={() =>
+                    jobActions.handleJobAction("status", selectedJobs)
+                  }
+                >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Change Status
                 </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => jobActions.handleJobAction("visibility", selectedJobs)}>
+
+                <DropdownMenuItem
+                  onClick={() =>
+                    jobActions.handleJobAction("visibility", selectedJobs)
+                  }
+                >
                   <Eye className="h-4 w-4 mr-2" />
                   Change Visibility
                 </DropdownMenuItem>
-                
-                <DropdownMenuItem onClick={() => jobActions.handleJobAction("feature", selectedJobs)}>
+
+                <DropdownMenuItem
+                  onClick={() =>
+                    jobActions.handleJobAction("feature", selectedJobs)
+                  }
+                >
                   <Star className="h-4 w-4 mr-2" />
                   Feature Actions
                 </DropdownMenuItem>
-                
+
                 {userRole === "admin" && jobActions.users.length > 0 && (
-                  <DropdownMenuItem onClick={() => jobActions.handleJobAction("assign", selectedJobs)}>
+                  <DropdownMenuItem
+                    onClick={() =>
+                      jobActions.handleJobAction("assign", selectedJobs)
+                    }
+                  >
                     <UserPlus className="h-4 w-4 mr-2" />
                     Assign Jobs
                   </DropdownMenuItem>
                 )}
-                
+
                 <DropdownMenuSeparator />
-                
-                <DropdownMenuItem onClick={() => jobActions.handleJobAction("archive", selectedJobs)}>
+
+                <DropdownMenuItem
+                  onClick={() =>
+                    jobActions.handleJobAction("archive", selectedJobs)
+                  }
+                >
                   <Archive className="h-4 w-4 mr-2" />
                   Archive Jobs
                 </DropdownMenuItem>
-                
+
                 <DropdownMenuItem
-                  onClick={() => jobActions.handleJobAction("delete", selectedJobs)}
+                  onClick={() =>
+                    jobActions.handleJobAction("delete", selectedJobs)
+                  }
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="h-4 w-4 mr-2" />

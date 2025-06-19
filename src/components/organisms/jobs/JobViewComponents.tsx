@@ -34,10 +34,12 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import { getJobUrl } from "@/lib/job-urls";
 import { JobActionsDropdown } from "./JobActionsDropdown";
 
 interface JobItem {
-  _id: string;
+  slug: string;
+  publicId: string;
   title: string;
   company: string;
   department?: string;
@@ -164,13 +166,13 @@ export function JobGridView({
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {jobs.map((job) => (
-        <Card key={job._id} className="hover:shadow-md transition-shadow">
+        <Card key={job.publicId} className="hover:shadow-md transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-4">
               <Checkbox
-                checked={selectedJobs.includes(job._id)}
+                checked={selectedJobs.includes(job.publicId)}
                 onCheckedChange={(checked) =>
-                  onSelectJob(job._id, checked as boolean)
+                  onSelectJob(job.publicId, checked as boolean)
                 }
               />
               <Badge className={getStatusColor(job.status)}>
@@ -251,7 +253,7 @@ export function JobGridView({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => router.push(`${viewBaseUrl}/${job._id}`)}
+                    onClick={() => router.push(`${viewBaseUrl}/${job.slug}`)}
                   >
                     <Eye className="w-3 h-3" />
                   </Button>
@@ -259,14 +261,14 @@ export function JobGridView({
                     variant="outline"
                     size="sm"
                     onClick={() =>
-                      router.push(`${editBaseUrl}/${job._id}/edit`)
+                      router.push(`${editBaseUrl}/${job.slug}/edit`)
                     }
                   >
                     <Edit3 className="w-3 h-3" />
                   </Button>
                   {jobActions ? (
                     <JobActionsDropdown
-                      jobId={job._id}
+                      jobId={job.publicId}
                       jobActions={jobActions}
                       userRole={userRole}
                       showCopyLink={true}
@@ -284,7 +286,7 @@ export function JobGridView({
                         <DropdownMenuItem
                           onClick={() =>
                             navigator.clipboard.writeText(
-                              `${window.location.origin}/jobs/${job._id}`
+                              getJobUrl({ slug: job.slug })
                             )
                           }
                         >
@@ -361,12 +363,12 @@ export function JobTableView({
         </TableHeader>
         <TableBody>
           {jobs.map((job) => (
-            <TableRow key={job._id} className="hover:bg-muted/50">
+            <TableRow key={job.publicId} className="hover:bg-muted/50">
               <TableCell>
                 <Checkbox
-                  checked={selectedJobs.includes(job._id)}
+                  checked={selectedJobs.includes(job.publicId)}
                   onCheckedChange={(checked) =>
-                    onSelectJob(job._id, checked as boolean)
+                    onSelectJob(job.publicId, checked as boolean)
                   }
                 />
               </TableCell>
@@ -442,7 +444,7 @@ export function JobTableView({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => router.push(`${viewBaseUrl}/${job._id}`)}
+                    onClick={() => router.push(`${viewBaseUrl}/${job.slug}`)}
                   >
                     <Eye className="w-4 h-4" />
                   </Button>
@@ -450,14 +452,14 @@ export function JobTableView({
                     variant="ghost"
                     size="sm"
                     onClick={() =>
-                      router.push(`${editBaseUrl}/${job._id}/edit`)
+                      router.push(`${editBaseUrl}/${job.slug}/edit`)
                     }
                   >
                     <Edit3 className="w-4 h-4" />
                   </Button>
                   {jobActions ? (
                     <JobActionsDropdown
-                      jobId={job._id}
+                      jobId={job.publicId}
                       jobActions={jobActions}
                       userRole={userRole}
                       showCopyLink={true}
@@ -475,7 +477,7 @@ export function JobTableView({
                         <DropdownMenuItem
                           onClick={() =>
                             navigator.clipboard.writeText(
-                              `${window.location.origin}/jobs/${job._id}`
+                              getJobUrl({ slug: job.slug })
                             )
                           }
                         >

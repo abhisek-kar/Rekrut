@@ -1,6 +1,9 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 
 export interface IJob extends Document {
+  publicId: string; // UUID for public URLs
+  slug: string; // SEO-friendly URL slug
   title: string;
   company: string;
   department?: string;
@@ -41,7 +44,7 @@ export interface IJob extends Document {
   featured: boolean;
   status: string; // 'draft', 'active', 'closed', 'archived' , 'paused', 'pending_review'
   isTemplate?: boolean; // Whether this is a job template
-  templateId?: mongoose.Types.ObjectId; 
+  templateId?: mongoose.Types.ObjectId;
   createdBy: mongoose.Types.ObjectId;
   assignedTo?: mongoose.Types.ObjectId;
   createdAt: Date;
@@ -50,6 +53,17 @@ export interface IJob extends Document {
 
 const JobSchema = new Schema<IJob>(
   {
+    publicId: {
+      type: String,
+      unique: true,
+      required: true,
+      default: () => uuidv4(),
+    },
+    slug: {
+      type: String,
+      unique: true,
+      // Don't set required: true since it's auto-generated in pre-save
+    },
     title: { type: String, required: true },
     company: { type: String, required: true },
     department: { type: String },
@@ -65,46 +79,46 @@ const JobSchema = new Schema<IJob>(
       country: { type: String },
       postalCode: { type: String },
     },
-    description: { 
-      type: String, 
-      required: function(this: IJob) {
+    description: {
+      type: String,
+      required: function (this: IJob) {
         // Only required if status is not 'draft'
-        return this.status !== 'draft';
-      }
+        return this.status !== "draft";
+      },
     },
     responsibilities: { type: String },
     requirements: { type: String },
     skills: {
       type: [String],
       validate: {
-        validator: function(this: IJob, value: string[]) {
+        validator: function (this: IJob, value: string[]) {
           // Skills are required if status is not 'draft'
-          if (this.status !== 'draft') {
+          if (this.status !== "draft") {
             return value && value.length > 0;
           }
           return true;
         },
-        message: 'At least one skill is required for published jobs'
-      }
+        message: "At least one skill is required for published jobs",
+      },
     },
     experienceLevel: {
       type: String,
       enum: ["entry", "mid", "senior"],
       default: "mid",
-      required: function(this: IJob) {
+      required: function (this: IJob) {
         // Only required if status is not 'draft'
-        return this.status !== 'draft';
-      }
+        return this.status !== "draft";
+      },
     },
     educationRequirements: [{ type: String }],
     employmentType: {
       type: String,
       enum: ["full-time", "part-time", "contract", "internship"],
       default: "full-time",
-      required: function(this: IJob) {
+      required: function (this: IJob) {
         // Only required if status is not 'draft'
-        return this.status !== 'draft';
-      }
+        return this.status !== "draft";
+      },
     },
     salary: {
       min: { type: Number },
@@ -137,7 +151,14 @@ const JobSchema = new Schema<IJob>(
       type: String,
       required: true,
       default: "draft",
-      enum: ["draft", "active", "closed", "archived", "paused", "pending_review"],
+      enum: [
+        "draft",
+        "active",
+        "closed",
+        "archived",
+        "paused",
+        "pending_review",
+      ],
     },
     isTemplate: { type: Boolean, default: false },
     templateId: { type: Schema.Types.ObjectId, ref: "Job" },
@@ -146,6 +167,52 @@ const JobSchema = new Schema<IJob>(
   },
   { timestamps: true }
 );
+
+// Utility function to generate slug from title
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-") // Replace multiple hyphens with single
+    .trim() // Remove leading/trailing spaces
+    .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
+}
+
+// Generate random string for uniqueness
+function generateRandomString(length: number = 4): string {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+// Pre-save middleware to generate slug
+JobSchema.pre("save", async function (next) {
+  // Always generate slug if it's not set or if title is modified
+  if (this.isNew || this.isModified("title") || !this.slug) {
+    const baseSlug = generateSlug(this.title);
+    const randomString = generateRandomString();
+    this.slug = `${baseSlug}-${randomString}`;
+
+    // Ensure slug is unique (very unlikely to collide, but just in case)
+    let counter = 1;
+    let finalSlug = this.slug;
+
+    const JobModel = this.constructor as Model<IJob>;
+    while (
+      await JobModel.findOne({ slug: finalSlug, _id: { $ne: this._id } })
+    ) {
+      finalSlug = `${this.slug}-${counter}`;
+      counter++;
+    }
+
+    this.slug = finalSlug;
+  }
+  next();
+});
 
 // Create indexes for common queries
 JobSchema.index({ status: 1 });
@@ -156,6 +223,8 @@ JobSchema.index({ skills: 1 });
 JobSchema.index({ createdAt: -1 });
 JobSchema.index({ isTemplate: 1 });
 JobSchema.index({ templateId: 1 });
+JobSchema.index({ publicId: 1 });
+JobSchema.index({ slug: 1 });
 
 // Use function to avoid issues with model compilation in Next.js hot reloading
 export default (mongoose.models.Job as Model<IJob>) ||

@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import dbConnect from '@/lib/db/connect';
-import Job from '@/models/Job';
-import User from '@/models/User';
+import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
+import dbConnect from "@/lib/db/connect";
+import Job from "@/models/Job";
+import User from "@/models/User";
 
 export async function GET(
   request: NextRequest,
@@ -10,45 +10,53 @@ export async function GET(
 ) {
   try {
     await dbConnect();
-    
+
     const { id } = params;
-    
-    // Validate ObjectId
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json(
-        { error: 'Invalid job ID' },
-        { status: 400 }
-      );
+
+    let job;
+
+    // Try to find by slug first (preferred for SEO), then by publicId, then by ObjectId (legacy)
+    if (id.includes("-")) {
+      // Likely a slug
+      job = await Job.findOne({
+        slug: id,
+        visibility: "public",
+        status: "active",
+      })
+        .populate("createdBy", "firstName lastName")
+        .lean();
+    } else if (id.length === 36 && id.includes("-")) {
+      // Likely a UUID (publicId)
+      job = await Job.findOne({
+        publicId: id,
+        visibility: "public",
+        status: "active",
+      })
+        .populate("createdBy", "firstName lastName")
+        .lean();
+    } else if (mongoose.Types.ObjectId.isValid(id)) {
+      // Legacy ObjectId support (for backward compatibility)
+      job = await Job.findOne({
+        _id: id,
+        visibility: "public",
+        status: "active",
+      })
+        .populate("createdBy", "firstName lastName")
+        .lean();
     }
-    
-    // Find the job by ID (only public and active jobs)
-    const job = await Job.findOne({
-      _id: id,
-      visibility: 'public',
-      status: 'active'
-    })
-    .populate('createdBy', 'firstName lastName')
-    .lean();
-    
+
     if (!job) {
-      return NextResponse.json(
-        { error: 'Job not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
-    
+
     // Increment view count (optional - you might want to track this)
-    await Job.findByIdAndUpdate(id, { 
-      $inc: { viewCount: 1 } 
+    await Job.findByIdAndUpdate(job._id, {
+      $inc: { viewCount: 1 },
     });
-    
+
     return NextResponse.json({ job });
-    
   } catch (error) {
-    console.error('Error fetching job:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch job' },
-      { status: 500 }
-    );
+    console.error("Error fetching job:", error);
+    return NextResponse.json({ error: "Failed to fetch job" }, { status: 500 });
   }
 }

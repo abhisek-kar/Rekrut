@@ -74,8 +74,29 @@ export async function GET(request: NextRequest) {
     };
 
     // Additional filters
+    let internalJobId: mongoose.Types.ObjectId | null = null;
+
     if (jobId) {
-      query.job = new mongoose.Types.ObjectId(jobId);
+      // Convert slug/publicId to internal _id
+      let job: any;
+      if (jobId.includes("-") && jobId.length > 20) {
+        // Likely a slug
+        job = await Job.findOne({ slug: jobId, assignedTo: session.user.id });
+      } else if (jobId.length === 36 && jobId.includes("-")) {
+        // Likely a publicId (UUID format)
+        job = await Job.findOne({
+          publicId: jobId,
+          assignedTo: session.user.id,
+        });
+      } else if (mongoose.Types.ObjectId.isValid(jobId)) {
+        // Legacy ObjectId
+        job = await Job.findOne({ _id: jobId, assignedTo: session.user.id });
+      }
+
+      if (job) {
+        internalJobId = job._id;
+        query.job = internalJobId;
+      }
     }
 
     if (status && status !== "all") {
@@ -83,16 +104,16 @@ export async function GET(request: NextRequest) {
     }
 
     // If requesting summary data for a specific job
-    if (summary && jobId) {
+    if (summary && internalJobId) {
       const applications = await Application.find({
-        job: new mongoose.Types.ObjectId(jobId),
+        job: internalJobId,
       })
         .sort({ createdAt: -1 })
         .limit(5)
         .lean();
 
       const statusCounts = await Application.aggregate([
-        { $match: { job: new mongoose.Types.ObjectId(jobId) } },
+        { $match: { job: internalJobId } },
         { $group: { _id: "$status", count: { $sum: 1 } } },
       ]);
 

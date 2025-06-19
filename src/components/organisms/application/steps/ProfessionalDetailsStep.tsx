@@ -22,11 +22,20 @@ import { ChevronRight, ChevronLeft, Briefcase } from "lucide-react";
 interface ProfessionalDetailsStepProps {
   data: ApplicationData;
   updateData: (updates: Partial<ApplicationData>) => void;
+  job?: {
+    salary?: {
+      currency?: string;
+    };
+  };
 }
 const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
   data,
   updateData,
+  job,
 }) => {
+  // Get currency from job or default to INR
+  const defaultCurrency = job?.salary?.currency || "INR";
+
   const handleSkillsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const skillsArray = e.target.value
       .split(",")
@@ -160,37 +169,19 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
                   onChange={(e) =>
                     updateData({
                       currentCTC: parseInt(e.target.value) || undefined,
+                      currentCTCCurrency: defaultCurrency, // Auto-set to job currency
                     })
                   }
                   placeholder="800000"
                   className="flex-1"
                 />{" "}
-                <Select
-                  value={data.currentCTCCurrency || "INR"}
-                  onValueChange={(value) =>
-                    updateData({ currentCTCCurrency: value })
-                  }
-                >
-                  {" "}
-                  <SelectTrigger className="w-24">
-                    {" "}
-                    <SelectValue />{" "}
-                  </SelectTrigger>{" "}
-                  <SelectContent>
-                    {" "}
-                    <SelectItem value="INR">INR</SelectItem>{" "}
-                    <SelectItem value="USD">USD</SelectItem>{" "}
-                    <SelectItem value="EUR">EUR</SelectItem>{" "}
-                    <SelectItem value="GBP">GBP</SelectItem>{" "}
-                    <SelectItem value="CAD">CAD</SelectItem>{" "}
-                    <SelectItem value="AUD">AUD</SelectItem>{" "}
-                    <SelectItem value="SGD">SGD</SelectItem>{" "}
-                  </SelectContent>{" "}
-                </Select>{" "}
+                <div className="flex items-center justify-center min-w-16 px-3 py-2 bg-muted rounded-md text-sm font-medium">
+                  {defaultCurrency}
+                </div>
               </div>{" "}
               <p className="text-xs text-muted-foreground">
                 {" "}
-                Enter your current Cost to Company per annum{" "}
+                Enter your current Cost to Company per annum in {defaultCurrency}{" "}
               </p>{" "}
             </div>{" "}
             <div className="space-y-2">
@@ -208,38 +199,20 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
                   onChange={(e) =>
                     updateData({
                       expectedCTC: parseInt(e.target.value) || undefined,
+                      expectedCTCCurrency: defaultCurrency, // Auto-set to job currency
                     })
                   }
                   placeholder="1200000"
                   required
                   className="flex-1"
                 />{" "}
-                <Select
-                  value={data.expectedCTCCurrency || "INR"}
-                  onValueChange={(value) =>
-                    updateData({ expectedCTCCurrency: value })
-                  }
-                >
-                  {" "}
-                  <SelectTrigger className="w-24">
-                    {" "}
-                    <SelectValue />{" "}
-                  </SelectTrigger>{" "}
-                  <SelectContent>
-                    {" "}
-                    <SelectItem value="INR">INR</SelectItem>{" "}
-                    <SelectItem value="USD">USD</SelectItem>{" "}
-                    <SelectItem value="EUR">EUR</SelectItem>{" "}
-                    <SelectItem value="GBP">GBP</SelectItem>{" "}
-                    <SelectItem value="CAD">CAD</SelectItem>{" "}
-                    <SelectItem value="AUD">AUD</SelectItem>{" "}
-                    <SelectItem value="SGD">SGD</SelectItem>{" "}
-                  </SelectContent>{" "}
-                </Select>{" "}
+                <div className="flex items-center justify-center min-w-16 px-3 py-2 bg-muted rounded-md text-sm font-medium">
+                  {defaultCurrency}
+                </div>
               </div>{" "}
               <p className="text-xs text-muted-foreground">
                 {" "}
-                Enter your expected Cost to Company per annum{" "}
+                Enter your expected Cost to Company per annum in {defaultCurrency}{" "}
               </p>{" "}
             </div>{" "}
             <div className="space-y-2">
@@ -251,7 +224,7 @@ const ProfessionalDetailsStep: React.FC<ProfessionalDetailsStepProps> = ({
               </Label>{" "}
               <Textarea
                 id="skills"
-                value={data.skills.join(", ")}
+                value={data.skills?.join(", ") || ""}
                 onChange={handleSkillsChange}
                 placeholder="List your key skills, technologies, and tools (e.g., React, Node.js, Python, AWS, etc.)"
                 rows={3}

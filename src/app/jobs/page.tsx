@@ -1,23 +1,40 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Briefcase, Clock, DollarSign, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/shadcn-ui/button';
-import { Input } from '@/components/shadcn-ui/input';
+import React, { useState, useEffect } from "react";
+import {
+  Search,
+  MapPin,
+  Briefcase,
+  Clock,
+  DollarSign,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { Button } from "@/components/shadcn-ui/button";
+import { Input } from "@/components/shadcn-ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/shadcn-ui/select';
-import { Badge } from '@/components/shadcn-ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/shadcn-ui/card';
-import { Skeleton } from '@/components/shadcn-ui/skeleton';
-import Link from 'next/link';
+} from "@/components/shadcn-ui/select";
+import { Badge } from "@/components/shadcn-ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/shadcn-ui/card";
+import { Skeleton } from "@/components/shadcn-ui/skeleton";
+import { getJobUrl } from "@/lib/job-urls";
+import Link from "next/link";
 
 interface Job {
   _id: string;
+  slug: string;
+  publicId: string;
   title: string;
   company: string;
   department?: string;
@@ -29,8 +46,8 @@ interface Job {
   };
   description?: string;
   skills?: string[];
-  experienceLevel?: 'entry' | 'mid' | 'senior';
-  employmentType?: 'full-time' | 'part-time' | 'contract' | 'internship';
+  experienceLevel?: "entry" | "mid" | "senior";
+  employmentType?: "full-time" | "part-time" | "contract" | "internship";
   salary?: {
     min?: number;
     max?: number;
@@ -68,13 +85,13 @@ export default function JobsPage() {
   });
 
   // Filter states
-  const [search, setSearch] = useState('');
-  const [location, setLocation] = useState('');
-  const [employmentType, setEmploymentType] = useState('all');
-  const [experienceLevel, setExperienceLevel] = useState('all');
-  const [locationType, setLocationType] = useState('all');
-  const [sortBy, setSortBy] = useState('createdAt');
-  const [sortOrder, setSortOrder] = useState('desc');
+  const [search, setSearch] = useState("");
+  const [location, setLocation] = useState("");
+  const [employmentType, setEmploymentType] = useState("all");
+  const [experienceLevel, setExperienceLevel] = useState("all");
+  const [locationType, setLocationType] = useState("all");
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState("desc");
 
   const fetchJobs = async (page = 1) => {
     setLoading(true);
@@ -84,21 +101,21 @@ export default function JobsPage() {
         limit: pagination.limit.toString(),
         ...(search && { search }),
         ...(location && { location }),
-        ...(employmentType !== 'all' && { employmentType }),
-        ...(experienceLevel !== 'all' && { experienceLevel }),
-        ...(locationType !== 'all' && { locationType }),
+        ...(employmentType !== "all" && { employmentType }),
+        ...(experienceLevel !== "all" && { experienceLevel }),
+        ...(locationType !== "all" && { locationType }),
         sortBy,
         sortOrder,
       });
 
       const response = await fetch(`/api/public/jobs?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch jobs');
-      
+      if (!response.ok) throw new Error("Failed to fetch jobs");
+
       const data: JobsResponse = await response.json();
       setJobs(data.jobs);
       setPagination(data.pagination);
     } catch (error) {
-      console.error('Error fetching jobs:', error);
+      console.error("Error fetching jobs:", error);
     } finally {
       setLoading(false);
     }
@@ -106,30 +123,40 @@ export default function JobsPage() {
 
   useEffect(() => {
     fetchJobs();
-  }, [search, location, employmentType, experienceLevel, locationType, sortBy, sortOrder]);
+  }, [
+    search,
+    location,
+    employmentType,
+    experienceLevel,
+    locationType,
+    sortBy,
+    sortOrder,
+  ]);
 
   const handlePageChange = (newPage: number) => {
     fetchJobs(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const formatSalary = (job: Job) => {
     if (!job.salary?.visible || (!job.salary.min && !job.salary.max)) {
       return null;
     }
-    
-    const currency = job.salary.currency || 'USD';
+
+    const currency = job.salary.currency || "USD";
     const formatAmount = (amount: number) => {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
         currency,
-        notation: 'compact',
+        notation: "compact",
         maximumFractionDigits: 0,
       }).format(amount);
     };
 
     if (job.salary.min && job.salary.max) {
-      return `${formatAmount(job.salary.min)} - ${formatAmount(job.salary.max)}`;
+      return `${formatAmount(job.salary.min)} - ${formatAmount(
+        job.salary.max
+      )}`;
     }
     if (job.salary.min) {
       return `From ${formatAmount(job.salary.min)}`;
@@ -140,11 +167,13 @@ export default function JobsPage() {
     return null;
   };
 
-  const getLocationString = (location: Job['location']) => {
-    if (location.type === 'remote') return 'Remote';
-    
-    const parts = [location.city, location.state, location.country].filter(Boolean);
-    return parts.length > 0 ? parts.join(', ') : 'Location not specified';
+  const getLocationString = (location: Job["location"]) => {
+    if (location.type === "remote") return "Remote";
+
+    const parts = [location.city, location.state, location.country].filter(
+      Boolean
+    );
+    return parts.length > 0 ? parts.join(", ") : "Location not specified";
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -152,9 +181,9 @@ export default function JobsPage() {
     const now = new Date();
     const diffInMs = now.getTime() - date.getTime();
     const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-    
-    if (diffInDays === 0) return 'Today';
-    if (diffInDays === 1) return 'Yesterday';
+
+    if (diffInDays === 0) return "Today";
+    if (diffInDays === 1) return "Yesterday";
     if (diffInDays < 7) return `${diffInDays} days ago`;
     if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
     return `${Math.floor(diffInDays / 30)} months ago`;
@@ -170,7 +199,8 @@ export default function JobsPage() {
               Find Your Dream Job
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Discover amazing opportunities from top companies. Your next career move starts here.
+              Discover amazing opportunities from top companies. Your next
+              career move starts here.
             </p>
           </div>
 
@@ -213,7 +243,10 @@ export default function JobsPage() {
                 </SelectContent>
               </Select>
 
-              <Select value={experienceLevel} onValueChange={setExperienceLevel}>
+              <Select
+                value={experienceLevel}
+                onValueChange={setExperienceLevel}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Experience Level" />
                 </SelectTrigger>
@@ -237,11 +270,14 @@ export default function JobsPage() {
                 </SelectContent>
               </Select>
 
-              <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
-                const [newSortBy, newSortOrder] = value.split('-');
-                setSortBy(newSortBy);
-                setSortOrder(newSortOrder);
-              }}>
+              <Select
+                value={`${sortBy}-${sortOrder}`}
+                onValueChange={(value) => {
+                  const [newSortBy, newSortOrder] = value.split("-");
+                  setSortBy(newSortBy);
+                  setSortOrder(newSortOrder);
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
@@ -264,11 +300,13 @@ export default function JobsPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
           <div>
             <h2 className="text-2xl font-semibold text-gray-900">
-              {loading ? 'Searching...' : `${pagination.total} Jobs Found`}
+              {loading ? "Searching..." : `${pagination.total} Jobs Found`}
             </h2>
             {pagination.total > 0 && (
               <p className="text-gray-600">
-                Showing {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} results
+                Showing {(pagination.page - 1) * pagination.limit + 1} -{" "}
+                {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
+                of {pagination.total} results
               </p>
             )}
           </div>
@@ -299,40 +337,56 @@ export default function JobsPage() {
             <div className="text-gray-400 mb-4">
               <Briefcase className="h-16 w-16 mx-auto" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No jobs found</h3>
-            <p className="text-gray-600">Try adjusting your search criteria or filters.</p>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No jobs found
+            </h3>
+            <p className="text-gray-600">
+              Try adjusting your search criteria or filters.
+            </p>
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {jobs.map((job) => (
-                <Card key={job._id} className="hover:shadow-lg transition-shadow duration-200 relative">
+                <Card
+                  key={job._id}
+                  className="hover:shadow-lg transition-shadow duration-200 relative"
+                >
                   {job.featured && (
                     <div className="absolute top-4 right-4 z-10">
-                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">
+                      <Badge
+                        variant="secondary"
+                        className="bg-yellow-100 text-yellow-800 border-yellow-200"
+                      >
                         Featured
                       </Badge>
                     </div>
                   )}
-                  
+
                   <CardHeader className="pb-4">
                     <CardTitle className="text-lg font-semibold line-clamp-2 pr-16">
                       {job.title}
                     </CardTitle>
                     <div className="space-y-1">
-                      <p className="text-base font-medium text-blue-600">{job.company}</p>
+                      <p className="text-base font-medium text-blue-600">
+                        {job.company}
+                      </p>
                       {job.department && (
-                        <p className="text-sm text-gray-600">{job.department}</p>
+                        <p className="text-sm text-gray-600">
+                          {job.department}
+                        </p>
                       )}
                     </div>
                   </CardHeader>
-                  
+
                   <CardContent className="pt-0">
                     <div className="space-y-3">
                       {/* Location */}
                       <div className="flex items-center text-sm text-gray-600">
                         <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-                        <span className="truncate">{getLocationString(job.location)}</span>
+                        <span className="truncate">
+                          {getLocationString(job.location)}
+                        </span>
                       </div>
 
                       {/* Salary */}
@@ -347,16 +401,20 @@ export default function JobsPage() {
                       <div className="flex flex-wrap gap-2">
                         {job.employmentType && (
                           <Badge variant="outline" className="text-xs">
-                            {job.employmentType.charAt(0).toUpperCase() + job.employmentType.slice(1)}
+                            {job.employmentType.charAt(0).toUpperCase() +
+                              job.employmentType.slice(1)}
                           </Badge>
                         )}
                         {job.experienceLevel && (
                           <Badge variant="outline" className="text-xs">
-                            {job.experienceLevel.charAt(0).toUpperCase() + job.experienceLevel.slice(1)} Level
+                            {job.experienceLevel.charAt(0).toUpperCase() +
+                              job.experienceLevel.slice(1)}{" "}
+                            Level
                           </Badge>
                         )}
                         <Badge variant="outline" className="text-xs">
-                          {job.location.type.charAt(0).toUpperCase() + job.location.type.slice(1)}
+                          {job.location.type.charAt(0).toUpperCase() +
+                            job.location.type.slice(1)}
                         </Badge>
                       </div>
 
@@ -364,7 +422,11 @@ export default function JobsPage() {
                       {job.skills && job.skills.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                           {job.skills.slice(0, 3).map((skill) => (
-                            <Badge key={skill} variant="secondary" className="text-xs">
+                            <Badge
+                              key={skill}
+                              variant="secondary"
+                              className="text-xs"
+                            >
                               {skill}
                             </Badge>
                           ))}
@@ -384,16 +446,17 @@ export default function JobsPage() {
                         </span>
                         {job.applicationDeadline && (
                           <span>
-                            Closes: {new Date(job.applicationDeadline).toLocaleDateString()}
+                            Closes:{" "}
+                            {new Date(
+                              job.applicationDeadline
+                            ).toLocaleDateString()}
                           </span>
                         )}
                       </div>
 
                       {/* Apply Button */}
-                      <Link href={`/jobs/${job._id}`} className="block">
-                        <Button className="w-full mt-4">
-                          View Details
-                        </Button>
+                      <Link href={getJobUrl(job)} className="block">
+                        <Button className="w-full mt-4">View Details</Button>
                       </Link>
                     </div>
                   </CardContent>
@@ -413,34 +476,39 @@ export default function JobsPage() {
                   <ChevronLeft className="h-4 w-4" />
                   Previous
                 </Button>
-                
+
                 <div className="flex items-center space-x-1">
-                  {Array.from({ length: Math.min(5, pagination.pages) }, (_, i) => {
-                    let pageNum;
-                    if (pagination.pages <= 5) {
-                      pageNum = i + 1;
-                    } else if (pagination.page <= 3) {
-                      pageNum = i + 1;
-                    } else if (pagination.page >= pagination.pages - 2) {
-                      pageNum = pagination.pages - 4 + i;
-                    } else {
-                      pageNum = pagination.page - 2 + i;
+                  {Array.from(
+                    { length: Math.min(5, pagination.pages) },
+                    (_, i) => {
+                      let pageNum;
+                      if (pagination.pages <= 5) {
+                        pageNum = i + 1;
+                      } else if (pagination.page <= 3) {
+                        pageNum = i + 1;
+                      } else if (pagination.page >= pagination.pages - 2) {
+                        pageNum = pagination.pages - 4 + i;
+                      } else {
+                        pageNum = pagination.page - 2 + i;
+                      }
+
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={
+                            pageNum === pagination.page ? "default" : "outline"
+                          }
+                          size="sm"
+                          onClick={() => handlePageChange(pageNum)}
+                          className="w-10"
+                        >
+                          {pageNum}
+                        </Button>
+                      );
                     }
-                    
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={pageNum === pagination.page ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handlePageChange(pageNum)}
-                        className="w-10"
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
+                  )}
                 </div>
-                
+
                 <Button
                   variant="outline"
                   size="sm"

@@ -394,7 +394,7 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
           )}
           
           {/* Question Examples */}
-          <Card className="bg-muted/50">
+          {/* <Card className="bg-muted/50">
             <CardContent className="p-4">
               <h4 className="text-sm font-medium mb-2">Example screening questions:</h4>
               <ul className="space-y-2">
@@ -444,7 +444,7 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
                 </li>
               </ul>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </form>
     </Form>

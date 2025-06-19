@@ -43,10 +43,34 @@ export async function GET(request: NextRequest) {
     const query: Record<string, unknown> = {};
 
     // Job filter - handle both jobId (from URL/props) and job (from filter dropdown)
+    let internalJobId: mongoose.Types.ObjectId | null = null;
+
     if (jobId) {
-      query.job = new mongoose.Types.ObjectId(jobId);
+      // Convert slug/publicId to internal _id like in POST route
+      let job: any;
+      if (jobId.includes("-") && jobId.length > 20) {
+        // Likely a slug
+        job = await Job.findOne({ slug: jobId });
+      } else if (jobId.length === 36 && jobId.includes("-")) {
+        // Likely a publicId (UUID format)
+        job = await Job.findOne({ publicId: jobId });
+      } else if (mongoose.Types.ObjectId.isValid(jobId)) {
+        // Legacy ObjectId
+        job = await Job.findById(jobId);
+      }
+
+      if (job) {
+        internalJobId = job._id;
+      }
     } else if (jobFilter && jobFilter !== "all") {
-      query.job = new mongoose.Types.ObjectId(jobFilter);
+      // Job filter from dropdown - this should already be an ObjectId
+      if (mongoose.Types.ObjectId.isValid(jobFilter)) {
+        internalJobId = new mongoose.Types.ObjectId(jobFilter);
+      }
+    }
+
+    if (internalJobId) {
+      query.job = internalJobId;
     }
 
     // Candidate filter - since candidate is embedded, we search by email
@@ -293,11 +317,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if job exists and is active (move this earlier)
-    const job = await Job.findById(jobId);
+    // Find job by slug/publicId/ObjectId and get the internal _id
+    let job;
+    if (jobId.includes("-") && jobId.length > 20) {
+      // Likely a slug
+      job = await Job.findOne({ slug: jobId });
+    } else if (jobId.length === 36 && jobId.includes("-")) {
+      // Likely a UUID (publicId)
+      job = await Job.findOne({ publicId: jobId });
+    } else if (mongoose.Types.ObjectId.isValid(jobId)) {
+      // Legacy ObjectId support
+      job = await Job.findById(jobId);
+    }
+
     if (!job) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
+
+    // Use the internal _id for database operations
+    const internalJobId = job._id;
 
     // Validate that required documents are provided
     const requiredDocuments = job.requiredDocuments || [];
@@ -344,7 +382,7 @@ export async function POST(request: NextRequest) {
 
     // Check if application already exists for this job and email
     const existingApplication = await Application.findOne({
-      job: jobId,
+      job: internalJobId,
       "candidate.email": applicationData.email,
     });
 
@@ -422,7 +460,7 @@ export async function POST(request: NextRequest) {
 
     // Create application with embedded candidate data
     const application = new Application({
-      job: jobId,
+      job: internalJobId,
       candidate: {
         firstName: applicationData.firstName,
         lastName: applicationData.lastName,

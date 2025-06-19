@@ -235,7 +235,7 @@ export default function SharedJobForm({
 
       // Navigate based on user role
       if (userRole === "subadmin") {
-        router.push(`/subadmin/jobs/${result.job._id}`);
+        router.push(`/subadmin/jobs/${result.job.slug || result.job.publicId}`);
       } else {
         router.push(redirectPath);
       }
@@ -284,7 +284,7 @@ export default function SharedJobForm({
 
       // Navigate based on user role
       if (userRole === "subadmin") {
-        router.push(`/subadmin/jobs/${result.job._id}`);
+        router.push(`/subadmin/jobs/${result.job.slug || result.job.publicId}`);
       } else {
         router.push(redirectPath);
       }

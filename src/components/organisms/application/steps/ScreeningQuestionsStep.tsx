@@ -45,8 +45,8 @@ const ScreeningQuestionsStep: React.FC<ScreeningQuestionsStepProps> = ({
   // Check if all required questions are answered
   const getUnansweredQuestions = () => {
     const answers = data.screeningAnswers || {};
-    return screeningQuestions.filter(q => 
-      q.required && (!answers[q.id] || answers[q.id].trim().length === 0)
+    return screeningQuestions.filter(
+      (q) => q.required && (!answers[q.id] || answers[q.id].trim().length === 0)
     );
   };
 
@@ -88,7 +88,8 @@ const ScreeningQuestionsStep: React.FC<ScreeningQuestionsStepProps> = ({
             Screening Questions
           </CardTitle>
           <CardDescription>
-            Please answer the following questions about your application for the {job?.title} position.
+            Please answer the following questions about your application for the{" "}
+            {job?.title} position.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -96,8 +97,9 @@ const ScreeningQuestionsStep: React.FC<ScreeningQuestionsStepProps> = ({
             {/* Instructions */}
             <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
               <p className="text-sm text-foreground">
-                Please provide thoughtful answers to help us understand your qualifications and interest in this role.
-                Questions marked with <span className="text-destructive">*</span> are required.
+                Please provide thoughtful answers to help us understand your
+                qualifications and interest in this role. Questions marked with{" "}
+                <span className="text-destructive">*</span> are required.
               </p>
             </div>
 
@@ -111,15 +113,17 @@ const ScreeningQuestionsStep: React.FC<ScreeningQuestionsStepProps> = ({
                     <span className="text-destructive">*</span>
                   )}
                 </Label>
-                
+
                 <Textarea
                   value={data.screeningAnswers?.[question.id] || ""}
-                  onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                  onChange={(e) =>
+                    handleAnswerChange(question.id, e.target.value)
+                  }
                   placeholder="Type your answer here..."
                   className="min-h-24 resize-y"
                   rows={3}
                 />
-                
+
                 <div className="text-xs text-muted-foreground">
                   {data.screeningAnswers?.[question.id]?.length || 0} characters
                 </div>
@@ -141,7 +145,11 @@ const ScreeningQuestionsStep: React.FC<ScreeningQuestionsStepProps> = ({
                     <ul className="text-sm text-destructive/80 mt-2 list-disc list-inside">
                       {unansweredQuestions.map((q, idx) => (
                         <li key={q.id}>
-                          Q{screeningQuestions.findIndex(sq => sq.id === q.id) + 1}: {q.question.substring(0, 50)}
+                          Q
+                          {screeningQuestions.findIndex(
+                            (sq) => sq.id === q.id
+                          ) + 1}
+                          : {q.question.substring(0, 50)}
                           {q.question.length > 50 ? "..." : ""}
                         </li>
                       ))}
@@ -165,7 +173,8 @@ const ScreeningQuestionsStep: React.FC<ScreeningQuestionsStepProps> = ({
 
             {/* Progress indicator */}
             <div className="text-sm text-muted-foreground text-center">
-              {screeningQuestions.length - unansweredQuestions.length} of {screeningQuestions.length} questions answered
+              {screeningQuestions.length - unansweredQuestions.length} of{" "}
+              {screeningQuestions.length} questions answered
             </div>
           </div>
         </CardContent>

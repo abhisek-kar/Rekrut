@@ -1,18 +1,22 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Briefcase, Clock, AlertTriangle, Info } from 'lucide-react';
-import { Button } from '@/components/shadcn-ui/button';
-import { Skeleton } from '@/components/shadcn-ui/skeleton';
-import { Alert, AlertDescription } from '@/components/shadcn-ui/alert';
-import { Card, CardContent } from '@/components/shadcn-ui/card';
-import { toast } from 'sonner';
-import Link from 'next/link';
-import MultiStepApplicationForm, { ApplicationData } from '@/components/organisms/application/MultiStepApplicationForm';
+import React, { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { ArrowLeft, Briefcase, Clock, AlertTriangle, Info } from "lucide-react";
+import { Button } from "@/components/shadcn-ui/button";
+import { Skeleton } from "@/components/shadcn-ui/skeleton";
+import { Alert, AlertDescription } from "@/components/shadcn-ui/alert";
+import { Card, CardContent } from "@/components/shadcn-ui/card";
+import { toast } from "sonner";
+import Link from "next/link";
+import MultiStepApplicationForm, {
+  ApplicationData,
+} from "@/components/organisms/application/MultiStepApplicationForm";
 
 interface Job {
   _id: string;
+  slug: string;
+  publicId: string;
   title: string;
   company: string;
   department?: string;
@@ -54,7 +58,7 @@ export default function JobApplicationPage() {
   const params = useParams();
   const router = useRouter();
   const jobId = params.id as string;
-  
+
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,40 +73,43 @@ export default function JobApplicationPage() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch(`/api/public/jobs/${jobId}`);
-      
+
       if (!response.ok) {
         if (response.status === 404) {
-          setError('Job not found or no longer available');
+          setError("Job not found or no longer available");
         } else {
-          setError('Failed to load job details');
+          setError("Failed to load job details");
         }
         return;
       }
-      
+
       const data = await response.json();
       setJob(data.job);
     } catch (err) {
-      console.error('Error fetching job:', err);
-      setError('Failed to load job details');
+      console.error("Error fetching job:", err);
+      setError("Failed to load job details");
     } finally {
       setLoading(false);
     }
   };
 
-  const getLocationString = (location: Job['location']) => {
-    if (location.type === 'remote') {
-      return 'Remote';
+  const getLocationString = (location: Job["location"]) => {
+    if (location.type === "remote") {
+      return "Remote";
     }
-    
-    const parts = [location.city, location.state, location.country].filter(Boolean);
-    const locationStr = parts.length > 0 ? parts.join(', ') : 'Location not specified';
-    
-    if (location.type === 'hybrid') {
+
+    const parts = [location.city, location.state, location.country].filter(
+      Boolean
+    );
+    const locationStr =
+      parts.length > 0 ? parts.join(", ") : "Location not specified";
+
+    if (location.type === "hybrid") {
       return `${locationStr} (Hybrid)`;
     }
-    
+
     return locationStr;
   };
 
@@ -116,15 +123,13 @@ export default function JobApplicationPage() {
     return new Date() > new Date(job.applicationDeadline);
   };
 
-  // Format deadline for display
+  // Format deadline for display (simple format)
   const formatDeadline = (deadline: string) => {
     const date = new Date(deadline);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
@@ -137,36 +142,42 @@ export default function JobApplicationPage() {
     return hoursDiff > 0 && hoursDiff <= 24;
   };
 
-  const handleApplicationSubmit = async (data: ApplicationData, files: FormData) => {
+  const handleApplicationSubmit = async (
+    data: ApplicationData,
+    files: FormData
+  ) => {
     try {
       // Check deadline before submission
       if (isApplicationDeadlinePassed()) {
-        toast.error('The application deadline for this position has passed.');
+        toast.error("The application deadline for this position has passed.");
         return;
       }
 
       // Add job ID to form data
-      files.append('jobId', jobId);
-      files.append('applicationData', JSON.stringify(data));
+      files.append("jobId", jobId);
+      files.append("applicationData", JSON.stringify(data));
 
-      const response = await fetch('/api/applications', {
-        method: 'POST',
+      const response = await fetch("/api/applications", {
+        method: "POST",
         body: files,
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to submit application');
+        throw new Error(errorData.message || "Failed to submit application");
       }
 
       const result = await response.json();
-      
-      toast.success('Application submitted successfully!');
+
+      toast.success("Application submitted successfully!");
       router.push(`/application-success?token=${result.token}`);
-      
     } catch (error) {
-      console.error('Error submitting application:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to submit application. Please try again.');
+      console.error("Error submitting application:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to submit application. Please try again."
+      );
       throw error; // Re-throw to let the form handle the error state
     }
   };
@@ -200,10 +211,11 @@ export default function JobApplicationPage() {
               <Briefcase className="h-16 w-16 mx-auto" />
             </div>
             <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-              {error || 'Job not found'}
+              {error || "Job not found"}
             </h1>
             <p className="text-gray-600 mb-6">
-              The job you're trying to apply for might have been removed or is no longer available.
+              The job you're trying to apply for might have been removed or is
+              no longer available.
             </p>
             <Link href="/jobs">
               <Button>Browse All Jobs</Button>
@@ -220,7 +232,9 @@ export default function JobApplicationPage() {
         {/* Header */}
         <div className="mb-8">
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Apply for {job.title}</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Apply for {job.title}
+            </h1>
             <p className="text-gray-600">
               {job.company} • {getLocationString(job.location)}
             </p>
@@ -234,8 +248,9 @@ export default function JobApplicationPage() {
               <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/10">
                 <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
                 <AlertDescription className="text-red-800 dark:text-red-300">
-                  <strong>Application Closed:</strong> The deadline for this position was{" "}
-                  {formatDeadline(job.applicationDeadline)}. Applications are no longer being accepted.
+                  <strong>Application Closed:</strong> The deadline for this
+                  position was {formatDeadline(job.applicationDeadline)}.
+                  Applications are no longer being accepted.
                 </AlertDescription>
               </Alert>
             ) : isDeadlineNear() ? (
@@ -247,10 +262,11 @@ export default function JobApplicationPage() {
                 </AlertDescription>
               </Alert>
             ) : (
-              <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/10">
-                <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <AlertDescription className="text-blue-800 dark:text-blue-300">
-                  <strong>Application Deadline:</strong> {formatDeadline(job.applicationDeadline)}
+              <Alert className="">
+                <Info className="h-4 w-4 " />
+                <AlertDescription className="">
+                  <strong>Application Deadline:</strong>{" "}
+                  {formatDeadline(job.applicationDeadline)}
                 </AlertDescription>
               </Alert>
             )}
@@ -264,7 +280,9 @@ export default function JobApplicationPage() {
               <div className="flex items-start space-x-3">
                 <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-foreground mb-2">Application Instructions</h3>
+                  <h3 className="font-semibold text-foreground mb-2">
+                    Application Instructions
+                  </h3>
                   <div className="text-sm text-muted-foreground whitespace-pre-wrap">
                     {job.applicationInstructions}
                   </div>
@@ -284,7 +302,8 @@ export default function JobApplicationPage() {
               Application Period Closed
             </h2>
             <p className="text-gray-600 mb-6">
-              The application deadline for this position has passed. Please check other available positions.
+              The application deadline for this position has passed. Please
+              check other available positions.
             </p>
             <Link href="/jobs">
               <Button>Browse Other Jobs</Button>
@@ -292,8 +311,8 @@ export default function JobApplicationPage() {
           </div>
         ) : (
           /* Multi-Step Application Form */
-          <MultiStepApplicationForm 
-            job={job} 
+          <MultiStepApplicationForm
+            job={job}
             onSubmit={handleApplicationSubmit}
             onBack={handleBackToJob}
           />

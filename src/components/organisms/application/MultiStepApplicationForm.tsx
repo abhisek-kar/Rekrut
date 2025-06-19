@@ -17,6 +17,8 @@ import ReviewSubmitStep from "./steps/ReviewSubmitStep";
 
 interface Job {
   _id: string;
+  slug: string;
+  publicId: string;
   title: string;
   company: string;
   department?: string;
@@ -34,6 +36,11 @@ interface Job {
   }>;
   applicationInstructions?: string;
   applicationDeadline?: string;
+  salary?: {
+    min?: number;
+    max?: number;
+    currency?: string;
+  };
 }
 
 export interface ApplicationData {
@@ -189,16 +196,19 @@ export default function MultiStepApplicationForm({
       setIsSubmitting(true);
 
       const formData = new FormData();
-      formData.append("jobId", job._id);
+      // Add job ID to form data - use slug for security
+      formData.append("jobId", job.slug || job.publicId || job._id);
       formData.append("applicationData", JSON.stringify(applicationData));
 
       // Handle dynamic documents based on job requirements
       if (applicationData.documents) {
-        Object.entries(applicationData.documents).forEach(([documentType, file]) => {
-          if (file) {
-            formData.append(documentType, file);
+        Object.entries(applicationData.documents).forEach(
+          ([documentType, file]) => {
+            if (file) {
+              formData.append(documentType, file);
+            }
           }
-        });
+        );
       }
 
       await onSubmit(applicationData, formData);
@@ -231,6 +241,7 @@ export default function MultiStepApplicationForm({
           <ProfessionalDetailsStep
             data={applicationData}
             updateData={updateApplicationData}
+            job={job}
           />
         );
       case 4:
@@ -298,22 +309,26 @@ export default function MultiStepApplicationForm({
         const requiredDocs = job.requiredDocuments || [];
         if (requiredDocs.length === 0) {
           // If no specific documents required, at least one document should be uploaded
-          return applicationData.documents && Object.keys(applicationData.documents).length > 0;
+          return (
+            applicationData.documents &&
+            Object.keys(applicationData.documents).length > 0
+          );
         }
         // Check if all required documents are present
-        return requiredDocs.every(docType => 
-          applicationData.documents && applicationData.documents[docType]
+        return requiredDocs.every(
+          (docType) =>
+            applicationData.documents && applicationData.documents[docType]
         );
       case 5:
         // Check if all required screening questions are answered
         const screeningQuestions = job.screeningQuestions || [];
-        const requiredQuestions = screeningQuestions.filter(q => q.required);
+        const requiredQuestions = screeningQuestions.filter((q) => q.required);
         if (requiredQuestions.length === 0) {
           return true; // No required questions
         }
         const answers = applicationData.screeningAnswers || {};
-        return requiredQuestions.every(q => 
-          answers[q.id] && answers[q.id].trim().length > 0
+        return requiredQuestions.every(
+          (q) => answers[q.id] && answers[q.id].trim().length > 0
         );
       case 6:
         return true; // Optional step
@@ -408,13 +423,8 @@ export default function MultiStepApplicationForm({
                 <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             ) : (
-              <Button
-                onClick={handleSubmit}
-                disabled={isSubmitting || !validateCurrentStep()}
-                className="bg-primary hover:bg-primary/90"
-              >
-                {isSubmitting ? "Submitting..." : "Submit Application"}
-              </Button>
+              // Don't show submit button here, it's handled in ReviewSubmitStep
+              <div></div>
             )}
           </div>
 
