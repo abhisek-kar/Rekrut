@@ -48,35 +48,11 @@ export default function AdminApplicationDetailsPage({
     <div className="flex flex-col min-h-screen">
       <PageHeader
         title={`Application Details`}
-        description={`${candidateName} • ${jobTitle}`}
-        actions={
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => router.back()}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </Button>
-            <Button
-              onClick={fetchApplication}
-              variant="outline"
-              size="sm"
-              disabled={loading}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw
-                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
-              />
-              Refresh
-            </Button>
-          </div>
-        }
+        description={`${candidateName} application details`}
+      
       />
 
-      <main className="flex-1 p-4 md:p-6">
+      <main className="flex-1 ">
         <SharedApplicationView
           application={application?.application || null}
           loading={loading}
