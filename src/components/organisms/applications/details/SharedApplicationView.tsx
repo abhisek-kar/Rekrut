@@ -31,6 +31,13 @@ import {
   Edit,
   Briefcase,
   Home,
+  Target,
+  Award,
+  CheckCircle,
+  Building,
+  HelpCircle,
+  Eye,
+  Link,
 } from "lucide-react";
 import { format } from "date-fns";
 import { InterviewDialog, NoteDialog, ReviewDialog } from "./EditDialogs";
@@ -115,7 +122,8 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
   };
 
   if (loading) {
-    return (
+    r
+    eturn (
       <SectionLoader message="Loading application details..." height="400px" />
     );
   }
@@ -128,12 +136,15 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
     );
   }
 
-  const formatCurrency = (amount: number, currency: string = "USD") => {
-    if (currency === "INR") {
+  const formatCurrency = (amount: number, currency?: string) => {
+    // Use job's currency if available, otherwise fall back to provided currency or USD
+    const currencyToUse = currency || application.job?.currency || "USD";
+    
+    if (currencyToUse === "INR") {
       return `₹${amount.toLocaleString("en-IN")}`;
-    } else if (currency === "EUR") {
+    } else if (currencyToUse === "EUR") {
       return `€${amount.toLocaleString()}`;
-    } else if (currency === "GBP") {
+    } else if (currencyToUse === "GBP") {
       return `£${amount.toLocaleString()}`;
     }
     return `$${amount.toLocaleString()}`;
@@ -373,10 +384,7 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                   <div className="border rounded-lg p-3">
                     <p className="text-sm text-muted-foreground">Current CTC</p>
                     <p className="text-lg font-semibold">
-                      {formatCurrency(
-                        application.candidate.currentSalary,
-                        application.candidate.currentSalaryCurrency
-                      )}
+                      {formatCurrency(application.candidate.currentSalary)}
                     </p>
                   </div>
                 )}
@@ -387,10 +395,7 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                       Expected CTC
                     </p>
                     <p className="text-lg font-semibold">
-                      {formatCurrency(
-                        application.candidate.expectedSalary,
-                        application.candidate.expectedSalaryCurrency
-                      )}
+                      {formatCurrency(application.candidate.expectedSalary)}
                     </p>
                   </div>
                 )}
@@ -442,6 +447,28 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                     </Badge>
                   </div>
                 )}
+
+                {application.candidate?.experienceLevel && (
+                  <div className="border rounded-lg p-3">
+                    <p className="text-sm text-muted-foreground">
+                      Experience Level
+                    </p>
+                    <Badge variant="outline" className="capitalize">
+                      {application.candidate.experienceLevel.replace("_", " ")}
+                    </Badge>
+                  </div>
+                )}
+
+                {application.candidate?.availabilityToStart && (
+                  <div className="border rounded-lg p-3">
+                    <p className="text-sm text-muted-foreground">
+                      Available From
+                    </p>
+                    <p className="font-semibold">
+                      {format(new Date(application.candidate.availabilityToStart), "MMM d, yyyy")}
+                    </p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -483,6 +510,92 @@ export const SharedApplicationView: React.FC<ApplicationDetailsProps> = ({
                 <div className="border rounded-lg p-4 bg-muted/50">
                   <p>{application.candidate.additionalComments}</p>
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Documents */}
+          {application.documents && Object.keys(application.documents).length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Documents ({Object.keys(application.documents).length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(application.documents).map(([docType, doc]: [string, any]) => (
+                    <div key={docType} className="border rounded-lg p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h5 className="font-medium capitalize text-sm text-muted-foreground mb-1">
+                            {docType.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                          </h5>
+                          <p className="font-semibold text-sm mb-2 break-all">
+                            {doc.filename}
+                          </p>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(doc.url, '_blank')}
+                              className="h-8"
+                            >
+                              <Eye className="w-3 h-3 mr-1" />
+                              View
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const link = document.createElement('a');
+                                link.href = doc.url;
+                                link.download = doc.filename;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                              }}
+                              className="h-8"
+                            >
+                              <Download className="w-3 h-3 mr-1" />
+                              Download
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Screening Questions Answers */}
+          {application.answers && Object.keys(application.answers).length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <HelpCircle className="w-5 h-5" />
+                  Screening Questions ({Object.keys(application.answers).length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {Object.entries(application.answers).map(([questionKey, answer]: [string, any]) => (
+                  <div key={questionKey} className="border rounded-lg p-4">
+                    <h5 className="font-medium text-sm text-muted-foreground mb-2">
+                      {questionKey.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                    </h5>
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <p className="text-sm">
+                        {typeof answer === 'string' ? answer : 
+                         typeof answer === 'boolean' ? (answer ? 'Yes' : 'No') :
+                         Array.isArray(answer) ? answer.join(', ') :
+                         JSON.stringify(answer)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           )}
