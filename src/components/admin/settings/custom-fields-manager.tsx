@@ -104,16 +104,29 @@ const customFieldSchema = z.object({
   placeholder: z.string().optional(),
   helpText: z.string().optional(),
   options: z.array(optionSchema).optional(),
-  isRequired: z.boolean().default(false),
-  isVisible: z.boolean().default(true),
+  isRequired: z.boolean(),
+  isVisible: z.boolean(),
   visibleTo: z
     .array(z.string())
     .min(1, { message: "Select at least one role" }),
   defaultValue: z.string().optional(),
-  order: z.number().default(0),
+  order: z.number(),
 });
 
-type CustomFieldFormValues = z.infer<typeof customFieldSchema>;
+export type CustomFieldFormValues = {
+  name: string;
+  label: string;
+  type: string;
+  entity: string;
+  placeholder?: string;
+  helpText?: string;
+  options?: { value: string; label: string }[];
+  isRequired: boolean;
+  isVisible: boolean;
+  visibleTo: string[];
+  defaultValue?: string;
+  order: number;
+};
 
 export interface CustomField {
   _id: string;
@@ -479,7 +492,13 @@ export function CustomFieldsManager({
                       <FormLabel>Entity Type*</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        defaultValue={
+                          typeof field.value === "string"
+                            ? field.value
+                            : field.value !== undefined
+                            ? String(field.value)
+                            : undefined
+                        }
                         disabled={!!editingField}
                       >
                         <FormControl>

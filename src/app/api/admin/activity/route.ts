@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
 
     // Process and format activities
     const formattedActivities = activities.map(activity => {
-      const user = activity.userId as { firstName: string; lastName: string; profilePhoto?: string } | null;
+      const user = activity.userId as unknown as { firstName: string; lastName: string; profilePhoto?: string } | null;
       const userInitials = user ? 
         `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() : 'UN';
       

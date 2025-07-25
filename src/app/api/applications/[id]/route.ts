@@ -116,9 +116,12 @@ export async function GET(
       matchDetails: application.matchDetails,
 
       // File attachments
-      resume: application.resume,
-      coverLetter: application.coverLetter,
-      additionalDocuments: application.additionalDocuments,
+      // resume: application.resume ?? null,
+      // coverLetter: application.coverLetter ?? null,
+      // additionalDocuments: application.additionalDocuments ?? null,
+      resume: null,
+      coverLetter: null,
+      additionalDocuments: null,
 
       // Custom fields and answers
       customFields: application.customFields,

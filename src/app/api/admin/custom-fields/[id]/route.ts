@@ -91,6 +91,11 @@ export async function PUT(
       helpText: string;
       required: boolean;
       isActive: boolean;
+      validation: any;
+      defaultValue: any;
+      isVisible: boolean;
+      visibleTo: string[];
+      order: number;
     }> = {
       label: body.label !== undefined ? body.label : existingField.label,
       type: body.type !== undefined ? body.type : existingField.type,
@@ -110,6 +115,13 @@ export async function PUT(
       { $set: updatedFields },
       { new: true }
     );
+
+    if (!updatedField) {
+      return NextResponse.json(
+        { error: "Custom field not found after update" },
+        { status: 404 }
+      );
+    }
 
     // Log activity
     await Activity.create({

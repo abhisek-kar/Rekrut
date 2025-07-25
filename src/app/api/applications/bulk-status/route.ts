@@ -47,13 +47,13 @@ export async function POST(request: NextRequest) {
     const { ids, status, reason, notify } = data;
 
     // Validate that all IDs are valid ObjectIds
-    const validIds = ids.filter((id) => mongoose.Types.ObjectId.isValid(id));
+    const validIds = ids.filter((id:any) => mongoose.Types.ObjectId.isValid(id));
 
     if (validIds.length !== ids.length) {
       return NextResponse.json(
         {
           error: "One or more invalid application IDs",
-          invalidIds: ids.filter((id) => !mongoose.Types.ObjectId.isValid(id)),
+          invalidIds: ids.filter((id:any) => !mongoose.Types.ObjectId.isValid(id)),
         },
         { status: 400 }
       );

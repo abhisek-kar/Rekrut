@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { Briefcase, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/shadcn-ui/button';
-import { Badge } from '@/components/shadcn-ui/badge';
-import { Skeleton } from '@/components/shadcn-ui/skeleton';
-import { JobType } from '@/types/job';
+import { Briefcase, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/shadcn-ui/button";
+import { Badge } from "@/components/shadcn-ui/badge";
+import { Skeleton } from "@/components/shadcn-ui/skeleton";
+import { JobType } from "@/types/job";
 
 interface AssignJobHeaderProps {
   job: JobType | null;
@@ -12,7 +12,11 @@ interface AssignJobHeaderProps {
   onBack: () => void;
 }
 
-export function AssignJobHeader({ job, loading, onBack }: AssignJobHeaderProps) {
+export function AssignJobHeader({
+  job,
+  loading,
+  onBack,
+}: AssignJobHeaderProps) {
   if (loading) {
     return (
       <div className="space-y-4">
@@ -42,7 +46,9 @@ export function AssignJobHeader({ job, loading, onBack }: AssignJobHeaderProps) 
         <div className="p-6 text-center">
           <Briefcase className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium">Job Not Found</h3>
-          <p className="text-muted-foreground mt-1">This job may have been deleted or is unavailable.</p>
+          <p className="text-muted-foreground mt-1">
+            This job may have been deleted or is unavailable.
+          </p>
         </div>
       </div>
     );
@@ -51,23 +57,26 @@ export function AssignJobHeader({ job, loading, onBack }: AssignJobHeaderProps) 
   // Helper to display and format job type
   const getJobTypeText = (type: string) => {
     const typeMap: Record<string, string> = {
-      'full-time': 'Full-time',
-      'part-time': 'Part-time',
-      'contract': 'Contract',
-      'internship': 'Internship',
+      "full-time": "Full-time",
+      "part-time": "Part-time",
+      contract: "Contract",
+      internship: "Internship",
     };
     return typeMap[type] || type;
   };
 
   // Helper to get status badge variant
   const getStatusVariant = (status: string) => {
-    const variantMap: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      'draft': 'secondary',
-      'active': 'default',
-      'closed': 'outline',
-      'archived': 'destructive',
+    const variantMap: Record<
+      string,
+      "default" | "secondary" | "destructive" | "outline"
+    > = {
+      draft: "secondary",
+      active: "default",
+      closed: "outline",
+      archived: "destructive",
     };
-    return variantMap[status] || 'default';
+    return variantMap[status] || "default";
   };
 
   return (
@@ -86,10 +95,11 @@ export function AssignJobHeader({ job, loading, onBack }: AssignJobHeaderProps) 
             {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
           </Badge>
           <Badge variant="outline">
-            {getJobTypeText(job.employmentType)}
+            {getJobTypeText(job.employmentType as string)}
           </Badge>
           <Badge variant="outline">
-            {job.location.type.charAt(0).toUpperCase() + job.location.type.slice(1)}
+            {job.location.type.charAt(0).toUpperCase() +
+              job.location.type.slice(1)}
           </Badge>
         </div>
       </div>

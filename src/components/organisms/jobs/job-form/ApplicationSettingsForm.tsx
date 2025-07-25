@@ -1,35 +1,32 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from '@/components/shadcn-ui/form';
-import { Input } from '@/components/shadcn-ui/input';
-import { Button } from '@/components/shadcn-ui/button';
-import { Textarea } from '@/components/shadcn-ui/textarea';
-import { Badge } from '@/components/shadcn-ui/badge';
-import { Switch } from '@/components/shadcn-ui/switch';
+import React, { useEffect, useState } from "react";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/shadcn-ui/form";
+import { Input } from "@/components/shadcn-ui/input";
+import { Button } from "@/components/shadcn-ui/button";
+import { Textarea } from "@/components/shadcn-ui/textarea";
+import { Badge } from "@/components/shadcn-ui/badge";
+import { Switch } from "@/components/shadcn-ui/switch";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/shadcn-ui/accordion";
-import {
-  Card,
-  CardContent,
-} from "@/components/shadcn-ui/card";
-import { X, Plus, Trash2 } from 'lucide-react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { JobType } from '@/types/job';
+import { Card, CardContent } from "@/components/shadcn-ui/card";
+import { X, Plus, Trash2 } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { JobType } from "@/types/job";
 
 // Define form validation schema
 const applicationSettingsSchema = z.object({
@@ -37,11 +34,15 @@ const applicationSettingsSchema = z.object({
   expectedStartDate: z.string().optional(),
   applicationInstructions: z.string().optional(),
   requiredDocuments: z.array(z.string()).optional(),
-  screeningQuestions: z.array(z.object({
-    question: z.string(),
-    required: z.boolean().default(true),
-    id: z.string(),
-  })).optional(),
+  screeningQuestions: z
+    .array(
+      z.object({
+        question: z.string(),
+        required: z.boolean().default(true),
+        id: z.string(),
+      })
+    )
+    .optional(),
 });
 
 type ApplicationSettingsFormValues = z.infer<typeof applicationSettingsSchema>;
@@ -54,41 +55,47 @@ interface ApplicationSettingsFormProps {
 
 // Common document types
 const documentSuggestions = [
-  'Resume/CV', 
-  'Cover Letter', 
-  'Portfolio', 
-  'References', 
-  'Work Samples', 
-  'Certifications',
-  'Transcripts',
-  'License'
+  "Resume/CV",
+  "Cover Letter",
+  "Portfolio",
+  "References",
+  "Work Samples",
+  "Certifications",
+  "Transcripts",
+  "License",
 ];
 
-export function ApplicationSettingsForm({ data, onChange, onValidityChange }: ApplicationSettingsFormProps) {
-  const [newDocument, setNewDocument] = useState('');
-  const [newQuestion, setNewQuestion] = useState('');
-  
+export function ApplicationSettingsForm({
+  data,
+  onChange,
+  onValidityChange,
+}: ApplicationSettingsFormProps) {
+  const [newDocument, setNewDocument] = useState("");
+  const [newQuestion, setNewQuestion] = useState("");
+
   // Generate initial screening questions with IDs if needed
-  const initialScreeningQuestions = (data.screeningQuestions || []).map(q => ({
-    ...q,
-    id: q.id || Math.random().toString(36).substring(2, 9)
-  }));
-  
+  const initialScreeningQuestions = (data.screeningQuestions || []).map(
+    (q) => ({
+      ...q,
+      id: q.id || Math.random().toString(36).substring(2, 9),
+    })
+  );
+
   // Initialize the form with existing data
   const form = useForm<ApplicationSettingsFormValues>({
-    resolver: zodResolver(applicationSettingsSchema),
+    resolver: zodResolver(applicationSettingsSchema) as any,
     defaultValues: {
-      applicationDeadline: data.applicationDeadline 
-        ? new Date(data.applicationDeadline).toISOString().split('T')[0]
-        : '',
+      applicationDeadline: data.applicationDeadline
+        ? new Date(data.applicationDeadline).toISOString().split("T")[0]
+        : "",
       expectedStartDate: data.expectedStartDate
-        ? new Date(data.expectedStartDate).toISOString().split('T')[0]
-        : '',
-      applicationInstructions: data.applicationInstructions || '',
+        ? new Date(data.expectedStartDate).toISOString().split("T")[0]
+        : "",
+      applicationInstructions: data.applicationInstructions || "",
       requiredDocuments: data.requiredDocuments || [],
       screeningQuestions: initialScreeningQuestions,
     },
-    mode: 'onChange',
+    mode: "onChange",
   });
 
   // Update parent component when form values change
@@ -96,10 +103,14 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
     // Format dates properly if they exist
     const formattedValues = {
       ...values,
-      applicationDeadline: values.applicationDeadline ? new Date(values.applicationDeadline) : undefined,
-      expectedStartDate: values.expectedStartDate ? new Date(values.expectedStartDate) : undefined
+      applicationDeadline: values.applicationDeadline
+        ? new Date(values.applicationDeadline)
+        : undefined,
+      expectedStartDate: values.expectedStartDate
+        ? new Date(values.expectedStartDate)
+        : undefined,
     };
-    
+
     onChange(formattedValues);
   };
 
@@ -108,11 +119,11 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
     const subscription = form.watch(() => {
       // This form is always valid since all fields are optional
       onValidityChange(true);
-      
+
       // Auto-submit the form with current values
       onSubmit(form.getValues());
     });
-    
+
     return () => subscription.unsubscribe();
   }, [form, onValidityChange, onChange, onSubmit]);
 
@@ -120,18 +131,22 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
   const handleAddDocument = (documentText?: string) => {
     const document = documentText || newDocument.trim();
     if (document && !form.getValues().requiredDocuments?.includes(document)) {
-      const updatedDocuments = [...(form.getValues().requiredDocuments || []), document];
-      form.setValue('requiredDocuments', updatedDocuments);
-      setNewDocument('');
+      const updatedDocuments = [
+        ...(form.getValues().requiredDocuments || []),
+        document,
+      ];
+      form.setValue("requiredDocuments", updatedDocuments);
+      setNewDocument("");
     }
   };
 
   // Remove a document
   const handleRemoveDocument = (docToRemove: string) => {
-    const updatedDocs = form.getValues().requiredDocuments?.filter(
-      doc => doc !== docToRemove
-    ) || [];
-    form.setValue('requiredDocuments', updatedDocs);
+    const updatedDocs =
+      form
+        .getValues()
+        .requiredDocuments?.filter((doc) => doc !== docToRemove) || [];
+    form.setValue("requiredDocuments", updatedDocs);
   };
 
   // Add a new screening question
@@ -141,28 +156,33 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
       const newQuestionObj = {
         question: newQuestion.trim(),
         required: true,
-        id: Math.random().toString(36).substring(2, 9)
+        id: Math.random().toString(36).substring(2, 9),
       };
-      
-      form.setValue('screeningQuestions', [...currentQuestions, newQuestionObj]);
-      setNewQuestion('');
+
+      form.setValue("screeningQuestions", [
+        ...currentQuestions,
+        newQuestionObj,
+      ]);
+      setNewQuestion("");
     }
   };
 
   // Remove a screening question
   const handleRemoveQuestion = (questionId: string) => {
     const currentQuestions = form.getValues().screeningQuestions || [];
-    const updatedQuestions = currentQuestions.filter(q => q.id !== questionId);
-    form.setValue('screeningQuestions', updatedQuestions);
+    const updatedQuestions = currentQuestions.filter(
+      (q) => q.id !== questionId
+    );
+    form.setValue("screeningQuestions", updatedQuestions);
   };
 
   // Toggle question required status
   const handleToggleRequired = (questionId: string) => {
     const currentQuestions = form.getValues().screeningQuestions || [];
-    const updatedQuestions = currentQuestions.map(q => 
+    const updatedQuestions = currentQuestions.map((q) =>
       q.id === questionId ? { ...q, required: !q.required } : q
     );
-    form.setValue('screeningQuestions', updatedQuestions);
+    form.setValue("screeningQuestions", updatedQuestions);
   };
 
   return (
@@ -176,20 +196,21 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
             <FormItem>
               <FormLabel>Application Deadline</FormLabel>
               <FormControl>
-                <Input 
+                <Input
                   type="date"
                   {...field}
-                  min={new Date().toISOString().split('T')[0]} // Can't select days in the past
+                  min={new Date().toISOString().split("T")[0]} // Can't select days in the past
                 />
               </FormControl>
               <FormDescription>
-                The last day candidates can apply for this position (leave blank for no deadline)
+                The last day candidates can apply for this position (leave blank
+                for no deadline)
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+
         {/* Expected Start Date */}
         <FormField
           control={form.control}
@@ -198,20 +219,21 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
             <FormItem>
               <FormLabel>Expected Start Date</FormLabel>
               <FormControl>
-                <Input 
+                <Input
                   type="date"
                   {...field}
-                  min={new Date().toISOString().split('T')[0]} // Can't select days in the past
+                  min={new Date().toISOString().split("T")[0]} // Can't select days in the past
                 />
               </FormControl>
               <FormDescription>
-                When the selected candidate is expected to start (leave blank if flexible)
+                When the selected candidate is expected to start (leave blank if
+                flexible)
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+
         {/* Application Instructions */}
         <FormField
           control={form.control}
@@ -220,20 +242,21 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
             <FormItem>
               <FormLabel>Application Instructions</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="Provide specific instructions for applicants..." 
+                <Textarea
+                  placeholder="Provide specific instructions for applicants..."
                   className="min-h-20"
-                  {...field} 
+                  {...field}
                 />
               </FormControl>
               <FormDescription>
-                Additional information or requirements for the application process
+                Additional information or requirements for the application
+                process
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+
         {/* Required Documents */}
         <FormField
           control={form.control}
@@ -248,13 +271,13 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
                     value={newDocument}
                     onChange={(e) => setNewDocument(e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
+                      if (e.key === "Enter") {
                         e.preventDefault();
                         handleAddDocument();
                       }
                     }}
                   />
-                  <Button 
+                  <Button
                     type="button"
                     onClick={() => handleAddDocument()}
                     size="sm"
@@ -263,15 +286,17 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
                     Add
                   </Button>
                 </div>
-                
+
                 <div>
                   {!form.getValues().requiredDocuments?.length ? (
-                    <div className="text-sm text-muted-foreground mb-2">No required documents specified</div>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      No required documents specified
+                    </div>
                   ) : (
                     <div className="flex flex-wrap gap-2 mb-4">
                       {form.getValues().requiredDocuments?.map((doc, index) => (
-                        <Badge 
-                          key={index} 
+                        <Badge
+                          key={index}
                           variant="secondary"
                           className="py-1.5 px-2 text-sm"
                         >
@@ -288,9 +313,11 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
                       ))}
                     </div>
                   )}
-                  
+
                   <div className="mt-2">
-                    <p className="text-sm font-medium mb-2">Common document types:</p>
+                    <p className="text-sm font-medium mb-2">
+                      Common document types:
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       {documentSuggestions.map((doc) => (
                         <Badge
@@ -313,14 +340,15 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
             </FormItem>
           )}
         />
-        
+
         {/* Screening Questions */}
         <div className="space-y-4 border p-4 rounded-md">
           <h3 className="font-medium">Screening Questions</h3>
           <FormDescription>
-            Add custom questions to screen candidates during the application process
+            Add custom questions to screen candidates during the application
+            process
           </FormDescription>
-          
+
           {/* Add Question Input */}
           <div className="flex items-center gap-2">
             <Input
@@ -328,34 +356,37 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
               value={newQuestion}
               onChange={(e) => setNewQuestion(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   e.preventDefault();
                   handleAddQuestion();
                 }
               }}
             />
-            <Button 
-              type="button"
-              onClick={handleAddQuestion}
-              size="sm"
-            >
+            <Button type="button" onClick={handleAddQuestion} size="sm">
               <Plus className="h-4 w-4 mr-1" />
               Add
             </Button>
           </div>
-          
+
           {/* Question List */}
           {!form.getValues().screeningQuestions?.length ? (
-            <div className="text-sm text-muted-foreground">No screening questions added yet</div>
+            <div className="text-sm text-muted-foreground">
+              No screening questions added yet
+            </div>
           ) : (
             <Accordion type="multiple" className="w-full">
               {form.getValues().screeningQuestions?.map((q, index) => (
-                <AccordionItem key={q.id} value={q.id} className="border rounded-md px-4 mb-2">
+                <AccordionItem
+                  key={q.id}
+                  value={q.id}
+                  className="border rounded-md px-4 mb-2"
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <AccordionTrigger className="py-2 hover:no-underline">
                         <span className="font-normal text-left">
-                          <span className="font-medium">Q{index + 1}:</span> {q.question}
+                          <span className="font-medium">Q{index + 1}:</span>{" "}
+                          {q.question}
                         </span>
                       </AccordionTrigger>
                     </div>
@@ -392,7 +423,7 @@ export function ApplicationSettingsForm({ data, onChange, onValidityChange }: Ap
               ))}
             </Accordion>
           )}
-          
+
           {/* Question Examples */}
           {/* <Card className="bg-muted/50">
             <CardContent className="p-4">

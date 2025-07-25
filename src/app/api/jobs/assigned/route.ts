@@ -32,7 +32,12 @@ export async function GET(request: NextRequest) {
     const query: {
       assignedTo: mongoose.Types.ObjectId;
       status?: string;
-      $or?: Array<{ title: { $regex: string; $options: string } } | { company: { $regex: string; $options: string } }>;
+      $or?: Array<
+        { title: { $regex: string; $options: string } } |
+        { company: { $regex: string; $options: string } } |
+        { description: { $regex: string; $options: string } }
+      >;
+      isTemplate?: { $ne: boolean };
     } = {
       assignedTo: new mongoose.Types.ObjectId(session.user.id)
     };

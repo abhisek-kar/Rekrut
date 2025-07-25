@@ -88,7 +88,7 @@ export function CompensationForm({
 
   // Initialize the form with existing data
   const form = useForm<CompensationFormValues>({
-    resolver: zodResolver(compensationSchema),
+    resolver: zodResolver(compensationSchema) as any,
     defaultValues: {
       salary: {
         min: data.salary?.min?.toString() || "",
@@ -338,23 +338,25 @@ export function CompensationForm({
                     </div>
                   ) : (
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {form.getValues().benefits?.map((benefit, index) => (
-                        <Badge
-                          key={index}
-                          variant="secondary"
-                          className="py-1.5 px-2 text-sm"
-                        >
-                          {benefit}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveBenefit(benefit)}
-                            className="ml-1 rounded-full hover:bg-muted p-0.5"
+                      {form
+                        .getValues()
+                        .benefits?.map((benefit: string, index: number) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="py-1.5 px-2 text-sm"
                           >
-                            <X className="h-3 w-3" />
-                            <span className="sr-only">Remove</span>
-                          </button>
-                        </Badge>
-                      ))}
+                            {benefit}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveBenefit(benefit)}
+                              className="ml-1 rounded-full hover:bg-muted p-0.5"
+                            >
+                              <X className="h-3 w-3" />
+                              <span className="sr-only">Remove</span>
+                            </button>
+                          </Badge>
+                        ))}
                     </div>
                   )}
 
@@ -420,23 +422,25 @@ export function CompensationForm({
                     </div>
                   ) : (
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {form.getValues().perks?.map((perk, index) => (
-                        <Badge
-                          key={index}
-                          variant="secondary"
-                          className="py-1.5 px-2 text-sm"
-                        >
-                          {perk}
-                          <button
-                            type="button"
-                            onClick={() => handleRemovePerk(perk)}
-                            className="ml-1 rounded-full hover:bg-muted p-0.5"
+                      {form
+                        .getValues()
+                        .perks?.map((perk: string, index: number) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="py-1.5 px-2 text-sm"
                           >
-                            <X className="h-3 w-3" />
-                            <span className="sr-only">Remove</span>
-                          </button>
-                        </Badge>
-                      ))}
+                            {perk}
+                            <button
+                              type="button"
+                              onClick={() => handleRemovePerk(perk)}
+                              className="ml-1 rounded-full hover:bg-muted p-0.5"
+                            >
+                              <X className="h-3 w-3" />
+                              <span className="sr-only">Remove</span>
+                            </button>
+                          </Badge>
+                        ))}
                     </div>
                   )}
 

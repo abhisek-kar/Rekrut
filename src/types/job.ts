@@ -59,4 +59,11 @@ export interface JobType {
   createdAt: string;
   updatedAt: string;
   applicationCount?: number;
+  screeningQuestions: Array<{
+    id?: string;
+    question?: string;
+    type?: "text" | "textarea" | "select" | "checkbox";
+    options?: string[];
+    required?: boolean;
+  }>;
 }

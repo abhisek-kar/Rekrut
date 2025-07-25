@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { Badge } from '@/components/shadcn-ui/badge';
-import { Button } from '@/components/shadcn-ui/button';
+import { useRouter } from "next/navigation";
+import { Badge } from "@/components/shadcn-ui/badge";
+import { Button } from "@/components/shadcn-ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +10,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/shadcn-ui/dropdown-menu';
+} from "@/components/shadcn-ui/dropdown-menu";
 import {
   Building,
   MapPin,
@@ -23,9 +23,9 @@ import {
   Share2,
   Eye,
   Archive,
-  Trash2
-} from 'lucide-react';
-import { JobType } from '@/types/job';
+  Trash2,
+} from "lucide-react";
+import { JobType } from "@/types/job";
 
 interface JobHeaderProps {
   job: JobType;
@@ -51,21 +51,21 @@ const jobTypeColors: Record<string, string> = {
   internship: "bg-teal-100 text-teal-800",
 };
 
-export function JobHeader({ 
-  job, 
-  onStatusUpdate, 
-  onDuplicate, 
-  onDelete, 
-  onAssignRecruiter 
+export function JobHeader({
+  job,
+  onStatusUpdate,
+  onDuplicate,
+  onDelete,
+  onAssignRecruiter,
 }: JobHeaderProps) {
   const router = useRouter();
-  
+
   // Format date for display
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -75,7 +75,9 @@ export function JobHeader({
         <div className="flex items-center gap-2">
           <h1 className="text-3xl font-bold tracking-tight">{job.title}</h1>
           {job.featured && (
-            <Badge variant="default" className="bg-yellow-500">Featured</Badge>
+            <Badge variant="default" className="bg-yellow-500">
+              Featured
+            </Badge>
           )}
         </div>
         <div className="flex items-center mt-2 text-muted-foreground">
@@ -92,14 +94,14 @@ export function JobHeader({
           <Badge className={statusColors[job.status]}>
             {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
           </Badge>
-          <Badge className={jobTypeColors[job.employmentType]}>
+          <Badge className={jobTypeColors[job.employmentType || "full-time"]}>
             {job.employmentType}
           </Badge>
           <div className="flex items-center text-sm">
             <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
             <span className="capitalize">
               {job.location?.type || "Not specified"}
-              {job.location?.type !== 'remote' && job.location?.city && (
+              {job.location?.type !== "remote" && job.location?.city && (
                 <> • {job.location.city}</>
               )}
             </span>
@@ -112,7 +114,7 @@ export function JobHeader({
       </div>
       <div className="flex flex-col gap-2 sm:items-end">
         <div className="flex gap-2">
-          <Button 
+          <Button
             onClick={() => router.push(`/jobs/${job._id}/edit`)}
             className="gap-1"
           >
@@ -132,8 +134,8 @@ export function JobHeader({
                 <Copy className="mr-2 h-4 w-4" />
                 Duplicate Job
               </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => window.open(`/apply/${job._id}`, '_blank')}
+              <DropdownMenuItem
+                onClick={() => window.open(`/apply/${job._id}`, "_blank")}
               >
                 <ArrowUpRight className="mr-2 h-4 w-4" />
                 View Public Page
@@ -142,27 +144,31 @@ export function JobHeader({
                 <UserPlus className="mr-2 h-4 w-4" />
                 Assign Recruiter
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => {/* Share functionality */}}>
+              <DropdownMenuItem
+                onClick={() => {
+                  /* Share functionality */
+                }}
+              >
                 <Share2 className="mr-2 h-4 w-4" />
                 Share Job
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={() => onStatusUpdate('active')}
-                disabled={job.status === 'active'}
+              <DropdownMenuItem
+                onClick={() => onStatusUpdate("active")}
+                disabled={job.status === "active"}
               >
                 <Eye className="mr-2 h-4 w-4 text-green-600" />
                 Publish Job
               </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => onStatusUpdate('closed')}
-                disabled={job.status === 'closed'}
+              <DropdownMenuItem
+                onClick={() => onStatusUpdate("closed")}
+                disabled={job.status === "closed"}
               >
                 <Archive className="mr-2 h-4 w-4 text-amber-600" />
                 Close Job
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={onDelete}
                 className="text-destructive focus:text-destructive"
               >

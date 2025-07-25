@@ -14,6 +14,7 @@ import { EmailSettings } from "@/components/admin/settings/email-settings";
 import {
   CustomFieldsManager,
   CustomField,
+  CustomFieldFormValues,
 } from "@/components/admin/settings/custom-fields-manager";
 import { PageHeader } from "@/components/shared/PageHeader";
 
@@ -314,7 +315,7 @@ export default function SettingsPage() {
   };
 
   // Add custom field
-  const handleAddCustomField = async (field: Omit<CustomField, "_id">) => {
+  const handleAddCustomField = async (field: Omit<CustomField | CustomFieldFormValues, "_id">) => {
     try {
       setIsLoading(true);
       const response = await fetch("/api/admin/custom-fields", {
@@ -456,7 +457,7 @@ export default function SettingsPage() {
 
             <TabsContent value="general" className="space-y-6">
               <GeneralSettings
-                initialData={generalSettings}
+                initialData={generalSettings ?? {}}
                 onSave={handleSaveGeneralSettings}
                 isLoading={isLoading}
               />

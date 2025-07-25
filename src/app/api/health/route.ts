@@ -24,8 +24,8 @@ export const GET = withSecurity(
         uptime: process.uptime(),
         database: {
           status: dbInfo.status,
-          host: dbInfo.host,
-          name: dbInfo.name,
+          host: dbInfo.host ?? undefined,
+          name: dbInfo.name ?? undefined,
           healthy: isDbHealthy,
         },
         performance: {

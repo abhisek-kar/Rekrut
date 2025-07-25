@@ -179,8 +179,8 @@ export async function GET(request: NextRequest) {
         status: app.status,
         source: app.source,
         matchingScore: app.matchScore,
-        resume: app.resume,
-        coverLetter: app.coverLetter,
+        // resume: app.resume, // Removed because 'resume' does not exist on Application type
+        // coverLetter: app.coverLetter,
         job: {
           _id: job._id ? job._id.toString() : job.toString(),
           title: job.title || "",

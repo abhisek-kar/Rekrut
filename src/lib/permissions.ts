@@ -59,7 +59,7 @@ export async function canAccessApplication(
 
     // SubAdmin can access applications for jobs assigned to them
     if (session.user.role === "subadmin") {
-      const job = application.jobId;
+      const job = (application as any).jobId;
       if (!job) return false;
 
       return (
@@ -148,7 +148,7 @@ export async function canModifyApplication(
 
     // SubAdmin can modify applications for jobs assigned to them
     if (session.user.role === "subadmin") {
-      const job = application.jobId;
+      const job = (application as any).jobId;
       if (!job) return false;
 
       return (

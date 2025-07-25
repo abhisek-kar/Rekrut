@@ -1,11 +1,8 @@
-'use client';
+"use client";
 
 import { Input } from "@/components/shadcn-ui/input";
 import { Button } from "@/components/shadcn-ui/button";
-import {
-  Card,
-  CardContent,
-} from "@/components/shadcn-ui/card";
+import { Card, CardContent } from "@/components/shadcn-ui/card";
 import {
   Select,
   SelectContent,
@@ -24,7 +21,10 @@ interface ApplicationsFilterProps {
     score: string;
   };
   onSearchChange: (value: string) => void;
-  onFilterChange: (name: keyof typeof filters, value: string) => void;
+  onFilterChange: (
+    name: keyof ApplicationsFilterProps["filters"],
+    value: string
+  ) => void;
   onResetFilters: () => void;
 }
 
@@ -36,7 +36,8 @@ export function ApplicationsFilter({
   onResetFilters,
 }: ApplicationsFilterProps) {
   // Check if any filter is active
-  const isFiltersActive = Object.values(filters).some(filter => !!filter) || searchTerm;
+  const isFiltersActive =
+    Object.values(filters).some((filter) => !!filter) || searchTerm;
 
   return (
     <Card>
@@ -53,7 +54,7 @@ export function ApplicationsFilter({
             />
             {searchTerm && (
               <button
-                onClick={() => onSearchChange('')}
+                onClick={() => onSearchChange("")}
                 className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-4 w-4" />
@@ -65,7 +66,7 @@ export function ApplicationsFilter({
           <div className="flex flex-wrap md:flex-nowrap gap-2">
             <Select
               value={filters.status}
-              onValueChange={(value) => onFilterChange('status', value)}
+              onValueChange={(value) => onFilterChange("status", value)}
             >
               <SelectTrigger className="w-full md:w-36">
                 <SelectValue placeholder="Status" />
@@ -83,7 +84,7 @@ export function ApplicationsFilter({
 
             <Select
               value={filters.source}
-              onValueChange={(value) => onFilterChange('source', value)}
+              onValueChange={(value) => onFilterChange("source", value)}
             >
               <SelectTrigger className="w-full md:w-36">
                 <SelectValue placeholder="Source" />
@@ -100,7 +101,7 @@ export function ApplicationsFilter({
 
             <Select
               value={filters.date}
-              onValueChange={(value) => onFilterChange('date', value)}
+              onValueChange={(value) => onFilterChange("date", value)}
             >
               <SelectTrigger className="w-full md:w-36">
                 <SelectValue placeholder="Date" />
@@ -115,7 +116,7 @@ export function ApplicationsFilter({
 
             <Select
               value={filters.score}
-              onValueChange={(value) => onFilterChange('score', value)}
+              onValueChange={(value) => onFilterChange("score", value)}
             >
               <SelectTrigger className="w-full md:w-36">
                 <SelectValue placeholder="Score" />

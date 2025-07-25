@@ -15,6 +15,8 @@ const mockJob = {
     country: "India",
   },
   requiredDocuments: ["resume", "portfolio"],
+  slug: "senior-frontend-developer",
+  publicId: "job-public-123",
 };
 
 export default function TestApplicationFormPage() {

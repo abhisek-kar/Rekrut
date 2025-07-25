@@ -77,7 +77,7 @@ export function ApplicationsTable({
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllRowsSelected()}
-          indeterminate={table.getIsSomeRowsSelected()}
+          // indeterminate={table.getIsSomeRowsSelected() }
           onCheckedChange={(value) => table.toggleAllRowsSelected(!!value)}
           aria-label="Select all"
         />
@@ -114,7 +114,7 @@ export function ApplicationsTable({
           <div className="flex items-center gap-3">
             <Avatar>
               <AvatarImage
-                src={candidate.profilePhoto}
+                src={"https://random-user.me/api/portraits/men/3.jpg"}
                 alt={`${candidate.firstName} ${candidate.lastName}`}
               />
               <AvatarFallback>

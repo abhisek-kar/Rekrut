@@ -84,7 +84,7 @@ export async function PUT(req: NextRequest) {
         ...setting.settings,
         ...body.settings
       };
-      setting.updatedBy = session.user.id;
+      setting.updatedBy = new (await import('mongoose')).Types.ObjectId(session.user.id);
       await setting.save();
     } else {
       // Create new settings document

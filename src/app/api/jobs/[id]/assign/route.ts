@@ -120,7 +120,7 @@ export async function PUT(
       
       try {
         await notifyJobAssignment(
-          job._id.toString(),
+          (job._id as mongoose.Types.ObjectId).toString(),
           subadminId,
           session.user.id,
           appUrl

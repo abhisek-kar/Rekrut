@@ -30,11 +30,11 @@ export function rateLimit(ip: string, options: RateLimitOptions) {
   
   // Clean up expired entries occasionally
   if (Math.random() < 0.01) { // 1% chance on each request
-    for (const [key, record] of ipRequestStore.entries()) {
+    Array.from(ipRequestStore.entries()).forEach(([key, record]) => {
       if (now > record.resetTime) {
         ipRequestStore.delete(key);
       }
-    }
+    });
   }
   
   // Get or create record for this IP

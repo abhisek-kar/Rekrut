@@ -33,13 +33,13 @@ const emailSettingsSchema = z.object({
     .positive({ message: "SMTP port must be a positive number" }),
   smtpUser: z.string().min(1, { message: "SMTP username is required" }),
   smtpPassword: z.string().min(1, { message: "SMTP password is required" }),
-  smtpSecure: z.boolean().default(true),
+  smtpSecure: z.boolean(),
   emailSignature: z.string().optional(),
-  applicationConfirmationEnabled: z.boolean().default(true),
-  statusChangeNotificationEnabled: z.boolean().default(true),
-  interviewScheduleEnabled: z.boolean().default(true),
-  rejectionEnabled: z.boolean().default(true),
-  offerEnabled: z.boolean().default(true),
+  applicationConfirmationEnabled: z.boolean(),
+  statusChangeNotificationEnabled: z.boolean(),
+  interviewScheduleEnabled: z.boolean(),
+  rejectionEnabled: z.boolean(),
+  offerEnabled: z.boolean(),
 });
 
 type EmailSettingsFormValues = z.infer<typeof emailSettingsSchema>;
