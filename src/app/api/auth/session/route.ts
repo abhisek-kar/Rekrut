@@ -1,6 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/nextauth";
+
+export const dynamic = "force-dynamic";
 
 // This route is maintained for backward compatibility
 // It returns information about the current session
@@ -19,7 +21,7 @@ export async function GET() {
     // Return session data
     return NextResponse.json({
       user: session.user,
-      expires: session.expires
+      expires: session.expires,
     });
   } catch (error) {
     console.error("Session error:", error);

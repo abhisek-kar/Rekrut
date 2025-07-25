@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import dbConnect from "@/lib/db/connect";
 import Job from "@/models/Job";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     await dbConnect();

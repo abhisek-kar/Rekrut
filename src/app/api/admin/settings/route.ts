@@ -5,6 +5,8 @@ import dbConnect from '@/lib/db/connect';
 import Setting from '@/models/Setting';
 import Activity from '@/models/Activity';
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     // Check authentication

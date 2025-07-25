@@ -223,8 +223,6 @@ JobSchema.index({ skills: 1 });
 JobSchema.index({ createdAt: -1 });
 JobSchema.index({ isTemplate: 1 });
 JobSchema.index({ templateId: 1 });
-JobSchema.index({ publicId: 1 });
-JobSchema.index({ slug: 1 });
 
 // Use function to avoid issues with model compilation in Next.js hot reloading
 export default (mongoose.models.Job as Model<IJob>) ||

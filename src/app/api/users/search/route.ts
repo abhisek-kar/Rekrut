@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db/connect";
 import User from "@/models/User";
 
+export const dynamic = "force-dynamic";
+
 // GET: Search users by email or name
 export async function GET(request: NextRequest) {
   try {

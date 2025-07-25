@@ -3,9 +3,14 @@ import { z } from "zod";
 import User from "@/models/User";
 import dbConnect from "@/lib/db/connect";
 
+export const dynamic = "force-dynamic";
+
 // Validation schema for updating user profile
 const updateProfileSchema = z.object({
-  firstName: z.string().min(2, { message: "First name is required" }).optional(),
+  firstName: z
+    .string()
+    .min(2, { message: "First name is required" })
+    .optional(),
   lastName: z.string().min(2, { message: "Last name is required" }).optional(),
   phone: z.string().optional(),
 });
@@ -26,14 +31,12 @@ export async function GET(request: NextRequest) {
     await dbConnect();
 
     // Find the user
-    const user = await User.findById(userId)
-      .select("-password -resetPasswordToken -resetPasswordExpires -setupToken -setupTokenExpires");
+    const user = await User.findById(userId).select(
+      "-password -resetPasswordToken -resetPasswordExpires -setupToken -setupTokenExpires"
+    );
 
     if (!user) {
-      return NextResponse.json(
-        { message: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -75,17 +78,14 @@ export async function PUT(request: NextRequest) {
     const user = await User.findById(userId);
 
     if (!user) {
-      return NextResponse.json(
-        { message: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     // Handle multipart form data or JSON
     let formData;
     let body;
     const contentType = request.headers.get("content-type") || "";
-    
+
     if (contentType.includes("multipart/form-data")) {
       formData = await request.formData();
       body = {
@@ -117,7 +117,7 @@ export async function PUT(request: NextRequest) {
     // Handle profile photo if it exists
     if (contentType.includes("multipart/form-data") && formData) {
       const profilePhoto = formData.get("profilePhoto") as File;
-      
+
       if (profilePhoto && profilePhoto.size > 0) {
         try {
           // In a real implementation with S3, we would upload here

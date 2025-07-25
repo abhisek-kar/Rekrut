@@ -4,10 +4,12 @@ import { authOptions } from "@/lib/auth-options";
 import Task from "@/models/Task";
 import dbConnect from "@/lib/db/connect";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session || session.user.role !== "subadmin") {
       return NextResponse.json(
         { error: "Unauthorized. Only SubAdmins can access this endpoint." },
@@ -16,10 +18,10 @@ export async function GET(req: NextRequest) {
     }
 
     await dbConnect();
-    
+
     const subadminId = session.user.id;
     const url = new URL(req.url);
-    
+
     // Parse query parameters for filtering and pagination
     const status = url.searchParams.get("status");
     const priority = url.searchParams.get("priority");
@@ -27,22 +29,22 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(url.searchParams.get("limit") || "20");
     const page = parseInt(url.searchParams.get("page") || "1");
     const skip = (page - 1) * limit;
-    
+
     // Build filter based on query parameters
     const filter: Record<string, unknown> = { assignedTo: subadminId };
-    
+
     if (status) {
       filter.status = status;
     }
-    
+
     if (priority) {
       filter.priority = priority;
     }
-    
+
     if (taskType) {
       filter.taskType = taskType;
     }
-    
+
     // Get tasks
     const tasks = await Task.find(filter)
       .sort({ dueDate: 1, priority: -1 }) // Sort by due date (ascending) and priority (high to low)
@@ -50,18 +52,30 @@ export async function GET(req: NextRequest) {
       .limit(limit)
       .populate("createdBy", "firstName lastName")
       .lean();
-    
+
     const totalCount = await Task.countDocuments(filter);
-    
+
     // Get counts for each status
     const counts = {
       all: await Task.countDocuments({ assignedTo: subadminId }),
-      pending: await Task.countDocuments({ assignedTo: subadminId, status: "pending" }),
-      inProgress: await Task.countDocuments({ assignedTo: subadminId, status: "inProgress" }),
-      completed: await Task.countDocuments({ assignedTo: subadminId, status: "completed" }),
-      cancelled: await Task.countDocuments({ assignedTo: subadminId, status: "cancelled" }),
+      pending: await Task.countDocuments({
+        assignedTo: subadminId,
+        status: "pending",
+      }),
+      inProgress: await Task.countDocuments({
+        assignedTo: subadminId,
+        status: "inProgress",
+      }),
+      completed: await Task.countDocuments({
+        assignedTo: subadminId,
+        status: "completed",
+      }),
+      cancelled: await Task.countDocuments({
+        assignedTo: subadminId,
+        status: "cancelled",
+      }),
     };
-    
+
     return NextResponse.json({
       tasks,
       counts,
