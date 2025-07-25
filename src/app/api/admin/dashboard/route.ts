@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/nextauth";
 import dbConnect from "@/lib/db/connect";
 import Job from "@/models/Job";
 import Application from "@/models/Application";
 import Candidate from "@/models/Candidate";
 import User from "@/models/User";
+import { auth } from "@/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     // Check if user is authenticated and has admin role
     if (!session || !session.user || session.user.role !== "admin") {

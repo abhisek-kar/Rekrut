@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
+
 import dbConnect from "@/lib/db/connect";
-import { authOptions } from "@/lib/auth/nextauth";
+import { auth } from "@/auth";
 import {
   getUserNotifications,
   markNotificationAsRead,
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     await dbConnect();
 
     // Get session to verify authentication
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -60,7 +60,7 @@ export async function PUT(request: NextRequest) {
     await dbConnect();
 
     // Get session to verify authentication
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

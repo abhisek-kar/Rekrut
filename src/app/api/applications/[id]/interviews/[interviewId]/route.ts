@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
 import mongoose from "mongoose";
 import dbConnect from "@/lib/db/connect";
-import { authOptions } from "@/lib/auth/nextauth";
 import Application from "@/models/Application";
 import Activity from "@/models/Activity";
+import { auth } from "@/auth";
 
 // PUT: Update a specific interview
 export async function PUT(
@@ -14,7 +13,7 @@ export async function PUT(
   try {
     await dbConnect();
 
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -103,7 +102,7 @@ export async function DELETE(
   try {
     await dbConnect();
 
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

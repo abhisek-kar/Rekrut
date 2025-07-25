@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
+
 import mongoose from "mongoose";
 import dbConnect from "@/lib/db/connect";
-import { authOptions } from "@/lib/auth/nextauth";
+import { auth } from "@/auth";
 import { createJobSchema, createDraftJobSchema } from "@/lib/validators/job";
 import Job from "@/models/Job";
 import { ZodError } from "zod";
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     await dbConnect();
 
     // Get session to verify authentication
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

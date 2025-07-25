@@ -4,8 +4,9 @@ import User from "@/models/User";
 import dbConnect from "@/lib/db/connect";
 import crypto from "crypto";
 import { sendEmail, generateAccountSetupEmail } from "@/lib/email";
+import { auth } from "@/auth"; 
 
-// Validation schema for creating a SubAdmin
+// ... (your subadminSchema remains the same)
 const subadminSchema = z.object({
   firstName: z.string().min(2, { message: "First name is required" }),
   lastName: z.string().min(2, { message: "Last name is required" }),
@@ -19,20 +20,17 @@ const subadminSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    // Check if request is from an admin
-    const userRole = request.headers.get("x-user-role");
+    const session = await auth();
 
-    if (userRole !== "admin") {
+    if (session?.user?.role !== "admin") {
       return NextResponse.json(
         { message: "Unauthorized: Admin access required" },
         { status: 403 }
       );
     }
 
-    // Connect to database
+    // --- The rest of your GET logic is correct and remains the same ---
     await dbConnect();
-
-    // Get query parameters
     const searchParams = request.nextUrl.searchParams;
     const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "";
@@ -40,9 +38,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const skip = (page - 1) * limit;
 
-    // Build query
     const query: Record<string, unknown> = { role: "subadmin" };
-    
     if (search) {
       query.$or = [
         { firstName: { $regex: search, $options: "i" } },
@@ -50,21 +46,21 @@ export async function GET(request: NextRequest) {
         { email: { $regex: search, $options: "i" } },
       ];
     }
-    
     if (status) {
       query.status = status;
     }
 
-    // Execute query
     const totalUsers = await User.countDocuments(query);
     const users = await User.find(query)
-      .select("-password -resetPasswordToken -resetPasswordExpires -setupToken -setupTokenExpires")
+      .select(
+        "-password -resetPasswordToken -resetPasswordExpires -setupToken -setupTokenExpires"
+      )
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
     return NextResponse.json({
-      users: users.map(user => ({
+      users: users.map((user) => ({
         id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -93,24 +89,23 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if request is from an admin
-    const userRole = request.headers.get("x-user-role");
+    // ✨ CORRECT: Get the session using the modern auth() function
+    const session = await auth();
 
-    if (userRole !== "admin") {
+    // ✨ CORRECT: Check the role from the secure session object
+    if (session?.user?.role !== "admin") {
       return NextResponse.json(
         { message: "Unauthorized: Admin access required" },
         { status: 403 }
       );
     }
 
-    // Connect to database
+    // --- The rest of your POST logic is correct and remains the same ---
     await dbConnect();
-
-    // Handle multipart form data or JSON
     let formData;
     let body;
     const contentType = request.headers.get("content-type") || "";
-    
+
     if (contentType.includes("multipart/form-data")) {
       formData = await request.formData();
       body = {
@@ -121,15 +116,15 @@ export async function POST(request: NextRequest) {
         password: formData.get("password"),
         status: formData.get("status"),
         sendSetupEmail: formData.get("sendSetupEmail") === "true",
-        permissions: JSON.parse(formData.get("permissions") as string || "[]"),
+        permissions: JSON.parse(
+          (formData.get("permissions") as string) || "[]"
+        ),
       };
     } else {
       body = await request.json();
     }
 
-    // Validate request data
     const result = subadminSchema.safeParse(body);
-
     if (!result.success) {
       return NextResponse.json(
         { message: "Invalid request data", errors: result.error.errors },
@@ -138,10 +133,7 @@ export async function POST(request: NextRequest) {
     }
 
     const validatedData = result.data;
-
-    // Check if email already exists
     const existingUser = await User.findOne({ email: validatedData.email });
-
     if (existingUser) {
       return NextResponse.json(
         { message: "Email already in use" },
@@ -149,22 +141,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If no password is provided or sendSetupEmail is true, generate setup token
     let setupToken, setupTokenExpiry;
     let password = validatedData.password;
-
     if (!password || validatedData.sendSetupEmail) {
       setupToken = crypto.randomBytes(32).toString("hex");
       setupTokenExpiry = new Date();
-      setupTokenExpiry.setHours(setupTokenExpiry.getHours() + 24); // Token valid for 24 hours
-      
-      // If no password provided, generate a random one
+      setupTokenExpiry.setHours(setupTokenExpiry.getHours() + 24);
       if (!password) {
         password = crypto.randomBytes(10).toString("hex");
       }
     }
 
-    // Create SubAdmin user
     const subadmin = new User({
       firstName: validatedData.firstName,
       lastName: validatedData.lastName,
@@ -178,37 +165,32 @@ export async function POST(request: NextRequest) {
       setupTokenExpires: setupTokenExpiry,
     });
 
-    // Handle profile photo if it exists
     if (contentType.includes("multipart/form-data") && formData) {
       const profilePhoto = formData.get("profilePhoto") as File;
-      
       if (profilePhoto && profilePhoto.size > 0) {
         try {
-          // In a real implementation with S3, we would upload here
-          // For now, we'll just store a placeholder URL
           const timestamp = Date.now();
           const uniqueId = Math.random().toString(36).substring(2, 10);
           subadmin.profilePhoto = `/uploads/profile-photos/${timestamp}-${uniqueId}-${profilePhoto.name}`;
         } catch (error) {
           console.error("Error uploading profile photo:", error);
-          // Continue without profile photo if upload fails
         }
       }
     }
 
     await subadmin.save();
 
-    // Send setup email if requested
     if (validatedData.sendSetupEmail) {
       try {
-        // Construct setup URL
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-        const setupUrl = `${baseUrl}/account-setup?token=${setupToken}&email=${encodeURIComponent(validatedData.email)}`;
-
-        // Generate account setup email
-        const htmlContent = generateAccountSetupEmail(setupUrl, validatedData.email);
-
-        // Send email
+        const baseUrl =
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+        const setupUrl = `${baseUrl}/account-setup?token=${setupToken}&email=${encodeURIComponent(
+          validatedData.email
+        )}`;
+        const htmlContent = generateAccountSetupEmail(
+          setupUrl,
+          validatedData.email
+        );
         await sendEmail({
           to: validatedData.email,
           subject: "Complete Your Rekrut ATS Account Setup",
@@ -216,31 +198,37 @@ export async function POST(request: NextRequest) {
         });
       } catch (emailError) {
         console.error("Error sending setup email:", emailError);
-        // Continue even if email fails
       }
     }
 
-    // Development convenience - remove in production
-    const devInfo = process.env.NODE_ENV === 'development' && validatedData.sendSetupEmail
-      ? { 
-          devSetupUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/account-setup?token=${setupToken}&email=${encodeURIComponent(validatedData.email)}` 
-        }
-      : {};
+    const devInfo =
+      process.env.NODE_ENV === "development" && validatedData.sendSetupEmail
+        ? {
+            devSetupUrl: `${
+              process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+            }/account-setup?token=${setupToken}&email=${encodeURIComponent(
+              validatedData.email
+            )}`,
+          }
+        : {};
 
-    return NextResponse.json({
-      success: true,
-      message: "SubAdmin created successfully",
-      user: {
-        id: subadmin._id,
-        firstName: subadmin.firstName,
-        lastName: subadmin.lastName,
-        email: subadmin.email,
-        role: subadmin.role,
-        status: subadmin.status,
-        profilePhoto: subadmin.profilePhoto,
+    return NextResponse.json(
+      {
+        success: true,
+        message: "SubAdmin created successfully",
+        user: {
+          id: subadmin._id,
+          firstName: subadmin.firstName,
+          lastName: subadmin.lastName,
+          email: subadmin.email,
+          role: subadmin.role,
+          status: subadmin.status,
+          profilePhoto: subadmin.profilePhoto,
+        },
+        ...devInfo,
       },
-      ...devInfo,
-    }, { status: 201 });
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Create SubAdmin error:", error);
     return NextResponse.json(

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
+
 import mongoose from "mongoose";
 import dbConnect from "@/lib/db/connect";
-import { authOptions } from "@/lib/auth/nextauth";
+import { auth } from "@/auth";
 import Candidate from "@/models/Candidate";
 import Application from "@/models/Application";
 import Job from "@/models/Job";
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     await dbConnect();
 
     // Get session to verify authentication and role
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

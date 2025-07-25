@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
 import mongoose from "mongoose";
 import dbConnect from "@/lib/db/connect";
-import { authOptions } from "@/lib/auth/nextauth";
 import Application from "@/models/Application";
 import User from "@/models/User";
 import Activity from "@/models/Activity";
 import { sendEmail } from "@/lib/email";
 import { getEmailTemplate } from "@/lib/email/templates";
 import { format } from "date-fns";
+import { auth } from "@/auth";
 
 // POST: Add a new interview to an application
 export async function POST(
@@ -18,7 +17,7 @@ export async function POST(
   try {
     await dbConnect();
 
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

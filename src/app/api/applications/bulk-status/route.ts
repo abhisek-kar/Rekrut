@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
+
 import mongoose from "mongoose";
 import dbConnect from "@/lib/db/connect";
-import { authOptions } from "@/lib/auth/nextauth";
+import { auth } from "@/auth";
 import { bulkStatusUpdateSchema } from "@/lib/validators/application";
 import Application from "@/models/Application";
 import Candidate from "@/models/Candidate";
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     await dbConnect();
 
     // Get session to verify authentication
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -47,13 +47,17 @@ export async function POST(request: NextRequest) {
     const { ids, status, reason, notify } = data;
 
     // Validate that all IDs are valid ObjectIds
-    const validIds = ids.filter((id:any) => mongoose.Types.ObjectId.isValid(id));
+    const validIds = ids.filter((id: any) =>
+      mongoose.Types.ObjectId.isValid(id)
+    );
 
     if (validIds.length !== ids.length) {
       return NextResponse.json(
         {
           error: "One or more invalid application IDs",
-          invalidIds: ids.filter((id:any) => !mongoose.Types.ObjectId.isValid(id)),
+          invalidIds: ids.filter(
+            (id: any) => !mongoose.Types.ObjectId.isValid(id)
+          ),
         },
         { status: 400 }
       );

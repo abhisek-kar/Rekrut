@@ -1,22 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth/nextauth";
+import { auth } from "@/auth";
 import dbConnect from "@/lib/db/connect";
 import Activity from "@/models/Activity";
-import User from "@/models/User";
 import { formatDistanceToNow } from "date-fns";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
-    // Check if user is authenticated and has admin role
-    if (!session || !session.user || session.user.role !== "admin") {
+    // Check if user is authenticated and has the correct role
+    if (!session?.user || session.user.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // --- The rest of your code remains the same ---
 
     // Connect to database
     await dbConnect();

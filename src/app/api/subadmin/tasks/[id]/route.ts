@@ -9,8 +9,8 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    
+    const session = await auth();
+
     if (!session || session.user.role !== "subadmin") {
       return NextResponse.json(
         { error: "Unauthorized. Only SubAdmins can access this endpoint." },
@@ -19,40 +19,40 @@ export async function PUT(
     }
 
     await dbConnect();
-    
+
     const taskId = params.id;
     const subadminId = session.user.id;
-    
+
     // Find the task and ensure it belongs to this subadmin
     const task = await Task.findOne({
       _id: taskId,
       assignedTo: subadminId,
     });
-    
+
     if (!task) {
       return NextResponse.json(
         { error: "Task not found or you don't have permission to update it" },
         { status: 404 }
       );
     }
-    
+
     // Get update data from request
     const data = await req.json();
     const { status, notes } = data;
-    
+
     // Update only allowed fields
     if (status) {
       task.status = status;
     }
-    
+
     if (notes) {
       task.notes = notes;
     }
-    
+
     task.updatedAt = new Date();
-    
+
     await task.save();
-    
+
     return NextResponse.json({
       task,
       message: "Task updated successfully",

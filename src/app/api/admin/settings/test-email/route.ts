@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth/nextauth';
 import { sendEmail } from '@/lib/email';
 import { getFeatureFlags } from '@/lib/env';
+import { auth } from '@/auth';
 
 export async function POST(request: NextRequest) {
   try {
     // Get session to verify authentication
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     
     if (!session?.user) {
       return NextResponse.json(
