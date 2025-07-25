@@ -1,53 +1,45 @@
+// In src/layout.tsx
+
 import type { Metadata } from "next";
 import "./globals.css";
 import { Poppins, Open_Sans } from "next/font/google";
-import { AuthProvider } from "@/context/AuthContext";
+import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/shadcn-ui/sonner";
-import { SessionProviderWrapper } from "@/lib/auth/session-provider";
-import { validateEnv } from "@/lib/env";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-
-// Validate environment variables at startup
-if (typeof window === "undefined") {
-  validateEnv();
-} 
+import { auth } from "@/auth"; // ✨ Import the auth function
 
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-poppins",
-  display: "swap",
 });
 const openSans = Open_Sans({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-open-sans",
-  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Rekrut ATS",
   description: "A recruitment platform",
-  
 };
 
-export default function RootLayout({
+// ✨ Make the component async
+export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
+  // ✨ Fetch the session on the server
+  const session = await auth();
+
   return (
-    <html lang="en">
-      
+    <html lang="en" suppressHydrationWarning>
       <body className={`${poppins.variable} ${openSans.variable}`}>
-        <ErrorBoundary level="global">
-          <SessionProviderWrapper>
-            <AuthProvider>
-              {children}
-              <Toaster />
-            </AuthProvider>
-          </SessionProviderWrapper>
-        </ErrorBoundary>
+        {/* ✨ Pass the server session to the provider */}
+        <SessionProvider session={session}>
+          {children}
+          <Toaster />
+        </SessionProvider>
       </body>
     </html>
   );

@@ -22,7 +22,7 @@ import { Input } from "@/components/shadcn-ui/input";
 import { Card, CardContent } from "@/components/shadcn-ui/card";
 import { Separator } from "@/components/shadcn-ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn-ui/avatar";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 // Profile form validation schema
 const profileFormSchema = z.object({

@@ -24,7 +24,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/shadcn-ui/sidebar";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { LogoutConfirmationModal } from "./logout-confirmation-modal";
 
 export function NavUser({

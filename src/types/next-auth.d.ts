@@ -1,49 +1,40 @@
-import { DefaultSession } from "next-auth";
+import { DefaultSession, DefaultUser } from "next-auth";
+import { JWT } from "next-auth/jwt";
 
+// Extend the built-in types to include your custom properties
 declare module "next-auth" {
   /**
-   * Returned by `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
+   * The Session object returned by `auth()` or `useSession()`
    */
   interface Session {
     user: {
-      /** User's ID */
       id: string;
-      /** User's role */
       role: "admin" | "subadmin";
-      /** User's first name */
-      firstName: string;
-      /** User's last name */
-      lastName: string;
-      /** User's profile photo URL */
-      profilePhoto?: string;
-    } & DefaultSession["user"];
+      firstName?: string | null;
+      lastName?: string | null;
+      profilePhoto?: string | null;
+    } & DefaultSession["user"]; // Keep the default properties like name, email, image
   }
 
   /**
-   * The shape of the user object returned in the OAuth providers' `profile` callback,
-   * or the second parameter of the `session` callback, when using a database.
+   * The User object passed to the `jwt` callback on sign-in.
+   * This should match the object returned from the `authorize` function.
    */
-  interface User {
-    id: string;
+  interface User extends DefaultUser {
     role: "admin" | "subadmin";
-    firstName: string;
-    lastName: string;
-    profilePhoto?: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    profilePhoto?: string | null;
   }
 }
 
 declare module "next-auth/jwt" {
-  /** Returned by the `jwt` callback and `getToken`, when using JWT sessions */
+  /**
+   * The JWT token that is encrypted and passed between requests.
+   */
   interface JWT {
-    /** User's ID */
     id: string;
-    /** User's role */
     role: "admin" | "subadmin";
-    /** User's first name */
-    firstName: string;
-    /** User's last name */
-    lastName: string;
-    /** User's profile photo URL */
-    profilePhoto?: string;
+    firstName?: string | null;
   }
 }

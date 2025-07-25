@@ -2,7 +2,7 @@
 
 // import { useEffect, Suspense } from "react";
 // import { useRouter } from "next/navigation";
-// import { useAuth } from "@/context/AuthContext";
+// import { useAuth } from "@/hooks/useAuth"; // Custom hook to manage authentication state
 // import { getDashboardRoute } from "@/lib/routes";
 // import { PageLoader } from "@/components/atoms/loader";
 // import dynamic from "next/dynamic";
@@ -124,50 +124,38 @@
 //   );
 // }
 
-"use client";
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import { getDashboardRoute } from "@/lib/routes";
 import { Button } from "@/components/shadcn-ui/button";
-import { PageLoader } from "@/components/atoms/loader";
 import Link from "next/link";
 import { Logo } from "@/components/atoms/logo";
 
-export default function Home() {
-  const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+export default async function Home() {
+  const session = await auth(); // Get the session on the server
 
-  // Redirect authenticated users to their dashboard
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      const dashboardRoute = getDashboardRoute(user.role);
-      router.push(dashboardRoute);
-    }
-  }, [isAuthenticated, user, router]);
-
-  // If authenticated, show redirecting state
-  if (isAuthenticated && user) {
-    return <PageLoader message="Redirecting to your dashboard..." />;
+  // If the user is authenticated, redirect them immediately on the server
+  if (session?.user) {
+    const dashboardRoute = getDashboardRoute(session.user.role);
+    redirect(dashboardRoute);
   }
 
-  // Show homepage for non-authenticated users
+  // Show this homepage only to non-authenticated users
   return (
     <div className="min-h-screen p-4 bg-gray-50">
       <div className="flex items-center justify-between">
         <Logo size="xl" />
-        div
         <Button asChild>
           <Link href="/login">Go to Login</Link>
         </Button>
       </div>
-      
+
       <div className="flex items-center justify-center mt-32">
         <div className="text-center max-w-md">
           <h1 className="text-4xl font-bold mb-4">Welcome to Rekrut ATS</h1>
           <p className="text-muted-foreground mb-8">
-            Streamline your recruitment process with our modern applicant tracking system.
+            Streamline your recruitment process with our modern applicant
+            tracking system.
           </p>
           <Button asChild size="lg">
             <Link href="/jobs">Get Started</Link>

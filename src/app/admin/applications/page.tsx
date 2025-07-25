@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { ApplicationsListView } from "@/components/organisms/applications/ApplicationsListView";
 import { PageHeader } from "@/components/shared/PageHeader";
 

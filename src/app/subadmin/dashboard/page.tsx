@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn-ui/tabs";
 import { DashboardMetricsPanel } from "@/components/organisms/subadmin/DashboardMetricsPanel";
 import { AssignedJobsPanel } from "@/components/organisms/subadmin/AssignedJobsPanel";

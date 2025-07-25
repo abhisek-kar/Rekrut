@@ -253,10 +253,10 @@ export function SubAdminTable({ data, isLoading = false }: SubAdminTableProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      {/* <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">SubAdmins</h2>
         
-      </div>
+      </div> */}
 
       <DataTable
         columns={columns}

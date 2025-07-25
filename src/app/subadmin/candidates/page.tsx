@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/shadcn-ui/button";
 import { Card, CardContent } from "@/components/shadcn-ui/card";
 import { Badge } from "@/components/shadcn-ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/shadcn-ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/shadcn-ui/avatar";
 import {
   Tabs,
   TabsContent,
@@ -27,9 +31,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/shadcn-ui/dropdown-menu";
-import { 
-  Users, 
-  Search, 
+import {
+  Users,
+  Search,
   Filter,
   Eye,
   Mail,
@@ -42,10 +46,10 @@ import {
   Star,
   MessageSquare,
   UserPlus,
-  Clock
+  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { SectionLoader } from "@/components/atoms/loader";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { formatDistanceToNow } from "date-fns";
@@ -135,7 +139,7 @@ export default function SubAdminCandidatesPage() {
       offered: 0,
       hired: 0,
       rejected: 0,
-    }
+    },
   });
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -169,17 +173,18 @@ export default function SubAdminCandidatesPage() {
         params.set("search", searchTerm.trim());
       }
 
-      const response = await fetch(`/api/subadmin/candidates?${params.toString()}`);
+      const response = await fetch(
+        `/api/subadmin/candidates?${params.toString()}`
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch candidates");
       }
 
       const data: CandidatesResponse = await response.json();
-      
+
       setCandidates(data.candidates);
       setStats(data.stats);
-
     } catch (error) {
       console.error("Error fetching candidates:", error);
       toast.error("Failed to load candidates");
@@ -187,7 +192,14 @@ export default function SubAdminCandidatesPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, activeTab, searchTerm, sortBy, sortOrder, applicationStatusFilter]);
+  }, [
+    currentPage,
+    activeTab,
+    searchTerm,
+    sortBy,
+    sortOrder,
+    applicationStatusFilter,
+  ]);
 
   // Fetch candidates when component mounts or dependencies change
   useEffect(() => {
@@ -235,11 +247,13 @@ export default function SubAdminCandidatesPage() {
       inactive: { label: "Inactive", color: "bg-gray-100 text-gray-800" },
       blacklisted: { label: "Blacklisted", color: "bg-red-100 text-red-800" },
     };
-    
-    return statusMap[status as keyof typeof statusMap] || {
-      label: status.charAt(0).toUpperCase() + status.slice(1),
-      color: "bg-gray-100 text-gray-800"
-    };
+
+    return (
+      statusMap[status as keyof typeof statusMap] || {
+        label: status.charAt(0).toUpperCase() + status.slice(1),
+        color: "bg-gray-100 text-gray-800",
+      }
+    );
   };
 
   // Get application status display info
@@ -247,17 +261,26 @@ export default function SubAdminCandidatesPage() {
     const statusMap = {
       applied: { label: "Applied", color: "bg-blue-100 text-blue-800" },
       screening: { label: "Screening", color: "bg-yellow-100 text-yellow-800" },
-      interview_scheduled: { label: "Interview Scheduled", color: "bg-purple-100 text-purple-800" },
-      interviewed: { label: "Interviewed", color: "bg-orange-100 text-orange-800" },
+      interview_scheduled: {
+        label: "Interview Scheduled",
+        color: "bg-purple-100 text-purple-800",
+      },
+      interviewed: {
+        label: "Interviewed",
+        color: "bg-orange-100 text-orange-800",
+      },
       offered: { label: "Offered", color: "bg-green-100 text-green-800" },
       hired: { label: "Hired", color: "bg-emerald-100 text-emerald-800" },
       rejected: { label: "Rejected", color: "bg-red-100 text-red-800" },
     };
-    
-    return statusMap[status as keyof typeof statusMap] || {
-      label: status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' '),
-      color: "bg-gray-100 text-gray-800"
-    };
+
+    return (
+      statusMap[status as keyof typeof statusMap] || {
+        label:
+          status.charAt(0).toUpperCase() + status.slice(1).replace("_", " "),
+        color: "bg-gray-100 text-gray-800",
+      }
+    );
   };
 
   // Render loading state
@@ -268,7 +291,9 @@ export default function SubAdminCandidatesPage() {
   // Render candidate card
   const renderCandidateCard = (candidate: SubAdminCandidate) => {
     const statusInfo = getStatusInfo(candidate.status);
-    const latestAppStatusInfo = getApplicationStatusInfo(candidate.latestApplicationStatus);
+    const latestAppStatusInfo = getApplicationStatusInfo(
+      candidate.latestApplicationStatus
+    );
 
     return (
       <Card key={candidate._id} className="hover:shadow-md transition-shadow">
@@ -276,12 +301,13 @@ export default function SubAdminCandidatesPage() {
           <div className="flex items-start gap-4">
             {/* Candidate Avatar */}
             <Avatar className="h-16 w-16">
-              <AvatarImage 
-                src={candidate.profilePhoto} 
+              <AvatarImage
+                src={candidate.profilePhoto}
                 alt={`${candidate.firstName} ${candidate.lastName}`}
               />
               <AvatarFallback className="text-lg">
-                {candidate.firstName[0]}{candidate.lastName[0]}
+                {candidate.firstName[0]}
+                {candidate.lastName[0]}
               </AvatarFallback>
             </Avatar>
 
@@ -304,11 +330,9 @@ export default function SubAdminCandidatesPage() {
                     </p>
                   )}
                 </div>
-                
+
                 <div className="flex items-center gap-2">
-                  <Badge className={statusInfo.color}>
-                    {statusInfo.label}
-                  </Badge>
+                  <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
                   <Badge className={latestAppStatusInfo.color}>
                     {latestAppStatusInfo.label}
                   </Badge>
@@ -338,10 +362,13 @@ export default function SubAdminCandidatesPage() {
                 <div className="flex items-center text-sm text-muted-foreground">
                   <MapPin className="w-4 h-4 mr-2" />
                   <span>
-                    {candidate.currentAddress.city && candidate.currentAddress.state
+                    {candidate.currentAddress.city &&
+                    candidate.currentAddress.state
                       ? `${candidate.currentAddress.city}, ${candidate.currentAddress.state}`
-                      : candidate.currentAddress.city || candidate.currentAddress.state}
-                    {candidate.currentAddress.country && `, ${candidate.currentAddress.country}`}
+                      : candidate.currentAddress.city ||
+                        candidate.currentAddress.state}
+                    {candidate.currentAddress.country &&
+                      `, ${candidate.currentAddress.country}`}
                   </span>
                 </div>
               )}
@@ -366,13 +393,20 @@ export default function SubAdminCandidatesPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center text-sm text-muted-foreground">
                   <FileText className="w-4 h-4 mr-2" />
-                  <span>{candidate.applicationCount} application{candidate.applicationCount !== 1 ? 's' : ''}</span>
+                  <span>
+                    {candidate.applicationCount} application
+                    {candidate.applicationCount !== 1 ? "s" : ""}
+                  </span>
                   {candidate.latestApplicationDate && (
                     <>
                       <span className="mx-2">•</span>
                       <Clock className="w-3 h-3 mr-1" />
                       <span>
-                        Latest {formatDistanceToNow(new Date(candidate.latestApplicationDate), { addSuffix: true })}
+                        Latest{" "}
+                        {formatDistanceToNow(
+                          new Date(candidate.latestApplicationDate),
+                          { addSuffix: true }
+                        )}
                       </span>
                     </>
                   )}
@@ -380,15 +414,17 @@ export default function SubAdminCandidatesPage() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
-                    onClick={() => router.push(`/subadmin/candidates/${candidate._id}`)}
+                    onClick={() =>
+                      router.push(`/subadmin/candidates/${candidate._id}`)
+                    }
                   >
                     <Eye className="w-3 h-3 mr-1" />
                     View Profile
                   </Button>
-                  
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm">
@@ -396,30 +432,56 @@ export default function SubAdminCandidatesPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => router.push(`/subadmin/candidates/${candidate._id}`)}>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          router.push(`/subadmin/candidates/${candidate._id}`)
+                        }
+                      >
                         <Eye className="w-4 h-4 mr-2" />
                         View Full Profile
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => router.push(`/subadmin/applications?candidateId=${candidate._id}`)}>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          router.push(
+                            `/subadmin/applications?candidateId=${candidate._id}`
+                          )
+                        }
+                      >
                         <FileText className="w-4 h-4 mr-2" />
                         View Applications ({candidate.applicationCount})
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => window.open(`mailto:${candidate.email}`, '_blank')}>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          window.open(`mailto:${candidate.email}`, "_blank")
+                        }
+                      >
                         <Mail className="w-4 h-4 mr-2" />
                         Send Email
                       </DropdownMenuItem>
                       {candidate.phone && (
-                        <DropdownMenuItem onClick={() => window.open(`tel:${candidate.phone}`, '_blank')}>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            window.open(`tel:${candidate.phone}`, "_blank")
+                          }
+                        >
                           <Phone className="w-4 h-4 mr-2" />
                           Call
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => toast.info("Add to shortlist feature coming soon")}>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          toast.info("Add to shortlist feature coming soon")
+                        }
+                      >
                         <Star className="w-4 h-4 mr-2" />
                         Add to Shortlist
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => toast.info("Add note feature coming soon")}>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          toast.info("Add note feature coming soon")
+                        }
+                      >
                         <MessageSquare className="w-4 h-4 mr-2" />
                         Add Note
                       </DropdownMenuItem>
@@ -431,18 +493,29 @@ export default function SubAdminCandidatesPage() {
               {/* Recent Applications Preview */}
               {candidate.applications.length > 0 && (
                 <div className="mt-3 pt-3 border-t">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Recent Applications:</p>
+                  <p className="text-xs font-medium text-muted-foreground mb-2">
+                    Recent Applications:
+                  </p>
                   <div className="space-y-1">
                     {candidate.applications.slice(0, 2).map((app) => {
-                      const appStatusInfo = getApplicationStatusInfo(app.status);
+                      const appStatusInfo = getApplicationStatusInfo(
+                        app.status
+                      );
                       return (
-                        <div key={app._id} className="flex items-center justify-between text-xs">
+                        <div
+                          key={app._id}
+                          className="flex items-center justify-between text-xs"
+                        >
                           <span className="font-medium">{app.jobTitle}</span>
                           <div className="flex items-center gap-2">
                             {app.matchingScore && (
-                              <span className="text-green-600">{app.matchingScore.overall}%</span>
+                              <span className="text-green-600">
+                                {app.matchingScore.overall}%
+                              </span>
                             )}
-                            <Badge className={`${appStatusInfo.color} text-xs py-0 px-1`}>
+                            <Badge
+                              className={`${appStatusInfo.color} text-xs py-0 px-1`}
+                            >
                               {appStatusInfo.label}
                             </Badge>
                           </div>
@@ -523,11 +596,14 @@ export default function SubAdminCandidatesPage() {
               className="pl-10"
             />
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-gray-400" />
-            
-            <Select value={applicationStatusFilter} onValueChange={handleApplicationStatusFilterChange}>
+
+            <Select
+              value={applicationStatusFilter}
+              onValueChange={handleApplicationStatusFilterChange}
+            >
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="Filter by application status" />
               </SelectTrigger>
@@ -535,7 +611,9 @@ export default function SubAdminCandidatesPage() {
                 <SelectItem value="all">All Application Status</SelectItem>
                 <SelectItem value="applied">Applied</SelectItem>
                 <SelectItem value="screening">Screening</SelectItem>
-                <SelectItem value="interview_scheduled">Interview Scheduled</SelectItem>
+                <SelectItem value="interview_scheduled">
+                  Interview Scheduled
+                </SelectItem>
                 <SelectItem value="interviewed">Interviewed</SelectItem>
                 <SelectItem value="offered">Offered</SelectItem>
                 <SelectItem value="hired">Hired</SelectItem>
@@ -543,17 +621,26 @@ export default function SubAdminCandidatesPage() {
               </SelectContent>
             </Select>
 
-            <Select value={`${sortBy}-${sortOrder}`} onValueChange={handleSortChange}>
+            <Select
+              value={`${sortBy}-${sortOrder}`}
+              onValueChange={handleSortChange}
+            >
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="Sort by..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="latestApplicationDate-desc">Latest Application</SelectItem>
+                <SelectItem value="latestApplicationDate-desc">
+                  Latest Application
+                </SelectItem>
                 <SelectItem value="createdAt-desc">Recently Added</SelectItem>
                 <SelectItem value="firstName-asc">Name A-Z</SelectItem>
                 <SelectItem value="firstName-desc">Name Z-A</SelectItem>
-                <SelectItem value="yearsOfExperience-desc">Most Experience</SelectItem>
-                <SelectItem value="applicationCount-desc">Most Applications</SelectItem>
+                <SelectItem value="yearsOfExperience-desc">
+                  Most Experience
+                </SelectItem>
+                <SelectItem value="applicationCount-desc">
+                  Most Applications
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -564,14 +651,16 @@ export default function SubAdminCandidatesPage() {
       <main className="flex-1 p-4 md:p-6">
         <div className="flex flex-col gap-6">
           {/* Status Tabs */}
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={handleTabChange}
+            className="w-full"
+          >
             <TabsList className="mb-6">
               <TabsTrigger value="all">
                 All Candidates ({stats.total})
               </TabsTrigger>
-              <TabsTrigger value="active">
-                Active ({stats.active})
-              </TabsTrigger>
+              <TabsTrigger value="active">Active ({stats.active})</TabsTrigger>
               <TabsTrigger value="inactive">
                 Inactive ({stats.inactive})
               </TabsTrigger>

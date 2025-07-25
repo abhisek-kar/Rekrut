@@ -14,7 +14,7 @@ import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/shadcn-ui/sidebar";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SubAdminLayout({
   children,

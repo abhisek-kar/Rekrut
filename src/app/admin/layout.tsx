@@ -1,43 +1,36 @@
 "use client";
 
 import React from "react";
-import { useRouter, usePathname } from "next/navigation";
-import {
-  Users,
-  LayoutGrid,
-  Briefcase,
-  FileText,
-  ContactRound,
-  Box,
-} from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Users, LayoutGrid, Briefcase, FileText } from "lucide-react";
 import { PageLoader } from "@/components/atoms/loader";
 
 import { AppSidebar } from "@/components/shadcn-components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/shadcn-ui/sidebar";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
+  // We still use these to conditionally render the UI
+  const { isAuthenticated, isLoading, user } = useAuth();
 
-  // Redirect if not authenticated or not an admin
-  React.useEffect(() => {
-    if (!isLoading && (!isAuthenticated || (user && user.role !== "admin"))) {
-      router.push("/login");
-    }
-  }, [isAuthenticated, isLoading, router, user]);
-
-  // If still loading or not authenticated, show loading screen
-  if (isLoading || !isAuthenticated || (user && user.role !== "admin")) {
-    return <PageLoader message="Loading admin dashboard..." />;
+  // This check is good for UX to prevent content flicker
+  if (isLoading) {
+    return <PageLoader message="Authenticating..." />;
   }
 
-  // Single unified navigation for admin (Settings moved to profile section)
+  // This check ensures we don't render the layout for a split second
+  // if the user is somehow unauthenticated on the client.
+  // CRITICAL: We DO NOT redirect here. The middleware handles that.
+  if (!isAuthenticated) {
+    return <PageLoader message="Authenticating..." />; // Or return null
+  }
+
+  // --- If we reach this point, the user is authenticated ---
+
   const navItems = [
     {
       title: "Dashboard",
@@ -54,11 +47,6 @@ export default function AdminLayout({
       href: "/admin/jobs",
       icon: Briefcase,
     },
-    // {
-    //   title: "Candidates",
-    //   href: "/admin/candidates",
-    //   icon: ContactRound
-    // },
     {
       title: "Applications",
       href: "/admin/applications",

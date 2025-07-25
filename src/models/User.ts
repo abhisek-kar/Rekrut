@@ -62,5 +62,5 @@ UserSchema.index({ status: 1 });
 UserSchema.index({ resetPasswordToken: 1 });
 UserSchema.index({ setupToken: 1 });
 
-const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+const User = mongoose.models?.User || mongoose.model<IUser>("User", UserSchema);
 export default User;

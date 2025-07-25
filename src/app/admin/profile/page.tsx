@@ -9,7 +9,7 @@ import {
 } from "@/components/shadcn-ui/tabs";
 import { ProfileForm } from "@/components/admin/profile-form";
 import { PasswordForm } from "@/components/admin/password-form";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { PageHeader } from "@/components/shared/PageHeader";
 
 export default function ProfilePage() {
